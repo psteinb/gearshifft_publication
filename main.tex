@@ -1,0 +1,145 @@
+\documentclass{llncs}
+%
+\usepackage{makeidx}  % allows for indexgeneration
+%\usepackage{amsthm,amsmath,amsfonts,amssymb}
+\usepackage[locale=US]{siunitx}
+\usepackage{graphicx}
+\graphicspath{{./figures/}}
+\usepackage{booktabs}
+\usepackage{wrapfig}
+\usepackage[table]{xcolor}
+\usepackage{tikz}
+%% \usetikzlibrary{arrows.meta}
+%% \usetikzlibrary{matrix}
+%% \usetikzlibrary{shapes}
+%% \usetikzlibrary{decorations.pathreplacing}
+%% \usetikzlibrary{positioning}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\renewcommand*{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand*{\algorithmicensure}{\textbf{Output:}}
+
+\newcommand{\todo}[1]{\textcolor{red}{(TODO #1)}}
+
+\newcommand{\Title}{gearshifft -- The FFT Benchmark Suite for Heterogeneous Platforms}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title{\Title}
+%\subtitle{}
+\titlerunning{gearshifft}
+\toctitle{\Title}
+\author{Peter Steinbach\inst{1} \and Matthias Werner\inst{2}}
+\institute{Max Planck Institute of Molecular Cell Biology and Genetics,\\ 01307 Dresden, Germany,\\
+\email{Peter.Steinbach@mpi-cbg.de}
+\and
+Center for Information Services and High Performance Computing,\\
+TU Dresden, 01062 Dresden, Germany\\
+\email{Matthias.Werner1@tu-dresden.de}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage[hyperfootnotes=false,bookmarks=false]{hyperref}
+\hypersetup{
+  pdftitle = {\Title},
+  pdfsubject = {},
+  pdfborder={0 0 0},
+  colorlinks=false,
+  linkcolor=[rgb]{0 0 0.3},
+  urlcolor=[rgb]{0 0 0.3},
+  citecolor=[rgb]{0 0 0.3},
+  pdfauthor={Peter Steinbach, Matthias Werner},
+  %plainpages=true
+}
+\usepackage[capitalize]{cleveref} % after hyperref
+
+\usepackage[
+			backend=biber,
+			citestyle=numeric-comp,
+			url=true,
+			natbib=true,
+			bibstyle=ieee,
+			maxnames=3,
+			bibencoding=utf8
+]{biblatex}
+\bibliography{bibs}
+\addbibresource{bibs.bib}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%
+\begin{document}
+%
+\frontmatter          % for the preliminaries
+%
+\pagestyle{headings}  % switches on printing of running heads
+%\addtocmark{Hamiltonian Mechanics} % additional mark in the TOC
+
+\maketitle              % typeset the title of the contribution
+
+\begin{abstract}
+The abstract should summarize the contents of the paper
+using at least 70 and at most 150 words. It will be set in 9-point
+font size and be inset 1.0 cm from the right and left margins.
+There will be two blank lines before and after the Abstract. \dots
+\keywords{computational geometry, graph theory, Hamilton cycles}
+\end{abstract}
+
+\section{Test}
+\label{sec:test}
+\begin{definition}
+  \label{def:d1}
+  Definition comes here.
+  \begin{equation}
+    \label{eq:e1}
+    \kappa \cdot \lambda = \int_0^\infty x\mathrm{d}x
+  \end{equation}
+\end{definition}
+\begin{definition}
+  \label{def:d2}
+  Definition comes here.
+  \begin{equation}
+    \label{eq:e2}
+    \mathcal{U}(\mathbf{B}) = \int_0^\infty y\mathrm{d}y
+  \end{equation}
+\end{definition}
+\begin{theorem}
+  \label{thm:t1}
+  Theorem comes here.
+\end{theorem}
+
+Refer to \cref{def:d1} with \cref{eq:e1}.
+Refer to \cref{def:d2} with \cref{eq:e2} in \cref{sec:test} for \cref{thm:t1}.
+Please read \cite{montecarlo}.
+
+\section{Introduction}
+% - what has been done
+% - why gearshifft
+% - status of gearshifft dev
+
+\section{Benchmark Model}
+% - describe the benchmark use cases
+
+\section{Implementation}
+% - [open source] framework: c++14 with help of boost
+% - demonstrate usage of gearshifft framework
+% - cufft, clfft, fftw
+% - issues?
+
+\section{Results}
+% - show measurements
+% - analysis
+
+\section{Conclusion}
+% - what can we conclude and recommend by the results?
+% - what remains as part of future work?
+% - issues?
+% - encourage community-driven benchmark?
+
+\printbibliography
+
+
+\end{document}
