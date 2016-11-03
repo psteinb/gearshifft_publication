@@ -2,6 +2,7 @@
 import math
 import sys
 #this is a python 3 script
+
 def divisor_list(n):
     upper_bound = int(n)//2 + 1
     for i in range(1,upper_bound):
@@ -118,14 +119,35 @@ def run_2D():
     scalar_radix3 = radix_list(3,2,20)
     scalar_radix5 = radix_list(5,2,14)
     scalar_radix7 = radix_list(7,2,11)
-    scalar_radix19 = radix_list(19,2,8)
+    some_radix19 = radix_list(19,2,5)
+    
+    radix19_pairs = []
+    count = 0;
+    for i in scalar_radix2[-4-len(some_radix19):-4]:
+        item = (some_radix19[count],i//some_radix19[count])
+        radix19_pairs.append(item)
+        count+=1
 
+    count = 0
+    for i in scalar_radix3[-4-len(some_radix19):-4]:
+        item = (some_radix19[count],i//some_radix19[count])
+        radix19_pairs.append(item)
+        count+=1
+
+    count = 0
+    for i in scalar_radix5[-4-len(some_radix19):-4]:
+        item = (some_radix19[count],i//some_radix19[count])
+        radix19_pairs.append(item)
+        count+=1
+
+        
     radix2 = [ "{0!s},{1!s}".format(*equal_size_divisor_pair(x)) for x in scalar_radix2 ]
     radix3 = [ "{0!s},{1!s}".format(*equal_size_divisor_pair(x)) for x in scalar_radix3 ]
     radix5 = [ "{0!s},{1!s}".format(*equal_size_divisor_pair(x)) for x in scalar_radix5 ]
     radix7 = [ "{0!s},{1!s}".format(*equal_size_divisor_pair(x)) for x in scalar_radix7 ]
     
-    radix19 = [ "{0!s},{1!s}".format(*equal_size_divisor_pair(x)) for x in scalar_radix19  ]
+    radix19 = [ "{0!s},{1!s}".format(*x) for x in radix19_pairs  ]
+    
     value.extend(join_2_list(radix2,radix3,radix5,radix7,radix19))
     return value
 
@@ -135,14 +157,39 @@ def run_3D():
     scalar_radix3 = radix_list(3,3,20)
     scalar_radix5 = radix_list(5,3,14)
     scalar_radix7 = radix_list(7,3,11)
-    scalar_radix19 = radix_list(19,3,8)
+    some_radix19 = radix_list(19,1,4)
+    
+    radix19_triple = []
+    count = 0;
+    for i in scalar_radix2[-4-len(some_radix19):-4]:
+        rem = i//some_radix19[count]
+        double_expon = round(math.log(rem)/math.log(2))#extract power of 2 
+        item = (some_radix19[count],2**(double_expon//2),2**(double_expon//2))
+        radix19_triple.append(item)
+        count+=1
 
+    count = 0
+    for i in scalar_radix3[-4-len(some_radix19):-4]:
+        rem = i//some_radix19[count]
+        double_expon = round(math.log(rem)/math.log(3))#extract power of 3 
+        item = (some_radix19[count],3**(double_expon//2),3**(double_expon//2))
+        radix19_triple.append(item)
+        count+=1
+
+    count = 0
+    for i in scalar_radix5[-4-len(some_radix19):-4]:
+        rem = i//some_radix19[count]
+        double_expon = round(math.log(rem)/math.log(5))#extract power of 5 
+        item = (some_radix19[count],5**(double_expon//2),5**(double_expon//2))
+        radix19_triple.append(item)
+        count+=1
+        
     radix2 = [ "{0!s},{1!s},{2!s}".format(*equal_size_divisor_triple(x)) for x in scalar_radix2 ]
     radix3 = [ "{0!s},{1!s},{2!s}".format(*equal_size_divisor_triple(x)) for x in scalar_radix3 ]
     radix5 = [ "{0!s},{1!s},{2!s}".format(*equal_size_divisor_triple(x)) for x in scalar_radix5 ]
     radix7 = [ "{0!s},{1!s},{2!s}".format(*equal_size_divisor_triple(x)) for x in scalar_radix7 ]
     
-    radix19 = [ "{0!s},{1!s},{2!s}".format(*equal_size_divisor_triple(x)) for x in scalar_radix19  ]
+    radix19 = [ "{0!s},{1!s},{2!s}".format(*(x)) for x in  radix19_triple ]
     value.extend(join_2_list(radix2,radix3,radix5,radix7,radix19))
 
     return value
