@@ -1,3 +1,11 @@
-% - what has been done
 % - why gearshifft
+
+Fast Fourier Transforms (FFTs) are at the heart of many signal processing and phase space exploration algorithms. Examples for their substantial usage come from image restoration in life sciences \cite{preibisch2014efficient,schmid2015real}, phase space reduction in weather forecasts \cite{maronga2015parallelized} to machine learning \cite{collobert2011torch7,jia2014caffe,abadi2016tensorflow} to just name a few.
+
+As input data grows in size and variety both of experimental hardware \cite{huisken2004optical} and simulation outputs \cite{maronga2015parallelized}, input data on the order of Gigabytes to FFT libraries becomes the standard. With the advent of graphics processing units (GPUs) for scientific processing computing around the beginning of the 21st century and the subsequent availability of general purpose programming paradigms to program these \cite{du2012cuda}, vendor-specific and open-source libraries to perform FFTs on accelerators emerged (cuFFT \cite{nvidia2010cufft} by nVidia, open-source clFFT \cite{clfft}) to offer performance which supersedes traditional high-performance implementations running on standard Central Processing Units (CPUs) such as the open-source fftw library \cite{FFTW97,FFTW05} or the intel specific MKL \cite{intel2007intel}.
+
+However, a top ten sites listed among the fastest worldwide (top500 \cite{meuer2011top500}) shows that the used hardware is by far not homogenous. 
+
+
+% - what has been done
 % - status of gearshifft dev
