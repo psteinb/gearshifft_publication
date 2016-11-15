@@ -1,3 +1,12 @@
+%%%%%%%%%%% THEORY %%%%%%%%%%%%
+
+@book{van1992computational,
+  title={Computational frameworks for the fast Fourier transform},
+  author={Van Loan, Charles},
+  volume={10},
+  year={1992},
+  publisher={Siam}
+}
 
 %%%%%%%%%%%% APPLICATIONS %%%%%%%%%%%%%%%
 
@@ -34,6 +43,19 @@
   year={2015},
   publisher={G{\"o}ttingen: Copernicus}
 }
+
+%%%%%%%%%%%% Bioinformatics
+@article{katoh2002mafft,
+  title={MAFFT: a novel method for rapid multiple sequence alignment based on fast Fourier transform},
+  author={Katoh, Kazutaka and Misawa, Kazuharu and Kuma, Kei-ichi and Miyata, Takashi},
+  journal={Nucleic acids research},
+  volume={30},
+  number={14},
+  pages={3059--3066},
+  year={2002},
+  publisher={Oxford Univ Press}
+}
+
 
 %%%%%%%%%%%%% DNN
 
@@ -74,7 +96,28 @@
   publisher={American Association for the Advancement of Science}
 }
 
-%%%%
+%%% Finance
+
+@article{hurd2010fourier,
+  title={A Fourier transform method for spread option pricing},
+  author={Hurd, Thomas R and Zhou, Zhuowei},
+  journal={SIAM Journal on Financial Mathematics},
+  volume={1},
+  number={1},
+  pages={142--157},
+  year={2010},
+  publisher={SIAM}
+}
+
+@inproceedings{dempster2002spread,
+  title={Spread option valuation and the fast Fourier transform},
+  author={Dempster, Michael Alan Howarth and Hong, SS George},
+  booktitle={Mathematical Finance—Bachelier Congress 2000},
+  pages={203--220},
+  year={2002},
+  organization={Springer}
+}
+%%%%%%%%%%%%%%%%%%% libraries %%%%%%%%%%%%%%%%%%%%%%
 
 @article{du2012cuda,
   title={From CUDA to OpenCL: Towards a performance-portable solution for multi-platform GPU programming},
@@ -139,6 +182,105 @@
   publisher={ed}
 }
 
+@article{DBLP:journals/corr/GholamiHMB15,
+  author    = {Amir Gholami and
+               Judith Hill and
+               Dhairya Malhotra and
+               George Biros},
+  title     = {AccFFT: {A} library for distributed-memory {FFT} on {CPU} and {GPU}
+               architectures},
+  journal   = {CoRR},
+  volume    = {abs/1506.07933},
+  year      = {2015},
+  url       = {http://arxiv.org/abs/1506.07933},
+  timestamp = {Wed, 01 Jul 2015 15:10:24 +0200},
+  biburl    = {http://dblp.uni-trier.de/rec/bib/journals/corr/GholamiHMB15},
+  bibsource = {dblp computer science bibliography, http://dblp.org}
+}
+%%%%%%%%%%%%%%%%%% BENCHMARKS %%%%%%%%%%%%%%%%%%
+
+%%%%%%%% PEER-REVIEWED
+@inproceedings{shoc2010,
+  title={The scalable heterogeneous computing (SHOC) benchmark suite},
+  author={Danalis, Anthony and Marin, Gabriel and McCurdy, Collin and Meredith, Jeremy S and Roth, Philip C and Spafford, Kyle and Tipparaju, Vinod and Vetter, Jeffrey S},
+  booktitle={Proceedings of the 3rd Workshop on General-Purpose Computation on Graphics Processing Units},
+  pages={63--74},
+  year={2010},
+  organization={ACM}
+}
+
+@inproceedings{eleftheriou2005performance,
+  title={Performance measurements of the 3d FFT on the Blue Gene/L supercomputer},
+  author={Eleftheriou, Maria and Fitch, Blake and Rayshubskiy, Aleksandr and Ward, TJ Christopher and Germain, Robert},
+  booktitle={European Conference on Parallel Processing},
+  pages={795--803},
+  year={2005},
+  organization={Springer}
+}
+
+
+@article{dongarra2013hpc,
+  title={HPC Challenge: Design, History, and Implementation Highlights},
+  author={Dongarra, Jack and Luszczek, Piotr},
+  journal={Contemporary High Performance Computing: From Petascale Toward Exascale},
+  year={2013},
+  publisher={Taylor and Francis, CRC Computational Science Series, Boca Raton, FL}
+}
+
+@article{park2015fast,
+  title={Fast Fourier transform benchmark on X86 Xeon system for multimedia data processing},
+  author={Park, Young-Soo and Park, Koo-Rack and Kim, Jin-Mook and Jeong, Hwa-Young},
+  journal={Multimedia Tools and Applications},
+  pages={1--16},
+  year={2015},
+  publisher={Springer}
+}
+
+@inproceedings{fialka2006fft,
+  title={FFT and convolution performance in image filtering on GPU},
+  author={Fialka, Ondirej and Cadik, Martin},
+  booktitle={Tenth International Conference on Information Visualisation (IV'06)},
+  pages={609--614},
+  year={2006},
+  organization={IEEE}
+}
+
+%%%%%%%% NON-PEER-REVIEWED
+
+@Unpublished{benchFFT,
+  author = 	 {Matteo Frigo and Steven G. Johnson},
+  title = 	 {benchFFT},
+  note = 	 {},
+  OPTkey = 	 {},
+  OPTmonth = 	 {},
+  OPTyear = 	 {},
+  OPTannote = 	 {},
+  url = {http://www.fftw.org/benchfft/}
+}
+
+@Unpublished{fft_check,
+  author = 	 {Takeshi Nishimatsu},
+  title = 	 {fft_check.F},
+  note = 	 {a 3-dimensional FFT benchmark program written in Fortran},
+  OPTkey = 	 {},
+  OPTmonth = 	 {},
+  OPTyear = 	 {},
+  OPTannote = 	 {},
+  url = {http://loto.sourceforge.net/feram/src/fft_check.html}
+}
+
+@Unpublished{roy_longbottom,
+  author = 	 {Roy Longbottom},
+  title = 	 {Android, Linux and Windows FFT Benchmarks
+For Intel and ARM CPUs},
+  OPTnote = 	 {},
+  OPTkey = 	 {},
+  month = 	 {April},
+  year = 	 {2016},
+  OPTannote = 	 {},
+  url = {http://www.roylongbottom.org.uk/FFTBenchmarks.htm}
+}
+
 
 %%%%%%%%%%%%%%%%% MISC %%%%%%%%%%%%%%%
 
@@ -164,3 +306,11 @@
   url = {https://github.com/mpicbg-scicomp/gearshifft}
 }
 
+@inproceedings{hoefler2010parallel,
+  title={Parallel zero-copy algorithms for fast Fourier transform and conjugate gradient using MPI datatypes},
+  author={Hoefler, Torsten and Gottlieb, Steven},
+  booktitle={European MPI Users' Group Meeting},
+  pages={132--141},
+  year={2010},
+  organization={Springer}
+}
