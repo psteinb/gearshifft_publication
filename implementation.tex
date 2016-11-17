@@ -3,3 +3,110 @@
 % - demonstrate usage of gearshifft framework
 % - cufft, clfft, fftw
 % - issues?
+% - #runs, cmake, project structure
+% - libraries : mem checks
+
+\gearshifft{} is developed as an open-source framework using C++14 standard and Boost Unit Test Framework for managing the benchmark trees.
+The frontend API is basically just a wrapper mapping the use case explained in \cref{sec:benchmark_model}.
+This interface is designed to integrate any given FFT library, that provides forward and backward Fourier transforms.
+The wrapper code leverages C++ templates and compile-time constant expressions.
+This yields minimal overhead at runtime and provides a type-agnostic interface, i.\,e. it is not fixed to single or double precision.
+However, corresponding timer calls and benchmark routines for collecting data are required at runtime, so measurements will have to be verified.
+
+The frontend interface requires the user to implement the context class and a class with implementation of FFT routines.
+The context class in \cref{lst:implcontext} is instantiated only once for the application lifetime.
+FFT implementation class in \cref{lst:implfft} is instantiated once per benchmark run and follows the ``resource allocation is initialization'' (RAII) pattern.
+
+
+\begin{lstlisting}[caption={Context class required by gearshifft API},label={lst:implcontext}]
+struct Context {
+  /// title for all benchmarks
+  static std::string title();
+  /// list all compute devices
+  static std::string getListDevices();
+  /// information for current device
+  std::string getDeviceInfos();
+  /// creates context
+  void create();
+  /// destroys context
+  void destroy();
+};
+\end{lstlisting}
+\begin{lstlisting}[caption={FFT class required by gearshifft API},label={lst:implfft}]
+template<
+ typename TFFT, // e.g. gearshifft::FFT_Inplace_Real, ...
+ typename TPrecision, // e.g. double, float, ...
+ size_t   NDim        // 1,..,3
+>
+struct MyImpl {
+  MyImpl();
+  ~MyImpl();
+  void malloc();
+  size_t getAllocSize();
+  size_t getTransferSize();
+  size_t getPlanSize();
+  void init_forward();
+  void init_backward();
+  void execute_forward();
+  void execute_backward();
+  template<typename THostData>
+  void upload(THostData* input);
+  template<typename THostData>
+  void download(THostData* output);
+  void destroy();
+};
+\end{lstlisting}
+\begin{lstlisting}[caption={Using FFT class},label={lst:implfftusing}]
+using Inplace_Real =
+gearshifft::FFT<gearshifft::FFT_Inplace_Real, MyImpl, TimerCPU>;
+\end{lstlisting}
+
+The wrapper for the user FFT class and the layout of measurement is given in the \lstinline!gearshifft::FFT! class.
+Its are shown in \cref{lst:fftabstract}. The measurement framework is illustrated in \cref{fig:timings}.
+\begin{lstlisting}[caption={FFT wrapper class},label={lst:fftabstract}]
+template<
+ typename TFFT,
+ template <typename,typename,size_t,typename... > typename TPlan,
+ typename TDeviceTimer,
+ typename... TPlanArgs // is redirected to TPlan
+>
+struct FFT : public TFFT {
+  template<typename T_Result, typename T_Vector, size_t NDim>
+  void operator(/*..*/);
+};
+\end{lstlisting}
+
+% implies plan reuse
+\begin{figure}\label{fig:timings}
+\begin{tikzpicture}
+\tikzset{gr1/.style={fill=black!15}}
+\matrix[
+ minimum height=1.5em,
+ matrix of nodes,
+ row sep=-\pgflinewidth,
+ column sep=-\pgflinewidth,
+ text depth=2.5ex,
+ text height=1.5ex,
+ text width=4em,
+ align=center,
+ nodes in empty cells,
+ row 1/.style={nodes={rectangle,draw,minimum width=3em,font=\scriptsize}}
+]
+(mf) at (0,0) {
+malloc &
+init\linebreak forward &
+|[gr1]| upload &
+|[gr1]| execute\linebreak forward &
+init\linebreak backward &
+|[gr1]| execute\linebreak backward &
+|[gr1]| download &
+destroy\\
+};
+\draw[dashed] (mf-1-1.north west) -- ++(0,1.5em) -| (mf-1-8.north east) node[pos=0.25,fill=white,font=\small] {total time};
+\end{tikzpicture}
+ \caption{Each operation is measured, where the colored ones are measured by device timers if required.}
+\end{figure}
+
+
+The backend of \gearshifft{} uses Boost Unit Test Framework to manage the benchmark instances.
+
