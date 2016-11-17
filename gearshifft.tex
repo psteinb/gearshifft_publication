@@ -10,14 +10,46 @@
 \usepackage[table]{xcolor}
 \usepackage{tikz}
 %% \usetikzlibrary{arrows.meta}
-%% \usetikzlibrary{matrix}
+\usetikzlibrary{matrix}
 %% \usetikzlibrary{shapes}
 %% \usetikzlibrary{decorations.pathreplacing}
 %% \usetikzlibrary{positioning}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{listings}
+\usepackage{textcomp}
+% preserve ttdefault
+\edef\oldtt{\ttdefault}
+\usepackage[scaled]{beramono}
+\usepackage[T1]{fontenc}
+\renewcommand*\ttdefault{\oldtt}
+
+
+\lstset{literate={~} {$\sim\,$}{1}}
+\lstset{upquote=true}
+\lstset{language=C++,
+  basicstyle=\small\fontfamily{fvm}\selectfont,%\ttfamily,
+% 	columns=fullflexible,
+  columns=fixed,
+  keepspaces=true,
+%       keywordstyle=\color{black}\bf,
+%       stringstyle=\color{red}\ttfamily,
+  showstringspaces=false,
+  commentstyle=\color[rgb]{0.3,0.3,0.3}\textit,
+%       morecomment=[l][\color{gray}]{\#},
+  identifierstyle=\color{black},
+  morekeywords={size_t},
+  emph={__global__,__device__},
+        emphstyle=\textit,
+        numbers=left,
+  numberstyle=\small\color{gray},
+  breaklines=true,
+  numbersep=5pt,
+  xleftmargin=.19in,
+}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \renewcommand*{\algorithmicrequire}{\textbf{Input:}}
 \renewcommand*{\algorithmicensure}{\textbf{Output:}}
@@ -121,24 +153,35 @@ sorting=nyt
 
 \section{Introduction}
 \label{sec:intro}
-\include{intro}
+\input{intro}
 
 
 \section{Benchmark Model}
 \label{sec:benchmark_model}
-\include{benchmark_model}
+\input{benchmark_model}
+
+% fft tranform variants
+% float, double
+% dft, fft model
+%
+% feinheiten libs später
+% implementation bg, fg, timer (TTS, fft + ifft, plan
+% clfft cpu jobs
+% isc springer final?
+
+% benchfft -> fftw -> peter
 
 \section{Implementation}
 \label{sec:implementation}
-\include{implementation}
+\input{implementation}
 
 \section{Results}
 \label{sec:results}
-\include{results}
+\input{results}
 
 \section{Summary}
 \label{sec:summary}
-\include{summary}
+\input{summary}
 
 \printbibliography
 
