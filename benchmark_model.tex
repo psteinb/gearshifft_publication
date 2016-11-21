@@ -1,2 +1,19 @@
+The FFT is today nothing more than a fast implementation of a standard mathematical procedure. Every developer in the scientific arena or domains that perform heavy computations expects that the performance of the FFT implementation in his or her preferred language meets the standards of the acronym, i.e. of being fast. As discussed in \cref{sec:introduction}, the landscape of available implementations on various hardware platforms has become very diverse. 
 
-% - describe the benchmark use cases
+With \gearshifft{}, our aim is to provide a set of simple commands to the community to run benchmarks against their desired FFT implementation and compare to other implementations in an unbiased way. Given the high rate of updates to e.g. GPU based FFT implementations (cuFFT experiences around 1-2 release updates per year with every CUDA version, clfft was updated siz times during the course of 2016) library vendors need to assess if the most recent version of their used FFT implementation yields the performance profits to justify updating their own packages. Further more, new users are often overwhelmed by the mere number of different FFT implementations and their variations in use. More over, HPC cluster administrators that would like to offer the best performing software stack to their users do also feel the need to stay on top of the developments. 
+
+For this purpose, \gearshifft{} approaches the challenge of benchmarking a variety of FFT libraries from a user perspective. This means, that the following variants have to be studied:
+
+\begin{enumerate}
+\item input data shape, i.e. 1D, 2D or 3D input data
+\item transform data, i.e. real to complex numbers or from complex to complex numbers
+\item transform precision, i.e. 32-bit or 64-bit IEEE floating point number representation
+\item memory mode
+  \begin{definition}
+  \item[in-place] the input data structure is used for storing the output data (low memory footprint and low bandwidth are to be expected)
+  \item[out-of-place]  where the transformed input is written to a different memory location than where the input resides (high memory footprint and high bandwidth are to be expected)
+  \end{definition}
+\item transform direction, i.e. forward (from discrete space to frequency space) or backward (from frequency space to discrete space)
+\end{enumerate}
+ 
+As any other benchmark, \gearshifft{} can be used to study and compare the performance of GPU accelerators running FFT kernels to classical CPU based FFT libraries. However, we will concentrate first on time-to-solution like metrics before discussing variables that directly depend on the hardware layout.  
