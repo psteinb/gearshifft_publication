@@ -7,8 +7,9 @@ library(dplyr)
 
 
 'Usage:
-   compare [options] <csv-files>...
+   compare_derived [options] <csv-files>...
 
+ 
  -r --real          	Use Real Data [default: FALSE]
  -c --complex       	Use Complex Data [default: FALSE]
  -i --inplace       	Use inplace transforms [default: FALSE]
@@ -17,7 +18,7 @@ library(dplyr)
  -d --fp64          	Use (64-bit) double precision [default: FALSE]
  -n --ndims=ND      	Use only ND dimensional output [default: 2], do not filter if ND=0
  --nolegend             Do not add a legend to the plot [default: FALSE]
- -y --ymetric=YMETRIC 	Use metric YMETRIC for plotting along y [default: Time_Total]
+ -y --ymetric=YMETRIC 	Use metric YMETRIC for plotting along y, this can now be a valid R expression that computes a derived value [default: Time_Total]
  --logy=LOGYVALUE       Use log scale on y-axis [default: 1]
  -x --xmetric=XMETRIC 	Use metric XMETRIC for plotting along y [default: Size_DeviceBuffer]
  --logx=LOGXVALUE       Use log scale on x-axis [default: 1]
@@ -139,10 +140,10 @@ if ( length(filter_dim) > 0){
 cat("total rows filtered: \t",nrow(succeeded),"\n")
 avcols <- colnames(succeeded)
 
-if(grep(opts[["ymetric"]],avcols) == 0){
+## if(grep(opts[["ymetric"]],avcols) == 0){
     
-    stop(cat(opts[["ymetric"]], "for y not found in available columns \n",avcols,"\n"))
-}
+##     stop(cat(opts[["ymetric"]], "for y not found in available columns \n",avcols,"\n"))
+## }
 
 if(grep(opts[["xmetric"]],avcols) == 0){
     
@@ -151,7 +152,7 @@ if(grep(opts[["xmetric"]],avcols) == 0){
 
 
 
-succeeded_ymetric_of_interest  <- succeeded %>% select(contains(opts[["ymetric"]]))
+succeeded_ymetric_of_interest  <- eval(parse(text=paste("succeeded %>% mutate( moi = ",opts[["xmetric"]],")" ,sep="")))
 succeeded_xmetric_of_interest  <- succeeded %>% select(contains(opts[["xmetric"]]))
 
 succeeded_factors <- succeeded %>% select(-ends_with("]"))
@@ -167,7 +168,7 @@ name_of_xmetric <- colnames(succeeded_xmetric_of_interest)[1]
 
 cat("calculating mean,median and sd of ",paste(name_of_ymetric)," versus ",name_of_xmetric,"\n")
 
-names(succeeded_reduced)[names(succeeded_reduced) == name_of_ymetric] <- "moi"
+#names(succeeded_reduced)[names(succeeded_reduced) == name_of_ymetric] <- "moi"
 names(succeeded_reduced)[names(succeeded_reduced) == name_of_xmetric] <- "xmoi"
 
 if( grepl("bytes",name_of_xmetric)  ) {
