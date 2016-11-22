@@ -32,7 +32,7 @@ Problem: irb8192x8192, setup: 10.01 s, time: 76.50 ms, ``mflops'': 57020
 ## single precision
 
 ```
-$ CFLAGS="-march=native" CXXFLAGS="-march=native" ./configure --enable-single --enable-sse --enable-sse2 --enable-shared --enable-openmp --enable-threads --enable-avx --enable-avx2 --enable-avx-128-fma --prefix=$PREFIX
+$ CFLAGS="-march=native" CXXFLAGS="-march=native" ./configure --enable-single --enable-sse --enable-sse2 --enable-shared --enable-openmp --enable-threads --enable-avx --enable-avx2 --enable-avx-128-fma 
 $ make
 $ make install
 ```
@@ -46,7 +46,7 @@ Problem: irb8192x8192, setup: 29.14 s, time: 267.86 ms, ``mflops'': 16285
 
 
 ```
-$ CFLAGS="-march=native" CXXFLAGS="-march=native" ./configure --enable-sse2 --enable-shared --enable-openmp --enable-threads $i  --enable-avx --enable-avx2 --enable-avx-128-fma --prefix=$PREFIX
+$ CFLAGS="-march=native" CXXFLAGS="-march=native" ./configure --enable-sse2 --enable-shared --enable-openmp --enable-threads --enable-avx --enable-avx2 --enable-avx-128-fma --prefix=$PREFIX
 $ make
 ```
 
