@@ -1,6 +1,10 @@
 # Summary of study regarding configure flags
 
-Small analysis to see if the configure flags influence fftw runtime. The bottom line, the default flags appear to yield 3x faster runtimes than the manual aggressive flags.
+Small analysis to see if the configure flags influence fftw runtime. The bottom line, the default flags appear to yield 3x faster runtimes than the manual aggressive flags. This is backed by the authors recommendation:
+
+> Special note for distribution maintainers: Although FFTW supports a zillion SIMD instruction sets, enabling them all at the same time is a bad idea, because it increases the planning time for minimal gain. We recommend that general-purpose x86 distributions only enable SSE2 and perhaps AVX. Users who care about the last ounce of performance should recompile FFTW themselves.
+
+That can be found in the [release notes for fftw 3.3.5](http://www.fftw.org/release-notes.html).
 
 # minimal 
 
