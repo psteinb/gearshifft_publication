@@ -4,7 +4,7 @@ library(docopt)
 library(ggplot2)
 library(readr)
 library(dplyr)
-
+# also requires svglite
 
 'Usage:
    compare [options] <csv-files>...
@@ -171,12 +171,15 @@ cat("calculating mean,median and sd of ",paste(name_of_ymetric)," versus ",name_
 names(succeeded_reduced)[names(succeeded_reduced) == name_of_ymetric] <- "moi"
 names(succeeded_reduced)[names(succeeded_reduced) == name_of_xmetric] <- "xmoi"
 
-if( grepl("bytes",name_of_xmetric)  ) {
-    succeeded_reduced$xmoi <- succeeded_reduced$xmoi / (1024.*1024.)
+logy_value <- as.integer(opts[["logy"]])
+logx_value <- as.integer(opts[["logx"]])
+
+if( grepl("bytes",name_of_xmetric) && logx_value == 1 ) {
+    succeeded_reduced$xmoi <- succeeded_reduced$xmoi / (1024.*1024.)    
     name_of_xmetric <- gsub("bytes","MB",name_of_xmetric)
 }
 
-if( grepl("bytes",name_of_xmetric) ){
+if( grepl("bytes",name_of_ymetric) && logy_value == 1 ){
     succeeded_reduced$moi <- succeeded_reduced$moi / (1024*1024)
     name_of_ymetric <- gsub("bytes","MB",name_of_ymetric)
 }
@@ -198,14 +201,14 @@ data_for_plotting <- succeeded_reduced %>%
 
 glimpse(data_for_plotting)
 
-my_theme <-  theme_bw() + theme(axis.title.x = element_text(size=20),
-                                axis.title.y = element_text(size=20),
-                                axis.text.x = element_text(size=14),
-                                axis.text.y = element_text(size=14)#,
+my_theme <-  theme_bw() + theme(axis.title.x = element_text(size=14),
+                                axis.title.y = element_text(size=14),
+                                axis.text.x = element_text(size=12),
+                                axis.text.y = element_text(size=12)#,
                                 #axis.text.x  = element_text()
                                 ) 
-my_theme <- my_theme + theme(legend.title = element_text(size=20, face="bold"),
-                             legend.text = element_text( size = 18),
+my_theme <- my_theme + theme(legend.title = element_text(size=12, face="bold"),
+                             legend.text = element_text( size = 8),
                              ## legend.text.align=0,
                              ## legend.title.align=0,
                              legend.position="top",
@@ -239,7 +242,7 @@ moi_plot <- ggplot(data_for_plotting, ## aes(x=xmoi,
 
 
 moi_plot <- moi_plot + geom_line(aes(y=moi_mean),size=1.)
-moi_plot <- moi_plot + geom_point(aes(y=moi_mean),size=2)
+moi_plot <- moi_plot + geom_point(aes(y=moi_mean),size=1.)
 moi_plot <- moi_plot + geom_errorbar(aes(ymin = moi_mean - moi_stddev,
                                          ymax = moi_mean + moi_stddev),
                                      width=0.5)
@@ -248,9 +251,6 @@ cat("filtered by",paste(filtered_by, collapse=" "),"\n")
 moi_plot <- moi_plot + ggtitle(paste(filtered_by,collapse=" "))
 moi_plot <- moi_plot + ylab(gsub("_"," ",name_of_ymetric)) + xlab(gsub("_"," ",name_of_xmetric)) 
 moi_plot <- moi_plot + my_theme ## + guides(col=guide_legend(ncol=2))
-
-logy_value <- as.integer(opts[["logy"]])
-logx_value <- as.integer(opts[["logx"]])
 
 xmin <- min(data_for_plotting$xmoi)
 xmax <- max(data_for_plotting$xmoi)
@@ -287,7 +287,7 @@ if(logx_value > 1) {
         new_breaks <- new_breaks[seq(1,length(new_breaks),4)]
     }
 
-    print_log <- function(x){ return(paste(logx_value,"^",eval(parse(text=paste("log",logx_value,"(",x,")",sep=""))),sep=""));}
+    print_log <- function(x){ return(paste("$",logx_value,"^{",eval(parse(text=paste("log",logx_value,"(",x,")",sep=""))),"}$",sep=""));}
     new_labels <- sapply(new_breaks,print_log)
     
     cat("new x breaks: ", paste(new_breaks),"\nnew x labels: ",new_labels,"\n")
@@ -309,9 +309,14 @@ if( nchar(opts[["aspect"]]) > 0 ){
 
 }
 
-ggsave(paste(opts[["filename"]],".png",sep=""),moi_plot,)
-ggsave(paste(opts[["filename"]],".svg",sep=""),moi_plot,)
-ggsave(paste(opts[["filename"]],".tex",sep=""),moi_plot,)
+# ggsave(paste(opts[["filename"]],".png",sep=""),moi_plot,)
+# ggsave(paste(opts[["filename"]],".svg",sep=""),moi_plot,)
+# ggsave(paste(opts[["filename"]],".tex",sep=""),moi_plot,)
+
+library(tikzDevice)
+tikz(file=paste(opts[["filename"]],".tex",sep=""),width=4.5,height=4)
+print(moi_plot)
+dev.off()
 
 ## succeeded_by_ID <- succeeded %>% group_by(id)
 ## head(succeeded_by_ID)

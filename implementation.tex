@@ -6,16 +6,16 @@
 % - #runs, cmake, project structure
 % - libraries : mem checks
 
-\gearshifft{} is developed as an open-source framework using C++14 standard and Boost Unit Test Framework for managing the tree of benchmark cases.
-The frontend API is basically a wrapper for the FFT client operations like plan initialisation, forward or backward transformation as explained in \cref{sec:benchmark_model}.
+\gearshifft{} is developed as an open-source framework using C++14 standard and Boost Unit Test Framework (UTF) for managing the tree of all the different benchmark cases.
+The frontend API is basically a wrapper for the FFT client operations like plan initialization, forward or backward transformation as explained in \cref{sec:benchmark_model} and illustrated in \cref{lst:implfft}.
 The interface for the FFT client is designed to integrate any given FFT library, that provides forward and backward Fourier transforms.
-The wrapper code leverages C++ templates and compile-time constant expressions.
-This yields minimal overhead at runtime and provides a type-agnostic interface, i.\,e. it is not fixed to single or double precision.
+The wrapper code leverages C++ templates and the meta-programming language for compile-time constant expressions.
+This yields minimal overhead at runtime and provides a type-agnostic interface, i.\,e. \gearshifft{} is not fixed to single or double precision.
 However, the benchmark runtime environment allocates memory for samples and performance data.
 
 The frontend interface requires the user to implement the context class and a class with methods for the FFT client routines.
 The context class in \cref{lst:implcontext} is instantiated only once for the application lifetime.
-The FFT client implementation class in \cref{lst:implfft} is instantiated once per benchmark run and follows the ``resource allocation is initialisation'' (RAII) pattern.
+The FFT client implementation class in \cref{lst:implfft} is instantiated once per benchmark run and follows the ``resource allocation is initialization (RAII) pattern.
 
 
 \begin{lstlisting}[caption={Context class required by gearshifft frontend API},label={lst:implcontext}]
@@ -74,10 +74,12 @@ struct FFT : public T_FFT {
 The wrapper for the FFT client and the layout of measurement is implemented in the \mc{gearshifft::FFT} functor.
 Its template parameters are shown in \cref{lst:fftabstract}. 
 \mc{T_FFT} is one of \gearshifft{} predefined types \mc{FFT_Inplace_Real}, \mc{FFT_Outplace_Real}, \mc{FFT_Inplace_Complex} and \mc{FFT_Outplace_Complex}.
-Most libraries allow plan reusage, even fftw when \mc{FFTW_MEASURE} is not used.
+
+Most libraries allow plan reuse.
 Reusing a plan means to use only one plan handle. After forward transform has been finished the same plan handle is used for backward transform.
-This might save memory as there are no two plans allocated at the same time.
-If it is not possible to reuse the plan handle, then plan handles for forward and inverse transform are allocated in the initialisation phase.
+This might save memory as there are no two plans allocated at the same time. FFTW already overwrites\footnote{FFTW already computes some FFTs to find the best plan} input and output buffer in the planning phase, when \mc{FFTW_MEASURE} is used. Afterwards, the buffers can be filled with data, but it means, that the plan cannot be reused at a later time, since the result buffer would be overwritten at planning stage.
+Thus, when it is not possible to reuse the plan handle, then plan handles for forward and inverse transform are allocated in the initialization phase.
+
 \mc{T_Client} defines the FFT client class like \mc{CuFFTImpl} or \mc{FftwImpl}.
 The template parameters are at least the \mc{T_FFT} type (\mc{FFT_Inplace_Real}, \ldots), the precision type (float, \ldots) and the FFT dimension (1, 2 or 3), see also \cref{lst:implfft}. If the client needs more template arguments the variadic template \mc{T_ClientArgs} is given to the \mc{T_Client} instantiation as fourth parameter (expansion of a parameter pack).
 The \mc{T_DeviceTimer} allows device located time measurements and is only implemented for CUDA/cuFFT library at the moment.
@@ -114,8 +116,9 @@ int main( int argc, char* argv[] )
 
 
 Now after the frontend API has been introduced, the backend of \gearshifft{} is discussed.
+% definition might be moved into former section
 A benchmark is defined to collect performance indicators of a set of operations, and repeats the execution several times to obtain reliable statistics. Different parameters like precision, FFT extents, transform variant, device type or FFT library relate to different benchmarks.
-\gearshifft{} controls many of them by command line arguments. The FFT libraries are related to different \gearshifft{} binaries (\mc{gearshifft_cufft}, \ldots).
+\gearshifft{} controls many of them by command line arguments (\cref{tab:cmdargs}). The FFT libraries are related to different \gearshifft{} binaries (\mc{gearshifft_cufft}, \ldots).
 The backend of \gearshifft{} uses Boost Unit Test Framework to generate the benchmark instances. % @todo ref
 
 The measurement layout and benchmark framework is illustrated in \cref{fig:framework}.
@@ -125,8 +128,7 @@ The total time measures from \mc{allocate} over forward and inverse transforms t
 Furthermore, the memory footprint of the FFT client is recorded to answer the question, which FFT library consumes minimal memory.
 %i.\,e. the FFT client \mc{T_Client} is intantiated to run its operations for plan generation, FFTs and data management.
 
-The functor \mc{FFT} contains the FFT client operations, wrapped with time measurements, and is invoked multiple times (compile-time constant in application.hpp). The input data buffer is hold by \mc{BenchmarkExecutor} and a copy is given to the \mc{FFT} functor.
-
+The functor \mc{FFT} contains the FFT client operations, wrapped with time measurements, and is invoked multiple times (compile-time constant in application.hpp). The input data buffer is hold by \mc{BenchmarkExecutor} and a copy is given to the \mc{FFT} functor each run.
 
 % implies plan reuse
 \begin{figure}
@@ -156,8 +158,15 @@ The functor \mc{FFT} contains the FFT client operations, wrapped with time measu
 \node[font=\scriptsize] at (0, 0.3) {Boost Test Suites};
 \node[font=\scriptsize] at (0,-1.7) {Boost Test Cases};
 \end{scope}
+% \begin{scope}[yshift=4cm,xshift=-6cm,every node/.style={anchor=west,align=left,font=\scriptsize}]
+% \node at (0,0) {cuFFT};
+% \node at (0,-0.5) {float};
+% \node at (0,-1) {1024x1024};
+% \node at (0,-1.5) {Inplace\_Real};
+% \end{scope}
+
 % 
-\begin{scope}[xshift=2cm]
+\begin{scope}[xshift=1.75cm]
 \begin{scope}
 \pclass{Benchmark}{-2}{4}{b}
 \pclass[Functor]{BenchmarkSuite}{-2}{3.2}{bs}
@@ -180,7 +189,7 @@ The functor \mc{FFT} contains the FFT client operations, wrapped with time measu
  text width=3.6em,
  align=center,
  nodes in empty cells,
- row 1/.style={nodes={rectangle,draw,minimum width=3em,font=\scriptsize}}
+ row 1/.style={nodes={rectangle,draw,minimum width=3em,font=\scriptsize\itshape}}
 ]
 (mf) at (0,0) {
 allocate &
@@ -214,8 +223,81 @@ destroy\\
 \draw[densely dashed,-angle 90] (fft) -- (impl.west|-fft) node[midway] (q) {};
 \draw[densely dashed] (q) -- (ctl-|q);
 \end{tikzpicture}
- \caption{The benchmark framework of \gearshifft{} using Boost UTF and a realised FFT interface; Here only FFT interfaces are shown, that are measured (gray operations are measured by device timers if required); Context also has an implicit interface, which is omitted here.}
+ \caption{The benchmark framework of \gearshifft{} using Boost UTF and a realized FFT interface; Here, only FFT interfaces are shown, that are measured (gray operations are measured by device timers if provided); Context also has an implicit interface, which is omitted here.}
  \label{fig:framework}
 \end{figure}
 
+Currently, there are three different FFT libraries used, namely cuFFT from NVIDIA \cite{cufft}, clFFT from AMD \cite{clfft} and FFTW \cite{FFTW97, FFTW05}.
+cuFFT is a NVIDIA CUDA GPU-only FFT library based on Cooley-Tukey and Bluestein algorithms \cite{cooley65,bluestein}.
+clFFT implements a variation of Cooley-Tukey for heterogeneous platforms.
+FFTW is CPU-only and primarily uses Cooley-Tukey supporting various SIMD (SSE, AVX, \ldots) optimizations.
+By this selection, an accelerator-, mixed and a CPU-optimized library is covered.
+
+As build system we use \texttt{cmake} to configure the includes and the executables according to the FFT libraries found by \texttt{cmake} in the user environment. There also options\footnote{Use \mc{ccmake .} in the build directory for customizing the settings.} for disabling FFT libraries or FFTW planning time limit. The project structure is depicted in \cref{fig:projstruct}. The common build procedure is to use a build directory (release, debug) for makefile generation with \mc{cmake ..}.
+
+\begin{figure}[htp]
+\begin{tikzpicture}
+\begin{scope}[grow via three points={one child at (0.4,-0.4) and
+  two children at (0.4,-0.4) and (0.4,-0.8)},
+  edge from parent path={(\tikzparentnode.south) |- (\tikzchildnode.west)},
+  every node/.style={anchor=west,font=\ttfamily}%
+]
+\node {gearshifft}
+    child { node (cfg) {config}}		
+    child { node (inc) {inc}
+      child { node (core) {core}}
+      child { node (lib) {libraries}}
+    }
+    child [missing] {}				
+    child [missing] {}
+    child { node (scripts) {scripts}}
+    child { node (src) {src}}; 
+\end{scope}
+\begin{scope}[every node/.style={anchor=west}]
+\coordinate (d) at (4.1,0);
+\draw[dotted] (cfg) -- (cfg-|d) node { config files for extents (extents.csv, \ldots)};
+\draw[dotted] (inc) -- (inc-|d) node { header files};
+\draw[dotted] (core) -- (core-|d) node { gearshifft core headers (benchmark.hpp, \ldots};
+\draw[dotted] (lib) -- (lib-|d) node { FFT client directories with headers (fftw/fftw.hpp, \ldots)};
+\draw[dotted] (scripts) -- (scripts-|d) node { python scripted config generator};
+\draw[dotted] (src) -- (src-|d) node { gearshifft source files (benchmark.cpp, options.cpp)}; 
+\end{scope}
+\end{tikzpicture}
+ \caption{gearshifft project structure.}
+ \label{fig:projstruct}
+\end{figure}
+
+
+
+For the command-line arguments Boost is utilized, particularly for benchmark lists and selection. The \gearshifft{} program options are given in \cref{tab:cmdargs}.
+
+\begin{table}[htp]
+ \centering
+ \caption{gearshifft command-line arguments}
+ \label{tab:cmdargs}
+  \begin{tabular}{llp{6.4cm}}
+\toprule
+Flag & [Flag] Argument & Description \\
+\midrule
+-h&[ -{}-help ]                    &Print help messages \\
+-e&[ -{}-extent ] arg              &Specific extent (eg. 1024x1024)\newline[$\ge1$ 
+                                  arguments possible] \\
+-f&[ -{}-file ] arg                &File with extents (row-wise csv)\newline[$\ge1$ 
+                                  arguments possible] \\
+-o&[ -{}-output ] arg (=result.csv)&Output csv file, will be overwritten! \\
+-v&[ -{}-verbose ]                 &Show statistics after benchmarks finished \\
+-d&[ -{}-device ] arg (=gpu)       &Compute device = (gpu|cpu|acc|<ID>). If 
+                                  device is not supported by FFT lib, then it
+                                  is ignored and default is used. \\
+-n&[ -{}-ndevices ] arg (=0)       &Number of devices (0=all), if supported by 
+                                  FFT lib (e.g. clfft and fftw with n CPU 
+                                  threads). \\
+-l&[ -{}-list-devices ]            &List of available compute devices with IDs,
+                                  if supported.  \\
+-b&[ -{}-list-benchmarks ]         &Show registered benchmarks \\
+-r&[ -{}-run-benchmarks ] arg      &Run specific benchmarks (wildcards 
+                                  possible, e.g. ClFFT/float/*/Inplace\_Real)\\
+\bottomrule
+  \end{tabular}
+\end{table}
 
