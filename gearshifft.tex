@@ -4,7 +4,8 @@
 %\usepackage{amsthm,amsmath,amsfonts,amssymb}
 \usepackage[locale=US]{siunitx}
 \usepackage{graphicx}
-\graphicspath{{./figures/}}
+\graphicspath{{./figures/gnuplot/}}
+\usepackage{calc} % required by gnuplot>cairolatex
 \usepackage{booktabs}
 \usepackage{wrapfig}
 \usepackage[table]{xcolor}
@@ -164,6 +165,7 @@ sorting=nyt
 \label{sec:implementation}
 \input{implementation}
 
+\clearpage
 \section{Results}
 \label{sec:results}
 \input{results}

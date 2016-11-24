@@ -5,3 +5,28 @@
 % - analysis
 % + inplace versus outplace
 % + real vs complex-as-real
+
+\begin{figure}[p]
+	\centering
+	{\small{
+	  \sisetup{
+		  retain-unity-mantissa=false,
+		  exponent-product={\!\times\!}
+	  }
+ 	  \input{figures/gnuplot/k80_cuda8_clfft.tex}
+	}}
+	\caption{Caption}
+	\label{fig:resultsa}
+\end{figure}
+\begin{figure}[p]
+	\centering
+	{\small{
+	  \sisetup{
+		  retain-unity-mantissa=false,
+		  exponent-product={\!\times\!}
+	  }
+ 	  \input{figures/gnuplot/k20xm_k80_cuda8.tex}
+	}}
+	\caption{Caption}
+	\label{fig:resultsb}
+\end{figure}
