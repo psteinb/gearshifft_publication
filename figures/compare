@@ -201,6 +201,9 @@ data_for_plotting <- succeeded_reduced %>%
 
 glimpse(data_for_plotting)
 
+# print(data_for_plotting)
+write.csv(data_for_plotting, file='test.csv')
+
 my_theme <-  theme_bw() + theme(axis.title.x = element_text(size=14),
                                 axis.title.y = element_text(size=14),
                                 axis.text.x = element_text(size=12),
@@ -313,10 +316,10 @@ if( nchar(opts[["aspect"]]) > 0 ){
 # ggsave(paste(opts[["filename"]],".svg",sep=""),moi_plot,)
 # ggsave(paste(opts[["filename"]],".tex",sep=""),moi_plot,)
 
-library(tikzDevice)
-tikz(file=paste(opts[["filename"]],".tex",sep=""),width=4.5,height=4)
-print(moi_plot)
-dev.off()
+## library(tikzDevice)
+## tikz(file=paste(opts[["filename"]],".tex",sep=""),width=4.5,height=4)
+## print(moi_plot)
+## dev.off()
 
 ## succeeded_by_ID <- succeeded %>% group_by(id)
 ## head(succeeded_by_ID)
