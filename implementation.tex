@@ -13,14 +13,9 @@ The wrapper code leverages C++ templates and the meta-programming language for c
 This yields minimal overhead at runtime and provides a type-agnostic interface, i.\,e. \gearshifft{} is not fixed to single or double precision.
 However, the benchmark runtime environment allocates memory for samples and performance data.
 
-The frontend interface requires the user to implement the context class and a class with methods for the FFT client routines.
-The context class in \cref{lst:implcontext} is instantiated only once for the application lifetime.
-The FFT client implementation class in \cref{lst:implfft} is instantiated once per benchmark run and follows the ``resource allocation is initialization (RAII) pattern.
-
-
 \begin{lstlisting}[caption={Context class required by gearshifft frontend API},label={lst:implcontext}]
 struct Context {
-  /// title for all benchmarks associated to this context
+  /// title for all benchmarks associated with this context
   static std::string title();
   /// list all compute devices
   static std::string get_device_list();
@@ -32,11 +27,20 @@ struct Context {
   void destroy();
 };
 \end{lstlisting}
+
+The frontend interface requires the user to implement the context class and a class with methods for the FFT client routines.
+The context class in \cref{lst:implcontext} is instantiated only once for the application lifetime.
+FFT libraries like clFFT have a global setup routine, which should not be invoked in each benchmark for the sake of performance and proper measurements. 
+The context functions \mc{create} and \mc{destroy} are run only once and are measured separately.
+This speeds up the whole benchmark as device and library initialization might be quite time-consuming. 
+By \mc{Application<Context>::getContext()} the user has access to the global context instance.
+
 \begin{lstlisting}[caption={FFT client implementation required by gearshifft frontend API},label={lst:implfft}]
 template<
  typename TFFT, // e.g. gearshifft::FFT_Inplace_Real, ...
  typename TPrecision, // e.g. double, float, ...
  size_t   NDim        // 1,..,3
+ /* .. further template types if needed .. */
 >
 struct FFT_Client_Impl {
   FFT_Client_Impl();
@@ -57,6 +61,10 @@ struct FFT_Client_Impl {
 };
 \end{lstlisting}
 
+The FFT client implementation class in \cref{lst:implfft} is instantiated once per benchmark run and follows the ``resource allocation is initialization (RAII) pattern.
+All the data allocated in instantiation must be freed on destruction, otherwise memory leaks can have significant impact on benchmark results.
+The FFT client implementation can assign user-defined template types to create different FFT client classes to mimic different use cases. An example is given by the FFTW implementation, which involves a compile-time constant configuration structure to map plan-rigors like \mc{FFTW_MEASURE} or \mc{FFTW_ESTIMATE}.
+
 \begin{lstlisting}[caption={FFT wrapper class},label={lst:fftabstract}]
 template<
  typename T_FFT, // e.g. FFT_Inplace_Real ..
@@ -73,16 +81,16 @@ struct FFT : public T_FFT {
 
 The wrapper for the FFT client and the layout of measurement is implemented in the \mc{gearshifft::FFT} functor.
 Its template parameters are shown in \cref{lst:fftabstract}. 
-\mc{T_FFT} is one of \gearshifft{} predefined types \mc{FFT_Inplace_Real}, \mc{FFT_Outplace_Real}, \mc{FFT_Inplace_Complex} and \mc{FFT_Outplace_Complex}.
+The template parameter \mc{T_FFT} is assigned with one of the predefined types \mc{FFT_Inplace_Real}, \mc{FFT_Outplace_Real}, \mc{FFT_Inplace_Complex} and \mc{FFT_Outplace_Complex}.
 
 Most libraries allow plan reuse.
 Reusing a plan means to use only one plan handle. After forward transform has been finished the same plan handle is used for backward transform.
-This might save memory as there are no two plans allocated at the same time. FFTW already overwrites\footnote{FFTW already computes some FFTs to find the best plan} input and output buffer in the planning phase, when \mc{FFTW_MEASURE} is used. Afterwards, the buffers can be filled with data, but it means, that the plan cannot be reused at a later time, since the result buffer would be overwritten at planning stage.
+This might save memory as there are no two plans allocated at the same time. FFTW already overwrites\footnote{FFTW already computes some FFTs to find the best plan} input and output buffer in the planning phase, when \mc{FFTW_MEASURE} is used. Afterwards, the buffers can be filled with data, but it means, that the plan cannot be reused at a later time, since the result buffer of the previous plan would be overwritten at the second planning stage.
 Thus, when it is not possible to reuse the plan handle, then plan handles for forward and inverse transform are allocated in the initialization phase.
 
 \mc{T_Client} defines the FFT client class like \mc{CuFFTImpl} or \mc{FftwImpl}.
 The template parameters are at least the \mc{T_FFT} type (\mc{FFT_Inplace_Real}, \ldots), the precision type (float, \ldots) and the FFT dimension (1, 2 or 3), see also \cref{lst:implfft}. If the client needs more template arguments the variadic template \mc{T_ClientArgs} is given to the \mc{T_Client} instantiation as fourth parameter (expansion of a parameter pack).
-The \mc{T_DeviceTimer} allows device located time measurements and is only implemented for CUDA/cuFFT library at the moment.
+The \mc{T_DeviceTimer} allows device-specific time measurements and is only implemented for CUDA/cuFFT library at the moment.
 
 \begin{lstlisting}[caption={Define FFT client types for corresponding FFTs},label={lst:implfftusing}]
 using Inplace_Real = gearshifft::FFT<
@@ -227,9 +235,9 @@ destroy\\
  \label{fig:framework}
 \end{figure}
 
-Currently, there are three different FFT libraries used, namely cuFFT from NVIDIA \cite{cufft}, clFFT from AMD \cite{clfft} and FFTW \cite{FFTW97, FFTW05}.
-cuFFT is a NVIDIA CUDA GPU-only FFT library based on Cooley-Tukey and Bluestein algorithms \cite{cooley65,bluestein}.
-clFFT implements a variation of Cooley-Tukey for heterogeneous platforms.
+Currently, \gearshifft{} comes with three different FFT libraries, namely cuFFT from NVIDIA \cite{cufft}, clFFT from AMD \cite{clfft} and FFTW \cite{FFTW97, FFTW05}.
+cuFFT is NVIDIA CUDA GPU-only using the Cooley-Tukey and Bluestein algorithms \cite{cooley65,bluestein}.
+clFFT implements a variation of Cooley-Tukey and Stockham algorithm in OpenCL to run on heterogeneous platforms.
 FFTW is CPU-only and primarily uses Cooley-Tukey supporting various SIMD (SSE, AVX, \ldots) optimizations.
 By this selection, an accelerator-, mixed and a CPU-optimized library is covered.
 
@@ -269,8 +277,6 @@ As build system we use \texttt{cmake} to configure the includes and the executab
 
 
 
-For the command-line arguments Boost is utilized, particularly for benchmark lists and selection. The \gearshifft{} program options are given in \cref{tab:cmdargs}.
-
 \begin{table}[htp]
  \centering
  \caption{gearshifft command-line arguments}
@@ -300,4 +306,9 @@ Flag & [Flag] Argument & Description \\
 \bottomrule
   \end{tabular}
 \end{table}
+
+For the command-line arguments Boost is utilized, particularly for benchmark lists and selection. The \gearshifft{} program options are given in \cref{tab:cmdargs}.\linebreak
+\verb!gearshifft_clfft -e 16,16 8x8x8 -r */float/*/Inplace_Real -d cpu!\linebreak
+runs clfft benchmarks with inplace real-to-complex / complex-to-real transform on an $8\times8\times8$ FFT and $16\times16$ FFT at single-precision. The default setting implies to use all CPU cores and to dump the results to result.csv (if already existent, it will be overwritten).
+The first wildcard \mc{*} relates to the title of the FFT client, where the second one refers to the extents.
 
