@@ -15,6 +15,13 @@ k80_cuda8_3d : $(k80_files)
 	./compare -c -k "radix357" -n 3 -a "library,precision,inplace" -f $(@)_radix357_comp $? > $(@)_radix357_comp_compare.log 2>&1
 	@echo "$(@) done"
 
+k80_cuda8 : $(k80_files)
+	./compare -r -k "oddshape" -n 3 -a "library,precision,inplace" -f $(@)_legend --notitle --legend-only $? > $(@)_legend_only.log 2>&1
+
+gtx1080_cuda8 : $(gtx1080_files)
+	./compare -r -k "oddshape" -n 3 -a "library,precision,inplace" -f $(@)_legend --notitle --legend-only $? > $(@)_legend_only.log 2>&1
+
+
 k80_cuda8_2d : $(k80_files)
 	./compare -r -k "oddshape" -n 2 -a "library,precision,inplace" -f $(@)_oddshape_real $? > $(@)_oddshape_real_compare.log 2>&1
 	./compare -r -k "powerof2" -n 2 -a "library,precision,inplace" -f $(@)_powerof2_real $?	> $(@)_powerof2_real_compare.log 2>&1
@@ -61,8 +68,9 @@ gtx1080_cuda8_1d : $(gtx1080_files)
 	@echo "$(@) done"	
 
 
-K80 : k80_cuda8_3d 	k80_cuda8_2d 	k80_cuda8_1d 	k80_cuda8_3d 	k80_cuda8_2d 	k80_cuda8_1d
-GTX1080 : gtx1080_cuda8_3d 	gtx1080_cuda8_2d 	gtx1080_cuda8_1d 	gtx1080_cuda8_3d 	gtx1080_cuda8_2d 	gtx1080_cuda8_1d 
+K80 : k80_cuda8_3d 	k80_cuda8_2d 	k80_cuda8_1d k80_cuda8
+
+GTX1080 : gtx1080_cuda8_3d 	gtx1080_cuda8_2d 	gtx1080_cuda8_1d gtx1080_cuda8
 
 clean :
 	rm -vf  k80_cuda8*.{png,svg,tex}
