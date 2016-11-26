@@ -1,0 +1,47 @@
+\documentclass[a4paper,10pt]{scrartcl}
+\usepackage[T1]{fontenc}
+
+\usepackage[left=25mm,right=25mm,head=20mm,bottom=20mm,foot=10mm,headsep=20mm]{geometry}
+\usepackage[pdftex]{graphicx}
+\usepackage{amssymb,amsthm,amsmath}
+\usepackage{amsfonts}
+\usepackage{calc} % required by gnuplot>cairolatex
+\usepackage[locale=US]{siunitx}
+\usepackage{xcolor}
+\usepackage{grffile} % to deal with graphics extensions 'foo.bar.ext'
+
+\usepackage[automark,headsepline]{scrlayer-scrpage}
+\pagestyle{scrheadings}
+\clearscrheadfoot
+\rehead{\rightmark}
+\rohead{\rightmark}
+
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks,
+  citecolor=black,
+  filecolor=black,
+  linkcolor=black,
+  urlcolor=black
+}
+
+\newenvironment{mfigure}{
+  \begin{figure}[htp]
+    \centering%
+    \sisetup{
+      retain-unity-mantissa=false,
+      exponent-product={\!\times\!}
+      }
+}{\end{figure}}
+
+
+\newcommand{\tc}[1]{\detokenize{#1}} % used by gnuplot
+\newcommand{\msection}[1]{\clearpage\section{\detokenize{#1}}}
+\newcommand{\msubsection}[1]{\subsection{\detokenize{#1}}}
+
+\begin{document}
+\tableofcontents
+
+\input{figures}
+
+\end{document}

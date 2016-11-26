@@ -5,34 +5,51 @@
 # comp_rc="Real Complex"  | rc="real|complex"
 # comp_libs="clfft cuda8" | lib="lib"
 # comp_devices="k80 k20x" | dev="dev"
+# comp_files | file
 # render_png
 # filename
 
+# print comp_prec
+# #print prec
+# print comp_rc
+# #print rc
+# #print comp_devices
+# print dev
+# #print comp_libs
+# print lib
+# print comp_files
+# print filename
 reset
 if(!exists("filename")) {
  print "Error. Missing filename."
  quit
-}
+ }
+
 if(!exists("comp_prec") && !exists("comp_rc")) {
- print "Error. Missing command line parameter."
+ print "Error. Missing command line parameter (neither comp_prec nor comp_rc)."
  quit
 }
-if(!exists("comp_libs") && !exists("comp_devices")) {
- print "Error. Missing command line parameter."
- quit
+prec_rc=0
+if(!exists("comp_libs") && !exists("comp_devices") && !exists("comp_files")) {
+ if(exists("comp_prec") && exists("comp_rc")) {
+  prec_rc=1
+ }else{
+  print "Error. Missing command line parameter (neither comp_libs nor comp_devices nor comp_files)."
+  quit
+ }
 }
 
 # loop0 is inplace vs outplace
 # loop1: real vs complex | prec1 vs prec2
 
 if(exists("comp_prec")) {
-print comp_prec
+#print comp_prec
 loop0_in = "comp_prec"
 loop0_t = "prec"
 #rc
 }
 if(exists("comp_rc")) {
-print comp_rc
+#print comp_rc
 loop0_in = "comp_rc"
 loop0_t = "rc"
 #prec
@@ -40,20 +57,40 @@ loop0_t = "rc"
 
 # loop2: lib1 vs lib2 | dev1 vs dev2
 # just affects infile
-
 if(exists("comp_libs")) {
-print comp_libs
+if(exists("comp_files")) { file="" }
+#print comp_libs
 loop2_in = "comp_libs"
 loop2_t = "lib"
 #dev
-}
-if(exists("comp_devices")) {
-print comp_devices
+} else { if(exists("comp_devices")) {
+if(exists("comp_files")) { file="" }
+#print comp_devices
 loop2_in = "comp_devices"
 loop2_t = "dev"
 #lib
 #todo title
+} else { if(exists("comp_files")) {
+loop2_in = "comp_files"
+loop2_t = "file"
+} else { if(prec_rc) {
+loop2_in = "comp_prec"
+loop2_t = "prec"
+} else {
+print "Error in comp branch."
+quit
+}}}}
+
+infile(dev,lib,file)= "result_".dev."_".lib."_".(exists("comp_libs") ? (word(comp_libs,1) eq lib ? word(comp_files,1) : word(comp_files,2)) : exists("comp_devices") ? (word(comp_devices,1) eq dev ? word(comp_files,1) : word(comp_files,2)) : file).".csv"
+
+#dev+lib+file are different
+if(exists("comp_libs") && exists("comp_devices") && exists("comp_files")) {
+file=""
+dev="" # loop2 is running on libs
+infile(dev,lib,file)= "result_".(word(comp_libs,1) eq lib ? word(comp_devices,1) : word(comp_devices,2))."_".lib."_".(word(comp_libs,1) eq lib ? word(comp_files,1) : word(comp_files,2)).".csv"
+
 }
+
 comp_places="Inplace Outplace"
 comp_kinds="powerof2 radix357 oddshape"
 comp_dims="1 2 3"
@@ -117,7 +154,7 @@ set output filename.".png" # lib."_".arch."_".prec.".png"
 
 set term cairolatex pdf color fontscale 0.5 size 4.95in, 3in dashlength 0.25
 set output filename.".tex"
-set format y "\\scriptsize{\\num{%.0te+%T}}"
+set format y "\\scriptsize{\\num{%.0te%T}}"
 }
 
 # set key off
@@ -133,9 +170,8 @@ col_x=13
 col_mean=15
 col_std=17
 #
-infile(dev,lib)=dev."_".lib.".csv"
 #mdev=system(sprintf("awk -F, 'NR==2{gsub(\"\\\"\",\"\");print $12}' %s", infile(dev,lib)))
-mdev="Device"
+#mdev="Device"
 #set title sprintf("%s - %dD FFT (%s) on %s", mtitle, dim, kind, mdev)
 ttitle=""
 
@@ -150,7 +186,7 @@ set lmargin 9
 set rmargin 0
 set bmargin 0
 set xrange[10:1e+10]
-set yrange[1:1e+4]
+set yrange[1e-2:1e+4]
 set style textbox opaque noborder
 counter=0
 
@@ -167,11 +203,13 @@ if(!exists("render_png")) {
  set label 1 sprintf("%s %dD", kind, dim) at 1e+3,2e+3 boxed front
 }
 id=0
+idr=0
 set macros
-plot for [k=1:2] 1/0 w l ls 4*k-1 lw 1.5*llw ti word(@loop2_in,k), \
+plot for [k=1:2] 1/0 w l ls 4*k-1 lw 1.5*llw ti sprintf("\\tc{%s}",word(@loop2_in,k)[:15]), \
      for [k=1:2] 1/0 w p ls 2*k-1 ps 1.5*pps ti word(comp_places,k), \
      for [k=1:2] 1/0 w l ls k     lw 1.5*llw ti word(@loop0_in,k), \
-     for [@loop2_t in @loop2_in] for [place in comp_places] for [@loop0_t in @loop0_in] infile(dev,lib) every 1::skiprows u ( stringcolumn(3) eq place && stringcolumn(4) eq rc && stringcolumn(5) eq prec && dim==$6 && stringcolumn(7) eq kind ? column(col_x) : 1/0):col_mean w lp ls id=id+1 notitle
+     for [@loop2_t in @loop2_in] for [place in comp_places] for [@loop0_t in @loop0_in] infile(dev,lib,file) every 1::skiprows u ( stringcolumn(3) eq place && stringcolumn(4) eq rc && stringcolumn(5) eq prec && dim==$6 && stringcolumn(7) eq kind ? column(col_x) : 1/0):col_mean w lp ls id=id+1 notitle, \
+     for [@loop2_t in @loop2_in] for [place in comp_places] for [@loop0_t in @loop0_in] infile(dev,lib,file) every 1::skiprows u ( stringcolumn(3) eq place && stringcolumn(4) eq rc && stringcolumn(5) eq prec && dim==$6 && stringcolumn(7) eq kind ? column(col_x) : 1/0):col_mean:col_std w yerrorbars ls idr=idr+1 notitle
 
 set tmargin 1
 set bmargin 1
@@ -203,8 +241,10 @@ if(!exists("render_png")) {
  set label 1 sprintf("%s %dD", kind, dim) at 1e+3,2e+3 boxed front
 }
 id=0
+idr=0
 set macros
-plot for [@loop2_t in @loop2_in] for [place in comp_places] for [@loop0_t in @loop0_in] infile(dev,lib) every 1::skiprows u ( stringcolumn(3) eq place && stringcolumn(4) eq rc && stringcolumn(5) eq prec && dim==$6 && stringcolumn(7) eq kind ? column(col_x) : 1/0):col_mean w lp ls id=id+1 #ti sprintf("%s %s %s", place, @loop2_t, @loop0_t)
+plot for [@loop2_t in @loop2_in] for [place in comp_places] for [@loop0_t in @loop0_in] infile(dev,lib,file) every 1::skiprows u ( stringcolumn(3) eq place && stringcolumn(4) eq rc && stringcolumn(5) eq prec && dim==$6 && stringcolumn(7) eq kind ? column(col_x) : 1/0):col_mean w lp ls id=id+1, \
+     for [@loop2_t in @loop2_in] for [place in comp_places] for [@loop0_t in @loop0_in] infile(dev,lib,file) every 1::skiprows u ( stringcolumn(3) eq place && stringcolumn(4) eq rc && stringcolumn(5) eq prec && dim==$6 && stringcolumn(7) eq kind ? column(col_x) : 1/0):col_mean:col_std w yerrorbars ls idr=idr+1
 unset macros
 set bmargin 1
 set tmargin 1
