@@ -1,0 +1,59 @@
+\documentclass[a4paper,10pt]{scrreprt}
+\usepackage[T1]{fontenc}
+
+\usepackage[left=25mm,right=25mm,head=20mm,bottom=20mm,foot=10mm,headsep=20mm]{geometry}
+\usepackage[pdftex]{graphicx}
+\graphicspath{{./figures/}}
+\usepackage{amssymb,amsthm,amsmath}
+\usepackage{amsfonts}
+\usepackage{calc} % required by gnuplot>cairolatex
+\usepackage[locale=US]{siunitx}
+\usepackage{xcolor}
+\usepackage{grffile} % to deal with graphics extensions 'foo.bar.ext'
+
+\usepackage[autooneside=false,automark,headsepline]{scrlayer-scrpage}
+\pagestyle{scrheadings}
+\clearscrheadfoot
+\rehead{\rightmark}
+\lehead{\leftmark}
+\rohead{\rightmark}
+\lohead{\leftmark}
+
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks,
+  citecolor=black,
+  filecolor=black,
+  linkcolor=black,
+  urlcolor=black
+}
+
+\newenvironment{mfigure}{
+  \begin{figure}[h]
+    \centering%
+    \sisetup{
+      retain-unity-mantissa=false,
+      exponent-product={\!\times\!}
+      }
+}{\end{figure}}
+
+
+\newcommand{\tc}[1]{\detokenize{#1}} % used by gnuplot
+\newcommand{\mchapter}[1]{\chapter{\detokenize{#1}}}
+\newcommand{\msection}[1]{\clearpage\section{\detokenize{#1}}}
+\newcommand{\msubsection}[1]{\clearpage\subsection{\detokenize{#1}}}
+
+\begin{document}
+\begin{itemize}
+  \item all diagrams use the same axes scaling to ease comparison\newline(thus, sometimes the data will be not fully visible)
+  \item error bars are shown if error is greater than \SI{1}{\percent}
+  \item the caption indicates the filename of the plot in figures/
+  \item section contains relevant information of first element of pair for comparison
+  \item subsection contains relevant information of second element of pair for comparison
+\end{itemize}
+  
+\tableofcontents
+
+\input{figures}
+
+\end{document}
