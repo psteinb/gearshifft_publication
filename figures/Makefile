@@ -84,5 +84,3 @@ clean :
 
 distclean : clean
 	rm -vf *compare.log
-	rm -vf *compare.log
-	rm -vf *compare.log
