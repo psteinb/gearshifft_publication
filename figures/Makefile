@@ -77,7 +77,10 @@ K80 : k80_cuda8_3d 	k80_cuda8_2d 	k80_cuda8_1d k80_cuda8
 GTX1080 : gtx1080_cuda8_3d 	gtx1080_cuda8_2d 	gtx1080_cuda8_1d gtx1080_cuda8
 
 clean :
-	rm -vf  *.{png,pdf,pdf_tex,svg,tex}
+	rm -vf  *tex
+	rm -vf *.png
+	rm -vf *.pdf
+	rm -vf *.svg
 
 distclean : clean
 	rm -vf *compare.log
