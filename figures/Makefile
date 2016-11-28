@@ -2,11 +2,21 @@
 k80_files = $(wildcard ../results/K80/cuda-8.0.44/*csv)
 gtx1080_files = $(wildcard ../results/GTX1080/cuda-8.0.44/*csv)
 
+cufft8_files = $(wildcard ../results/*/cuda-8.0.44/cufft*csv)
+estimate_fftw_files = $(wildcard ../results/haswell/fftw-3.3.5/fftw_estimate*csv)
+measure_fftw_files = $(wildcard ../results/haswell/fftw-3.3.5/fftw_gcc*csv)
+wisdom_fftw_files = $(wildcard ../results/haswell/fftw-3.3.5/fftw_wisdom*csv)
+
 svg_files = $(wildcard *.svg)
 
-TARGETS = K80 GTX1080
+TARGETS = results_figure1
 
 all : $(TARGETS)
+
+results_figure1 : $(cufft8_files) $(estimate_fftw_files)
+	./compare -r -s -o -k "powerof2" -n 3 -a "hardware,library" --notitle --nolegend -f $(@) $? > $(@).log 2>&1
+	./compare -r -s -o -k "powerof2" -n 3 -a "hardware,library" --notitle --legend-only -f $(@)_legend $? > $(@)_legend.log 2>1&
+	./compare -r -s -o -k "powerof2" -n 3 -a "hardware,library" --notitle --nolegend -f $(@)_check $? > $(@)_check.log 2>&1
 
 k80_cuda8_3d : $(k80_files)
 	./compare -r -k "oddshape" -n 3 -a "library,precision,inplace" --notitle --nolegend -f $(@)_oddshape_real $? > $(@)_oddshape_real_compare.log 2>&1

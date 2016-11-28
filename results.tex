@@ -1,4 +1,6 @@
-Based on the experiences made for \cite{preibisch2014efficient, schmid2015real}, this section will discuss results obtained with gearshifft on various hardware in order to showcase the capabilities of \gearshifft{}. We will assume the motivation of a developer seeking to optimize the use of FFTs in the context of the aforementioned publications, i.e. 3D real-to-complex transforms with continguous single-precision input data. Expeditions into other use cases will be made where appropriate. The curious reader may rest assured that a more comprehensive study is easily possible with \gearshifft{}, however the mere multiplicity of all possible combinations and use cases of FFT render it not feasible nor practical to discuss 1D or 2D in a comprehensive fashion as well.
+Based on the experiences made for \cite{preibisch2014efficient, schmid2015real}, this section will discuss results obtained with gearshifft on various hardware in order to showcase the capabilities of \gearshifft{}. We will assume the motivation of a developer seeking to optimize the use of FFTs in the context of the aforementioned publications, i.e. 3D real-to-complex transforms with continguous single-precision input data. If not stated otherwise, this is the transform type assumed for all illustrations hereafter. 
+
+Expeditions into other use cases will be made where appropriate. The curious reader may rest assured that a more comprehensive study is easily possible with \gearshifft{}, however the mere multiplicity of all possible combinations and use cases of FFT render it neither feasible nor practical to discuss 1D or 2D in a comprehensive fashion as well.
 
 For this study, we will concentrate on three modern and current FFT implementations available free of charge: fftw (on x86 CPUs), cufft (on nVidia GPUs) and clfft (on x86 CPUs or nVidia GPUs). We consider this the natural starting point of developers beyond possible domain specific implementations. It should be noted, that this will infer not only a study in terms of hardware performance, but also how well the APIs designed by the authors of fftw, clFFT and cuFFT are documented, understood and used in practise. We consider both hardware and cognitive performance a virtue of almost equal importance.
 
@@ -35,10 +37,12 @@ In order to generate one data set, a set arrays of arbitrary shapes is provided 
 
 The FFT calls to benchmark are executed five times each. From this, the arithmetic mean and sample standard deviations are used for figures presented below. As the number of repititions is a configurable parameter of \gearshifft{}, we leave it to the user to produce a more comprehensive data set than used for this publication. We consider five repetitions enough at this point to show and discuss several aspects of performance and usability of \gearshifft{} and the FFT libraries under study.  
 
+%TODO: why maximum size of transforms?
+
 \subsection{Time To Solution}
 \label{ssec:tts}
 
-
+We begin the discussion with the classical use case for developers that might be accustomed to small size transforms. As such, an out-of-place transform with \texttt{powerof2} signal shapes will be assumed.  
 
 \begin{figure}[!tbp]
   \centering

@@ -89,7 +89,7 @@ if(opts[["fp64"]]){
 }
 
 if(opts[["fp32"]]){
-    filter_prec <- "single"
+    filter_prec <- "float"
 }
 
 
