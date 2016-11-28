@@ -19,7 +19,8 @@ library(gridExtra)
  --nolegend             Do not add a legend to the plot [default: FALSE]
  --notitle              Do not add a title to the plot [default: FALSE]
  --legend-only           Only save the legend to file [default: FALSE]
- -y --ymetric=YMETRIC 	Use metric YMETRIC for plotting along y [default: Time_Total]
+ -y --ymetric=YMETRIC 	Use metric YMETRIC for plotting along y, this can now be a valid R expression that computes a derived value [default: Time_Total]
+ --ylabel=YLABEL 	Use YLABEL for labelling the ymetric, note that underscores will be replaced by white spaces as white spaces are not correctly handled currently [default: ]
  --logy=LOGYVALUE       Use log scale on y-axis [default: 1]
  -x --xmetric=XMETRIC 	Use metric XMETRIC for plotting along y [default: Size_DeviceBuffer]
  --logx=LOGXVALUE       Use log scale on x-axis [default: 1]
@@ -139,38 +140,75 @@ if ( length(filter_dim) > 0){
 } 
 
 cat("total rows filtered: \t",nrow(succeeded),"\n")
-avcols <- colnames(succeeded)
+data_colnames = colnames(succeeded)
 
-if(grep(opts[["ymetric"]],avcols) == 0){
-    
-    stop(cat(opts[["ymetric"]], "for y not found in available columns \n",avcols,"\n"))
+
+##############################################################################
+                                        # extracting ymetric expression
+
+ymetric_keywords = trimws(unlist(strsplit(opts[["ymetric"]],"[-|+|/|*|)|(]")))
+ymetric_expression = opts[["ymetric"]]
+
+                                        # creating expression
+for(i in 1:length(ymetric_keywords)) {
+
+    indices = grep(ymetric_keywords[i],data_colnames) 
+    if( length(indices) > 0 && !is.null(ymetric_keywords[i]) && nchar(ymetric_keywords[i]) > 1){
+        to_replace = paste("succeeded[,",indices[1],"]",sep="")
+        cat(i,ymetric_keywords[i],"->",to_replace,"in",ymetric_expression,"\n")
+        ymetric_expression = gsub(ymetric_keywords[i],to_replace,
+                                  ymetric_expression)
+    }
 }
 
-if(grep(opts[["xmetric"]],avcols) == 0){
+
+cat("parsing of expression ",opts[["ymetric"]]," yielded .",ymetric_expression,". \n",sep="")
+
+
+                                        # creating metric of interest (moi)
+new_values = eval(parse(text=ymetric_expression))
+colnames(new_values) <- c("ymoi")
+
+name_of_ymetric = opts[["ymetric"]]
+if(exists('ylabel', where=opts) && !is.null(opts[["ylabel"]])) {
     
-    stop(cat(opts[["xmetric"]], "for x not found in available columns \n",avcols,"\n"))
+    cat("[ylabel] using ylabel: ",opts[["ylabel"]],"\n")
+    if( nchar(opts[["ylabel"]]) > 1){
+        name_of_ymetric = gsub("_"," ",opts[["ylabel"]])
+    }
+}
+
+if( length(ymetric_keywords) == 1  ){
+    name_of_ymetric = data_colnames[grep(ymetric_keywords[1], data_colnames)[1]] 
+}
+
+succeeded_ymetric_of_interest  = new_values
+################################################################################
+
+##############################################################################
+                                        # extracting xmetric expression
+if(grep(opts[["xmetric"]],data_colnames) == 0){
+    
+    stop(cat(opts[["xmetric"]], "for x not found in available columns \n",data_colnames,"\n"))
 }
 
 
-
-succeeded_ymetric_of_interest  <- succeeded %>% select(contains(opts[["ymetric"]]))
 succeeded_xmetric_of_interest  <- succeeded %>% select(contains(opts[["xmetric"]]))
+name_of_xmetric <- colnames(succeeded_xmetric_of_interest)[1]
+################################################################################
+
 
 succeeded_factors <- succeeded %>% select(-ends_with("]"))
 
 succeeded_reduced <- bind_cols(succeeded_factors,
                                succeeded_xmetric_of_interest,
                                succeeded_ymetric_of_interest)
-
-
-name_of_ymetric <- colnames(succeeded_ymetric_of_interest)[1]
-name_of_xmetric <- colnames(succeeded_xmetric_of_interest)[1]
-
-
-cat("calculating mean,median and sd of ",paste(name_of_ymetric)," versus ",name_of_xmetric,"\n")
-
-names(succeeded_reduced)[names(succeeded_reduced) == name_of_ymetric] <- "moi"
 names(succeeded_reduced)[names(succeeded_reduced) == name_of_xmetric] <- "xmoi"
+
+
+cat("calculating mean,median and sd of ",name_of_ymetric," versus ",name_of_xmetric,"\n")
+
+
 
 if( grepl("bytes",name_of_xmetric)  ) {
     succeeded_reduced$xmoi <- succeeded_reduced$xmoi / (1024.*1024.)
@@ -178,7 +216,7 @@ if( grepl("bytes",name_of_xmetric)  ) {
 }
 
 if( grepl("bytes",name_of_xmetric) ){
-    succeeded_reduced$moi <- succeeded_reduced$moi / (1024*1024)
+    succeeded_reduced$ymoi <- succeeded_reduced$ymoi / (1024*1024)
     name_of_ymetric <- gsub("bytes","MB",name_of_ymetric)
 }
 
@@ -191,9 +229,9 @@ cat("summarizing by ",paste(cols_to_grp_by),"\n")
 data_for_plotting <- succeeded_reduced %>%
     group_by_(.dots = cols_to_grp_by) %>%
     ##group_by(library, hardware, id, nx, ny, nz, xmoi) %>%
-    summarize( moi_mean = mean(moi),
-              moi_median = median(moi),
-              moi_stddev = sd(moi)
+    summarize( moi_mean = mean(ymoi),
+              moi_median = median(ymoi),
+              moi_stddev = sd(ymoi)
               )
 
 

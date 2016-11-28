@@ -141,10 +141,7 @@ if ( length(filter_dim) > 0){
 cat("total rows filtered: \t",nrow(succeeded),"\n")
 data_colnames = colnames(succeeded)
 
-## if(grep(opts[["ymetric"]],data_colnames) == 0){
-    
-##     stop(cat(opts[["ymetric"]], "for y not found in available columns \n",data_colnames,"\n"))
-## }
+
 
 if(grep(opts[["xmetric"]],data_colnames) == 0){
     
