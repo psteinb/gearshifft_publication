@@ -1,6 +1,10 @@
 # figures
 
-This directory contains the scripts to produce the figures used in this publication.
+This directory contains the scripts to produce the figures used in this publication. Please build the all target before compiling the entire publication:
+
+```
+$ make
+```
 
 # dependencies
 
