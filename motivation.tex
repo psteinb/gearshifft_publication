@@ -13,6 +13,9 @@ with $k$ being an integer index within $0 \le k < n$. This operation was found t
 \end{equation}
 
 Equation \cref{eq:cooley-turkey} describes a decomposition that can be performed recursively. Here, $n_1$ would be denoted as \emph{radix} which refers to $n_1$ transforms of size $n_2$. These smaller transforms are combined by a \emph{butterfly} pattern with $n_2$ DFTs of size $n_1$ on the outputs of the corresponding sub-transforms.
+For $n$ being a power of two, the radix-2 DFT is rather simple and a common implemented form of Cooley-Tukey algorithm \cite{cooley1965algorithm}.
+Arbitrary and mixed radices are more complicated and can be tackled with the prime-factorization or Chirp Z-transform implemented by the Bluestein's algorithm \cite{bluestein}.
+Due to these differences, we classify the FFT extent shapes into \emph{powerof2} (radix-2), \emph{radix357} (mixed-radix of primes 3, 5 and 7) and into \emph{oddshape} (arbitrary radices excluding the previous cases).
 This mathematical discussion has essential consequences for the design and implementation of libraries that perform FFTs in various hardware environments, which shall become evident later.
 
 Every developer in the scientific arena or other domains that perform heavy computations expects that the performance of the FFT implementation in his or her preferred language meets the standards of the acronym, i.e. it is fast or even the fastest available. As discussed in \cref{sec:intro}, the landscape of available implementations on various hardware platforms has become very diverse. Keeping a clear view of performance that can be expected of FFT implementations is becoming a challenge. 
@@ -22,10 +25,10 @@ With \gearshifft{}, our aim is to provide a set of simple commands to the commun
 For this purpose, \gearshifft{} approaches the challenge of benchmarking a variety of FFT libraries from a user perspective. This means, that the following parameters shall be easy to study:
 
 \begin{enumerate}
-\item input data shape, i.e. whether 1D, 2D or 3D input data
+\item input data dimension and shape, i.e. whether 1D, 2D or 3D input data
 \item transform data, i.e. real to complex numbers or from complex to complex numbers
 \item transform precision, i.e. 32-bit or 64-bit IEEE floating point number representation
-\item memory mode
+\item memory mode (``placeness'')
   \begin{itemize}
   \item \emph{in-place}: the input data structure is used for storing the output data (low memory footprint and low bandwidth are to be expected)
   \item \emph{out-of-place}:  where the transformed input is written to a different memory location than where the input resides (high memory footprint and high bandwidth are to be expected)
