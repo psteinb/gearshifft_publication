@@ -65,8 +65,8 @@ K80 : k80_cuda8_3d 	k80_cuda8_2d 	k80_cuda8_1d 	k80_cuda8_3d 	k80_cuda8_2d 	k80_
 GTX1080 : gtx1080_cuda8_3d 	gtx1080_cuda8_2d 	gtx1080_cuda8_1d 	gtx1080_cuda8_3d 	gtx1080_cuda8_2d 	gtx1080_cuda8_1d 
 
 clean :
-	rm -vf  k80_cuda8*.{png,svg,tex}
-	rm -vf  gtx1080_cuda8*.{png,svg,tex} 
+	rm -vf  k80_cuda8*.{png,pdf,svg,tex}
+	rm -vf  gtx1080_cuda8*.{png,pdf,svg,tex} 
 	# rm -vf  k80_cuda8_2d*.{svg.png,tex} 
 	# rm -vf  k80_cuda8_1d*.{svg.png,tex} 
 	# rm -vf k80_cuda8_3d*.{svg.png,tex}

@@ -19,7 +19,7 @@ library(dplyr)
  -n --ndims=ND      	Use only ND dimensional output [default: 2], do not filter if ND=0
  --nolegend             Do not add a legend to the plot [default: FALSE]
  -y --ymetric=YMETRIC 	Use metric YMETRIC for plotting along y, this can now be a valid R expression that computes a derived value [default: Time_Total]
- --ylabel=YLABEL 	Use metric YLABEL for labelling the ymetric (default: "")
+ --ylabel=YLABEL 	Use YLABEL for labelling the ymetric, note that underscores will be replaced by white spaces as white spaces are not correctly handled currently [default: ]
  --logy=LOGYVALUE       Use log scale on y-axis [default: 1]
  -x --xmetric=XMETRIC 	Use metric XMETRIC for plotting along y [default: Size_DeviceBuffer]
  --logx=LOGXVALUE       Use log scale on x-axis [default: 1]
@@ -152,7 +152,7 @@ if(grep(opts[["xmetric"]],data_colnames) == 0){
 }
 
 ##############################################################################
-                                        # extracting ymatric expression
+                                        # extracting ymetric expression
 
 ymetric_keywords = trimws(unlist(strsplit(opts[["ymetric"]],"[-|+|/|*|)|(]")))
 ymetric_expression = opts[["ymetric"]]
@@ -177,8 +177,12 @@ cat("parsing of expression ",opts[["ymetric"]]," yielded .",ymetric_expression,"
 new_values = eval(parse(text=ymetric_expression))
 colnames(new_values) <- c("ymoi")
 
-#succeeded  = succeeded %>% bind_cols(new_values)
-
+name_of_ymetric = opts[["ymetric"]]
+if(exists('ylabel', where=opts) && !is.null(opts[["ylabel"]])) {
+    
+    cat("[ylabel] using ylabel\n",opts[["ylabel"]])
+    name_of_ymetric = gsub("_"," ",opts[["ylabel"]])
+} 
 
 succeeded_ymetric_of_interest  = new_values
 ################################################################################
@@ -194,13 +198,6 @@ succeeded_reduced = bind_cols(succeeded_factors,
 
 str(succeeded_reduced)
 
-name_of_ymetric = opts[["ymetric"]]
-if(exists('ylabel', where=opts) && !is.null(opts[["ylabel"]])) {
-    
-    cat("[ylabel] using ylabel\n",opts[["ylabel"]])
-    name_of_ymetric = opts[["ylabel"]]
-} 
-name_of_ymetric
 
 
 cat("calculating mean,median and sd of ",name_of_ymetric," versus ",name_of_xmetric,"\n")
@@ -355,9 +352,8 @@ if( nchar(opts[["aspect"]]) > 0 ){
 
 }
 
-ggsave(paste(opts[["filename"]],".png",sep=""),moi_plot,)
+ggsave(paste(opts[["filename"]],".pdf",sep=""),moi_plot,)
 ggsave(paste(opts[["filename"]],".svg",sep=""),moi_plot,)
 ggsave(paste(opts[["filename"]],".tex",sep=""),moi_plot,)
 
-## succeeded_by_ID = succeeded %>% group_by(id)
-## head(succeeded_by_ID)
+
