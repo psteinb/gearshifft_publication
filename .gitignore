@@ -1,3 +1,13 @@
 /figures/*.png
-/figures/*.tex
+/figures/*.pdf
+/figures/*tex
 /figures/*.log
+/figures/.Rhistory
+/figures/Rplots.pdf
+/gearshifft.aux
+/gearshifft.run.xml
+/gearshifft.pdf
+/gearshifft.log
+/gearshifft.bbl
+/gearshifft.bcf
+/gearshifft.blg
