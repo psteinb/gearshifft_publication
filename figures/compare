@@ -3,8 +3,8 @@
 library(docopt)
 library(ggplot2)
 library(readr)
-library(dplyr)
-
+library(dplyr, warn.conflicts=F)
+library(gridExtra)
 
 'Usage:
    compare [options] <csv-files>...
@@ -16,7 +16,11 @@ library(dplyr)
  -s --fp32          	Use (32-bit) single precision [default: FALSE]
  -d --fp64          	Use (64-bit) double precision [default: FALSE]
  -n --ndims=ND      	Use only ND dimensional output [default: 2], do not filter if ND=0
- -y --ymetric=YMETRIC 	Use metric YMETRIC for plotting along y [default: Time_Total]
+ --nolegend             Do not add a legend to the plot [default: FALSE]
+ --notitle              Do not add a title to the plot [default: FALSE]
+ --legend-only           Only save the legend to file [default: FALSE]
+ -y --ymetric=YMETRIC 	Use metric YMETRIC for plotting along y, this can now be a valid R expression that computes a derived value [default: Time_Total]
+ --ylabel=YLABEL 	Use YLABEL for labelling the ymetric, note that underscores will be replaced by white spaces as white spaces are not correctly handled currently [default: ]
  --logy=LOGYVALUE       Use log scale on y-axis [default: 1]
  -x --xmetric=XMETRIC 	Use metric XMETRIC for plotting along y [default: Size_DeviceBuffer]
  --logx=LOGXVALUE       Use log scale on x-axis [default: 1]
@@ -64,8 +68,6 @@ open_gearshifft_csv <- function (fname){
 dframes <- lapply(opts[["<csv-files>"]], open_gearshifft_csv) %>% bind_rows()
 
 gearshifft_data <- dframes %>% bind_rows()
-
-
 
 cat("total rows collected: \t",nrow(gearshifft_data),"\n")
 
@@ -138,38 +140,75 @@ if ( length(filter_dim) > 0){
 } 
 
 cat("total rows filtered: \t",nrow(succeeded),"\n")
-avcols <- colnames(succeeded)
+data_colnames = colnames(succeeded)
 
-if(grep(opts[["ymetric"]],avcols) == 0){
-    
-    stop(cat(opts[["ymetric"]], "for y not found in available columns \n",avcols,"\n"))
+
+##############################################################################
+                                        # extracting ymetric expression
+
+ymetric_keywords = trimws(unlist(strsplit(opts[["ymetric"]],"[-|+|/|*|)|(]")))
+ymetric_expression = opts[["ymetric"]]
+
+                                        # creating expression
+for(i in 1:length(ymetric_keywords)) {
+
+    indices = grep(ymetric_keywords[i],data_colnames) 
+    if( length(indices) > 0 && !is.null(ymetric_keywords[i]) && nchar(ymetric_keywords[i]) > 1){
+        to_replace = paste("succeeded[,",indices[1],"]",sep="")
+        cat(i,ymetric_keywords[i],"->",to_replace,"in",ymetric_expression,"\n")
+        ymetric_expression = gsub(ymetric_keywords[i],to_replace,
+                                  ymetric_expression)
+    }
 }
 
-if(grep(opts[["xmetric"]],avcols) == 0){
+
+cat("parsing of expression ",opts[["ymetric"]]," yielded .",ymetric_expression,". \n",sep="")
+
+
+                                        # creating metric of interest (moi)
+new_values = eval(parse(text=ymetric_expression))
+colnames(new_values) <- c("ymoi")
+
+name_of_ymetric = opts[["ymetric"]]
+if(exists('ylabel', where=opts) && !is.null(opts[["ylabel"]])) {
     
-    stop(cat(opts[["xmetric"]], "for x not found in available columns \n",avcols,"\n"))
+    cat("[ylabel] using ylabel: ",opts[["ylabel"]],"\n")
+    if( nchar(opts[["ylabel"]]) > 1){
+        name_of_ymetric = gsub("_"," ",opts[["ylabel"]])
+    }
+}
+
+if( length(ymetric_keywords) == 1  ){
+    name_of_ymetric = data_colnames[grep(ymetric_keywords[1], data_colnames)[1]] 
+}
+
+succeeded_ymetric_of_interest  = new_values
+################################################################################
+
+##############################################################################
+                                        # extracting xmetric expression
+if(grep(opts[["xmetric"]],data_colnames) == 0){
+    
+    stop(cat(opts[["xmetric"]], "for x not found in available columns \n",data_colnames,"\n"))
 }
 
 
-
-succeeded_ymetric_of_interest  <- succeeded %>% select(contains(opts[["ymetric"]]))
 succeeded_xmetric_of_interest  <- succeeded %>% select(contains(opts[["xmetric"]]))
+name_of_xmetric <- colnames(succeeded_xmetric_of_interest)[1]
+################################################################################
+
 
 succeeded_factors <- succeeded %>% select(-ends_with("]"))
 
 succeeded_reduced <- bind_cols(succeeded_factors,
                                succeeded_xmetric_of_interest,
                                succeeded_ymetric_of_interest)
-
-
-name_of_ymetric <- colnames(succeeded_ymetric_of_interest)[1]
-name_of_xmetric <- colnames(succeeded_xmetric_of_interest)[1]
-
-
-cat("calculating mean,median and sd of ",paste(name_of_ymetric)," versus ",name_of_xmetric,"\n")
-
-names(succeeded_reduced)[names(succeeded_reduced) == name_of_ymetric] <- "moi"
 names(succeeded_reduced)[names(succeeded_reduced) == name_of_xmetric] <- "xmoi"
+
+
+cat("calculating mean,median and sd of ",name_of_ymetric," versus ",name_of_xmetric,"\n")
+
+
 
 if( grepl("bytes",name_of_xmetric)  ) {
     succeeded_reduced$xmoi <- succeeded_reduced$xmoi / (1024.*1024.)
@@ -177,7 +216,7 @@ if( grepl("bytes",name_of_xmetric)  ) {
 }
 
 if( grepl("bytes",name_of_xmetric) ){
-    succeeded_reduced$moi <- succeeded_reduced$moi / (1024*1024)
+    succeeded_reduced$ymoi <- succeeded_reduced$ymoi / (1024*1024)
     name_of_ymetric <- gsub("bytes","MB",name_of_ymetric)
 }
 
@@ -190,9 +229,9 @@ cat("summarizing by ",paste(cols_to_grp_by),"\n")
 data_for_plotting <- succeeded_reduced %>%
     group_by_(.dots = cols_to_grp_by) %>%
     ##group_by(library, hardware, id, nx, ny, nz, xmoi) %>%
-    summarize( moi_mean = mean(moi),
-              moi_median = median(moi),
-              moi_stddev = sd(moi)
+    summarize( moi_mean = mean(ymoi),
+              moi_median = median(ymoi),
+              moi_stddev = sd(ymoi)
               )
 
 
@@ -204,17 +243,14 @@ my_theme <-  theme_bw() + theme(axis.title.x = element_text(size=20),
                                 axis.text.y = element_text(size=14)#,
                                 #axis.text.x  = element_text()
                                 ) 
-my_theme <- my_theme + theme(legend.title = element_text(size=20, face="bold"),
+my_theme <- my_theme + theme(legend.title = element_text(size=18, face="bold"),
                              legend.text = element_text( size = 18),
-                             ## legend.text.align=0,
-                             ## legend.title.align=0,
                              legend.position="top",
-#                             legend.position=c(0, 1.),
-                             legend.box.just="left"#,
-                             
-#                             legend.justification=c(0,0),
-                             #legend.key = element_rect(colour = 'white', fill = 'white', size = 0., linetype='dashed')
-                             ) #+ theme(legend.title=element_blank()) 
+                             legend.direction="horizontal",
+                             legend.box ="horizontal",
+                             legend.background = element_rect(colour = 'white', fill = 'white', size = 0., linetype='dashed'),
+                             legend.key = element_rect(colour = 'white', fill = 'white', size = 0., linetype='dashed')
+                             ) 
 
 aesthetics_from_cli <- strsplit(opts[["aesthetics"]],",")
 
@@ -244,10 +280,21 @@ moi_plot <- moi_plot + geom_errorbar(aes(ymin = moi_mean - moi_stddev,
                                          ymax = moi_mean + moi_stddev),
                                      width=0.5)
 
-cat("filtered by",paste(filtered_by, collapse=" "),"\n")
-moi_plot <- moi_plot + ggtitle(paste(filtered_by,collapse=" "))
-moi_plot <- moi_plot + ylab(gsub("_"," ",name_of_ymetric)) + xlab(gsub("_"," ",name_of_xmetric)) 
-moi_plot <- moi_plot + my_theme ## + guides(col=guide_legend(ncol=2))
+cat("filtered by",paste(filtered_by, collapse=" "),"(n aesthetics = ",paste(length(aesthetics_from_cli[[1]])),")\n")
+if( opts[["notitle"]] == F ) {
+    moi_plot <- moi_plot + ggtitle(paste(filtered_by,collapse=" "))
+}
+
+moi_plot <- moi_plot + ylab(gsub("_"," ",name_of_ymetric)) + xlab(gsub("_"," ",name_of_xmetric))
+moi_plot <- moi_plot + my_theme 
+
+
+if(opts[["nolegend"]]){
+    moi_plot <- moi_plot + theme(legend.position="none")
+}
+
+
+
 
 logy_value <- as.integer(opts[["logy"]])
 logx_value <- as.integer(opts[["logx"]])
@@ -309,9 +356,41 @@ if( nchar(opts[["aspect"]]) > 0 ){
 
 }
 
-ggsave(paste(opts[["filename"]],".png",sep=""),moi_plot,)
-ggsave(paste(opts[["filename"]],".svg",sep=""),moi_plot,)
-ggsave(paste(opts[["filename"]],".tex",sep=""),moi_plot,)
+## TODO: save legend in an independent plot
+## http://stackoverflow.com/questions/12041042/how-to-plot-just-the-legends-in-ggplot2
+## http://stackoverflow.com/questions/12539348/ggplot-separate-legend-and-plot
 
+g_legend<-function(a.gplot){ 
+  tmp <- ggplot_gtable(ggplot_build(a.gplot)) 
+  leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box") 
+  legend <- tmp$grobs[[leg]] 
+  return(legend)
+} 
+
+
+if(opts[["legend-only"]]){
+
+    my_theme <- my_theme + theme(legend.title = element_text(size=20, face="bold"),
+                             legend.text = element_text( size = 18),
+                             ## legend.text.align=0,
+                             ## legend.title.align=0,
+                             legend.position="top",
+#                             legend.position=c(0, 1.),
+                             legend.box.just="left",
+                             legend.background = element_rect(colour = 'white', fill = 'white', size = 0., linetype='dashed'),
+#                             legend.justification=c(0,0),
+                             legend.key = element_rect(colour = 'white', fill = 'white', size = 0., linetype='dashed')
+                             )
+    moi_plot = moi_plot + my_theme
+    legend <- g_legend(moi_plot)
+    ## grid.draw(legend)
+    ggsave(paste(opts[["filename"]],".svg",sep=""),legend)
+    ggsave(paste(opts[["filename"]],".png",sep=""),legend)
+
+} else {
+    ggsave(paste(opts[["filename"]],".png",sep=""),moi_plot)
+    ggsave(paste(opts[["filename"]],".svg",sep=""),moi_plot)
+    
+}
 ## succeeded_by_ID <- succeeded %>% group_by(id)
 ## head(succeeded_by_ID)
