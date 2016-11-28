@@ -1,7 +1,17 @@
 % - show measurements
-% + K80, (Maxwell?), GTX 1080, AMD?
+% + K80, GTX 1080, P100
 % + Haswell E5
 
-% - analysis
+% - analysis starting from 3D
 % + inplace versus outplace
 % + real vs complex-as-real
+
+\begin{figure}[!tbp]
+  \centering
+  \def\svgwidth{0.4\columnwidth}
+  \subfloat[Fig A.]{\input{figures/k80_cuda8_3d_powerof2_comp.pdf_tex}\label{fig:f1}}
+  \hfill
+  \def\svgwidth{0.4\columnwidth}
+  \subfloat[Fig B.]{\input{figures/k80_cuda8_3d_radix357_comp.pdf_tex}\label{fig:f2}}
+  \caption{Some demo figures.}
+\end{figure}
