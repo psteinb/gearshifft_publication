@@ -1,10 +1,44 @@
-% - show measurements
-% + K80, GTX 1080, P100
-% + Haswell E5
+Based on the experiences made for \cite{preibisch2014efficient, schmid2015real}, this section will discuss results obtained with gearshifft on various hardware in order to showcase the capabilities of \gearshifft{}. We will assume the motivation of a developer seeking to optimize the use of FFTs in the context of the aforementioned publications, i.e. 3D real-to-complex transforms with continguous single-precision input data. Expeditions into other use cases will be made where appropriate. The curious reader may rest assured that a more comprehensive study is easily possible with \gearshifft{}, however the mere multiplicity of all possible combinations and use cases of FFT render it not feasible nor practical to discuss 1D or 2D in a comprehensive fashion as well.
 
-% - analysis starting from 3D
-% + inplace versus outplace
-% + real vs complex-as-real
+For this study, we will concentrate on three modern and current FFT implementations available free of charge: fftw (on x86 CPUs), cufft (on nVidia GPUs) and clfft (on x86 CPUs or nVidia GPUs). We consider this the natural starting point of developers beyond possible domain specific implementations. It should be noted, that this will infer not only a study in terms of hardware performance, but also how well the APIs designed by the authors of fftw, clFFT and cuFFT are documented, understood and used in practise. We consider both hardware and cognitive performance a virtue of almost equal importance.
+
+\subsection{Experimental Environment}
+\label{ssec:env}
+
+The results presented in the following sections were collected on three systems:
+
+\begin{itemize}
+\item \emph{Taurus HPC cluster}\cite{taurus} running RHEL 7.2
+  \begin{itemize}
+  \item \emph{K80 node}: 2x Intel(R) Xeon(R) CPU E5-2680 v3 (12 cores) @ 2.50GHz, 64 GB RAM, 4x NVIDIA Tesla K80 (12 GB GDDR5 RAM) GPUs 
+  \item \emph{K20X node}: 2x Intel(R) Xeon(R) CPU E5-2450 (8 cores) @ 2.10GHz, 48 GB RAM, 2x NVIDIA Tesla K20x (6 GB GDDR RAM) GPUs 
+  \end{itemize}
+\item \emph{Hypnos HPC cluster}\cite{hypnos} running Ubuntu 14.04.3:\newline
+  2x Intel(R) Xeon(R) CPU E5-2603 v3 @ 1.60GHz, 64 GB RAM (2.67 GB per core), 1x NVIDIA Tesla P100 (16 GB HBM2 RAM) GPUs via PCIe 
+\item  \emph{Dell workstation} running CentOS 7.2:\newline 
+  2x Intel(R) Xeon(R) CPU E5-2640 v3 @ 2.60GHz, 64 GB RAM, 1x NVIDIA GeForce GTX 1080 (8 GB GDDR5X RAM)
+\end{itemize}
+
+As presented above, all used systems operated on a variant of 64-bit Linux and were accessed via an ssh session without running a graphical user interface of any kind. All measurements used the GNU compiler collection (GCC, \cite{stallman2001using}) version 5.3.0 as the underlying compiler if not stated otherwise. 
+
+The FFT implementations evaluated were:
+
+\begin{itemize}
+\item fftw \cite{FFTW05}, version 3.3.5
+\item cuFFT from CUDA 8.0.44
+\item clFFT 2.12.2
+\end{itemize}
+
+All used nVidia GPU implementations interfaced with the proprietary driver provided by the vendor. 
+
+In order to generate one data set, a set arrays of arbitrary shapes is provided to a specific FFT API. The configuration files thereof can be accessed via \cite{gearshifft_github}. The shape configurations are separated in groups: \texttt{powerof2} (all dimensions are powers of $2$), \texttt{radix357} (all dimenions are either powers of $3$, $5$ or $7$) and \texttt{oddshape} (all dimenions are powers of $19$ in order to emulated very uncommon signal sizes). These configurations were generated in order to probe the FFT implementations for a wide spectrum of possible applications.  
+
+The FFT calls to benchmark are executed five times each. From this, the arithmetic mean and sample standard deviations are used for figures presented below. As the number of repititions is a configurable parameter of \gearshifft{}, we leave it to the user to produce a more comprehensive data set than used for this publication. We consider five repetitions enough at this point to show and discuss several aspects of performance and usability of \gearshifft{} and the FFT libraries under study.  
+
+\subsection{Time To Solution}
+\label{ssec:tts}
+
+
 
 \begin{figure}[!tbp]
   \centering
@@ -15,3 +49,12 @@
   \subfloat[Fig B.]{\input{figures/k80_cuda8_3d_radix357_comp.pdf_tex}\label{fig:f2}}
   \caption{Some demo figures.}
 \end{figure}
+
+
+% - show measurements
+% + K80, GTX 1080, P100
+% + Haswell E5
+
+% - analysis starting from 3D
+% + inplace versus outplace
+% + real vs complex-as-real
