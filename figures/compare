@@ -384,12 +384,13 @@ if(opts[["legend-only"]]){
     moi_plot = moi_plot + my_theme
     legend <- g_legend(moi_plot)
     ## grid.draw(legend)
+    ggsave(paste(opts[["filename"]],".svg",sep=""),legend)
     ggsave(paste(opts[["filename"]],".png",sep=""),legend)
 
 } else {
     ggsave(paste(opts[["filename"]],".png",sep=""),moi_plot)
     ggsave(paste(opts[["filename"]],".svg",sep=""),moi_plot)
-    ggsave(paste(opts[["filename"]],".tex",sep=""),moi_plot)
+    
 }
 ## succeeded_by_ID <- succeeded %>% group_by(id)
 ## head(succeeded_by_ID)
