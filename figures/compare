@@ -41,27 +41,42 @@ open_gearshifft_csv <- function (fname){
     colnames(local_frame) <- gsub(' ','_',colnames(local_frame))
     #extracting card info
     lines <- readLines(fname)
-    lines[[1]] <- gsub(' "','',lines[[1]])
-    lines[[1]] <- gsub('"','',lines[[1]])
-    lines[[1]] <- gsub(';','',lines[[1]])
+    line_1 = lines[[1]]
+    line_1 <- gsub(' "','',line_1)
+    line_1 <- gsub('"','',line_1)
+    line_1 <- gsub(';','',line_1)
     colnames(local_frame) <- gsub('ID','id',colnames(local_frame))
+
     
-    line_1 <- strsplit(c(lines[[1]]),",")
+    line_1_splited <- strsplit(line_1,",")
     gpu_model <- ""
     nrw <- nrow(local_frame)
-    #cat(paste(line_1),typeof(line_1),"\t",length(line_1),"\n\n")
-    if(grepl("clfft", line_1[[1]][1], ignore.case = TRUE)){
-        gpu_model <- line_1[[1]][3]
-        
+    
+    if(grepl("clfft", line_1_splited[[1]][1], ignore.case = TRUE)){
+        gpu_model <- line_1_splited[[1]][3]
+        plan_flags = "None"
         cat("THIS IS CLFFT ",gpu_model,"\twith ",nrw,"\n")
-    }
-    else {
-        gpu_model <- line_1[[1]][1]
-        cat("THIS IS cuFFT ",gpu_model,"\twith ",nrw,"\n")
+    } else {
+
+        if(grepl("CUDA Runtime", line_1, ignore.case = TRUE)) {
+            gpu_model <- line_1_splited[[1]][1]
+            plan_flags = "None"
+            cat("THIS IS cuFFT ",gpu_model,"\twith ",nrw,"\n")
+            
+        }
+
+        if(grepl("SupportedThreads", line_1, ignore.case = TRUE)) {
+            gpu_model <- paste("E5-2680v3 ",line_1_splited[[1]][4],"c",sep="")
+            plan_flags = line_1_splited[[1]][8]
+            cat("THIS IS fftw ",gpu_model,"\twith ",nrw,"(",plan_flags,")\n")
+            
+        }
 
     }
-
+    
     local_frame$hardware <- gpu_model
+    local_frame$plan_flags <- plan_flags
+    
     return(local_frame)
 }
 
@@ -107,6 +122,8 @@ filter_dim <- as.integer(opts[["ndims"]])
 
 ####################################### FILTER ##############################################
 succeeded <- gearshifft_data %>% filter(success == "Success")
+glimpse(succeeded)
+
 filtered_by <- c("success")
 
 if ( nchar(filter_mode) > 0){
@@ -141,6 +158,7 @@ if ( length(filter_dim) > 0){
 
 cat("total rows filtered: \t",nrow(succeeded),"\n")
 data_colnames = colnames(succeeded)
+glimpse(succeeded)
 
 
 ##############################################################################
@@ -170,16 +188,17 @@ new_values = eval(parse(text=ymetric_expression))
 colnames(new_values) <- c("ymoi")
 
 name_of_ymetric = opts[["ymetric"]]
+
+if( length(ymetric_keywords) == 1  ){
+    name_of_ymetric = data_colnames[grep(ymetric_keywords[1], data_colnames)[1]] 
+}
+
 if(exists('ylabel', where=opts) && !is.null(opts[["ylabel"]])) {
     
     cat("[ylabel] using ylabel: ",opts[["ylabel"]],"\n")
     if( nchar(opts[["ylabel"]]) > 1){
         name_of_ymetric = gsub("_"," ",opts[["ylabel"]])
     }
-}
-
-if( length(ymetric_keywords) == 1  ){
-    name_of_ymetric = data_colnames[grep(ymetric_keywords[1], data_colnames)[1]] 
 }
 
 succeeded_ymetric_of_interest  = new_values
@@ -246,8 +265,10 @@ my_theme <-  theme_bw() + theme(axis.title.x = element_text(size=20),
 my_theme <- my_theme + theme(legend.title = element_text(size=18, face="bold"),
                              legend.text = element_text( size = 18),
                              legend.position="top",
-                             legend.direction="horizontal",
+                             legend.direction="vertical",
                              legend.box ="horizontal",
+                             legend.box.just ="top",
+                             
                              legend.background = element_rect(colour = 'white', fill = 'white', size = 0., linetype='dashed'),
                              legend.key = element_rect(colour = 'white', fill = 'white', size = 0., linetype='dashed')
                              ) 
@@ -261,7 +282,11 @@ for(i in 1:length(aesthetics_keys)) {
     
     if( i <= length(aesthetics_from_cli[[1]]) ){
         cat("ggplot aesthetics : ",aesthetics_keys[i]," = ",
-            aesthetics_from_cli[[1]][i],"\n")
+            aesthetics_from_cli[[1]][i]," possible values: ",
+            eval(parse(text=paste("levels(as.factor(data_for_plotting$",
+                           aesthetics_from_cli[[1]][i],"))",
+                           sep=""))),
+            "\n")
         aesthetics_to_use[[aesthetics_keys[i]]] <- as.symbol(aesthetics_from_cli[[1]][i])
     }
 }
@@ -292,8 +317,6 @@ moi_plot <- moi_plot + my_theme
 if(opts[["nolegend"]]){
     moi_plot <- moi_plot + theme(legend.position="none")
 }
-
-
 
 
 logy_value <- as.integer(opts[["logy"]])
@@ -381,13 +404,15 @@ if(opts[["legend-only"]]){
 #                             legend.justification=c(0,0),
                              legend.key = element_rect(colour = 'white', fill = 'white', size = 0., linetype='dashed')
                              )
-    moi_plot = moi_plot + my_theme
+    moi_plot = moi_plot + my_theme + guides(col = guide_legend(nrow = 2))
     legend <- g_legend(moi_plot)
     ## grid.draw(legend)
-    ggsave(paste(opts[["filename"]],".svg",sep=""),legend)
-    ggsave(paste(opts[["filename"]],".png",sep=""),legend)
+    ggsave(paste(opts[["filename"]],".svg",sep=""),legend,width=12,height=1.25)
+    ggsave(paste(opts[["filename"]],".png",sep=""),legend,width=12,height=1.25)
 
 } else {
+
+    moi_plot = moi_plot + guides(col = guide_legend(ncol= length(aesthetics_from_cli[[1]]), nrow = 2))
     ggsave(paste(opts[["filename"]],".png",sep=""),moi_plot)
     ggsave(paste(opts[["filename"]],".svg",sep=""),moi_plot)
     

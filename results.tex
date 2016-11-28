@@ -42,22 +42,63 @@ The FFT calls to benchmark are executed five times each. From this, the arithmet
 \subsection{Time To Solution}
 \label{ssec:tts}
 
-We begin the discussion with the classical use case for developers that might be accustomed to small size transforms. As such, an out-of-place transform with \texttt{powerof2} signal shapes will be assumed.  
+We begin the discussion with the classical use case for developers that might be accustomed to small size transforms. As such, an out-of-place transform with \texttt{powerof2} signal shapes will be assumed. The memory volume required for this operation amounts to the real input array plus an equally shaped complex output array.   
 
 \begin{figure}[!tbp]
   \centering
-  \def\svgwidth{0.4\columnwidth}
-  \subfloat[Fig A.]{\input{figures/k80_cuda8_3d_powerof2_comp.pdf_tex}\label{fig:f1}}
+  \def\svgwidth{0.95\columnwidth}
+  \input{figures/results_figure1_legend.pdf_tex}
+  \def\svgwidth{0.45\columnwidth}
+  \subfloat[Fig A.]{\input{figures/results_figure1a.pdf_tex}\label{fig:f1a}}
   \hfill
-  \def\svgwidth{0.4\columnwidth}
-  \subfloat[Fig B.]{\input{figures/k80_cuda8_3d_radix357_comp.pdf_tex}\label{fig:f2}}
-  \caption{Some demo figures.}
+  \def\svgwidth{0.45\columnwidth}
+  \subfloat[Fig B.]{\input{figures/results_figure1b.pdf_tex}\label{fig:f1b}}
+  \caption{Time-to-solution for power-of-2 3D single-precision real-to-complex forward transforms using fftw (\texttt{FFTW_ESTIMATE}) and cufft. \cref{fig:f1b} shows the same data as \cref{fig:f1a} but in a log10-log2 scale.}
+  \label{fig:tts}
 \end{figure}
 
+\cref{fig:tts} reports a comparison of runtime results of power-of-2 single-precision real-to-complex forward transforms from fftw and cufft. It is evident that given the largest device memory available of $\unit[16]{GB}$, the GPU data does not yield any points higher than $\unit[8]{GB}$. Note that the total time reflects the time to set up a plan, allocate memory on device, perform the data transfer onto the device, execute the FFT, transfer the result back to the host and clean up the used plan and the allocated memory. \cref{fig:f1a} shows that the oldest GPU generation used in this comparison yields the slowest results for input signals in the order of $\unit[1-2]{GB}$. All other and more recent GPU models supersede fftw using all available cores in this node. Any judgement on the superiority of cufft over fftw can be considered premature at this point, as fftw was used with the \texttt{FFTW_ESTIMATE} planner flag.
 
-% - show measurements
-% + K80, GTX 1080, P100
-% + Haswell E5
+\begin{figure}[!tbp]
+  \centering
+  \def\svgwidth{0.95\columnwidth}
+  \input{figures/results_figure2_legend.pdf_tex}
+  \def\svgwidth{0.45\columnwidth}
+  \subfloat[Fig A.]{\input{figures/results_figure2a.pdf_tex}\label{fig:f2a}}
+  \hfill
+  \def\svgwidth{0.45\columnwidth}
+  \subfloat[Fig B.]{\input{figures/results_figure2b.pdf_tex}\label{fig:f2b}}
+  \caption{Time-to-solution for power-of-2 3D single-precision real-to-complex forward transforms using fftw (\texttt{FFTW_ESTIMATE}) and cufft. \cref{fig:f2a} report the complete time to solution, whereas \cref{fig:f2b} is limited to the time spent for the execution of the forward transform only. Both figures use a in a log10-log2 scale.}
+  \label{fig:fftw_plan_flags}
+\end{figure}
+
+\cref{fig:fftw_plan_flags} compares the time-to-solution to the actual time spent for the FFT operation itself. This illustration makes the cost and the benefit of higher planning flags than \texttt{FFTW_ESTIMATE} obvious. Where \texttt{FFTW_MEASURE} imposes a runtime penalty of 1 to 2 orders of magnitude with respect to \texttt{FFTW_ESTIMATE}, it offers superior performance. The careful observer has noticed that the planning times for \texttt{FFTW_MEASURE} become prohibitively large for large input data sizes and reach minutes for data sets in the Gigabyte range. This is a well-known feature of fftw as the authors note in \cite{FFTW05}:
+
+\begin{center}
+  ``In performance critical applications, many transforms of the same
+  size are typically required, and therefore a large one-time cost is
+  usually acceptable.''
+\end{center}
+ 
+\gearshifft{} allows to disect this problem further and isolate the planning time only.
+
+\begin{figure}[!tbp]
+  \centering
+  \def\svgwidth{0.95\columnwidth}
+  \input{figures/results_figure3a.pdf_tex}}
+  \caption{Time-to-plan for power-of-2 3D single-precision real-to-complex forward transforms using fftw, clfft and cufft. The figure uses a log10-log2 scale.}
+  \label{fig:plan_time_only}
+\end{figure}
+
+\cref{fig:plan_time_only} illustrates the problem to it's full extent. \texttt{FFTW_MEASURE} consumes up to 3-4 orders of magnitude more time to produce a plan than a standard (GPU based libraries) or \texttt{FFTW_ESTIMATE} based planner call. We can only hypothesize that this is due to the fact that:
+
+\begin{itemize}
+\item the factorization of the radix found during planning takes a lot of time
+\item the available parameter space of possible FFT implementations for a given radix factorisation becomes very large on the CPU
+\item the optimisation to find the optimal implementation for a given radix is too time consuming 
+\end{itemize}
+
+
 
 % - analysis starting from 3D
 % + inplace versus outplace
