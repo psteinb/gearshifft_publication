@@ -1,18 +1,19 @@
-A FFT is a fast implementation of the discrete Fourier transform which is a standard text-book mathematical procedure. The forward transform is a mapping from an array $x$ of $n$ real numbers in the time domain to an array $X$ of $n$ complex numbers in the frequency domain (also referred to as Fourier domain):
+A FFT is a fast implementation of the discrete Fourier transform which is a standard text-book mathematical procedure. The forward transform is a mapping from an array $x$ of $n$ complex numbers in the time domain to an array $X$ of $n$ complex numbers in the frequency domain (also referred to as Fourier domain):
 
 \begin{equation}
   \label{eq:dft}
   X[k] = \sum_{j=0}^{n-1} x[j]e^{\frac{-2\pi\sqrt{-1}jk}{n}}
 \end{equation}
 
-with $k$ being an integer index into $Y$ within $0 \le k < n$. This operation was found to be computable in $\mathcal{O}(n \log n)$ complexity by Cooley-Turkey \cite{cooley1965algorithm}, which in turn rediscovered findings by Gauss \cite{gauss}. The basis for this solution is the observation that, given the factorization of $n=n_1n_2$, the  DFT of size $n$ can be rewritten by smaller DFTs of size $n_1$ and $n_2$.  Given the aforementioned indices $j=j_1n_2 + j_2$ and $k=k_1+k_2n_2$, \cref{eq:dft} can be re-expressed as:
+with $k$ being an integer index within $0 \le k < n$. This operation was found to be computable in $\mathcal{O}(n \log n)$ complexity by Cooley-Turkey \cite{cooley1965algorithm}, which in turn rediscovered findings by Gauss \cite{gauss}. The basis for this solution is the observation that, given the factorization of $n=n_1n_2$, the  DFT of size $n$ can be rewritten by smaller DFTs of size $n_1$ and $n_2$.  Given the aforementioned indices $j=j_1n_2 + j_2$ and $k=k_1+k_2n_1$, \cref{eq:dft} can be re-expressed as:
 
 \begin{equation}
   \label{eq:cooley-turkey}
-  X[k_1 + k_2n_2] = \sum_{j_2=0}^{n_2-1} \left( \left( \sum_{j_1=0}^{n_1-1} x[j_1n_2 + j_2] e^{\frac{-2\pi\sqrt{-1}j_1k_1}{n_1}} \right) e^{\frac{-2\pi\sqrt{-1}j_2k_1}{n}} \right) e^{\frac{-2\pi\sqrt{-1}j_2k_2}{n_2}}
+  X[k_1 + k_2n_1] = \sum_{j_2=0}^{n_2-1} \left( \left( \sum_{j_1=0}^{n_1-1} x[j_1n_2 + j_2] e^{\frac{-2\pi\sqrt{-1}j_1k_1}{n_1}} \right) e^{\frac{-2\pi\sqrt{-1}j_2k_1}{n}} \right) e^{\frac{-2\pi\sqrt{-1}j_2k_2}{n_2}}
 \end{equation}
 
-Equation \cref{eq:cooley-turkey} describes a decomposition that can be performed recursively. Here, $n_1$ or $n_2$ is commonly denoted as \emph{radix} whereas the smaller of each is referred to as \emph{butterfly}. This mathematical discussion has essential consequences for the design and implementation of libraries that perform FFTs in various hardware environments, which shall become evident later.
+Equation \cref{eq:cooley-turkey} describes a decomposition that can be performed recursively. Here, $n_1$ would be denoted as \emph{radix} which refers to $n_1$ transforms of size $n_2$. These smaller transforms are combined by a \emph{butterfly} pattern with $n_2$ DFTs of size $n_1$ on the outputs of the corresponding sub-transforms.
+This mathematical discussion has essential consequences for the design and implementation of libraries that perform FFTs in various hardware environments, which shall become evident later.
 
 Every developer in the scientific arena or other domains that perform heavy computations expects that the performance of the FFT implementation in his or her preferred language meets the standards of the acronym, i.e. it is fast or even the fastest available. As discussed in \cref{sec:intro}, the landscape of available implementations on various hardware platforms has become very diverse. Keeping a clear view of performance that can be expected of FFT implementations is becoming a challenge. 
 
