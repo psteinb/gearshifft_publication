@@ -56,28 +56,28 @@ open_gearshifft_csv <- function (fname){
     
     if(grepl("clfft", line_1_splited[[1]][1], ignore.case = TRUE)){
         gpu_model <- line_1_splited[[1]][3]
-        plan_flags = "None"
+        flags = "None"
         cat("THIS IS CLFFT ",gpu_model,"\twith ",nrw,"\n")
     } else {
 
         if(grepl("CUDA Runtime", line_1, ignore.case = TRUE)) {
             gpu_model <- line_1_splited[[1]][1]
-            plan_flags = "None"
+            flags = "None"
             cat("THIS IS cuFFT ",gpu_model,"\twith ",nrw,"\n")
             
         }
 
         if(grepl("SupportedThreads", line_1, ignore.case = TRUE)) {
             gpu_model <- paste("E5-2680v3 ",line_1_splited[[1]][4],"c",sep="")
-            plan_flags = line_1_splited[[1]][8]
-            cat("THIS IS fftw ",gpu_model,"\twith ",nrw,"(",plan_flags,")\n")
+            flags = gsub("_","-",line_1_splited[[1]][8])
+            cat("THIS IS fftw ",gpu_model,"\twith ",nrw,"(",flags,")\n")
             
         }
 
     }
     
     local_frame$hardware <- gpu_model
-    local_frame$plan_flags <- plan_flags
+    local_frame$flags <- flags
     
     return(local_frame)
 }
