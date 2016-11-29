@@ -37,12 +37,12 @@ results_figure3 : $(clfft_K80_gpu_files) $(cufft8_K80_files) $(estimate_fftw_fil
 
 results_figure4 : $(cufft8_files)
 	@echo "input: $(?)"
-	./compare -r -s -k "powerof2" -n 3 -a "hardware,inplace" --nolegend --ylimit=0,100 --xlabel="Signal_Size_[bytes]" --ymetric="100.*(Time_Download+Time_Upload)/Time_Total" --ylabel="(Upload+Download)/Total_[%]" --notitle --logx=2 -f $(@)a $? > $(@)a.log 2>&1
-	./compare -r -s -k "powerof2" -n 3 -a "hardware,inplace" --xlabel="Signal_Size_[bytes]" --ymetric="100.*(Time_Download)/Time_Total" --ylabel="Download/Total_[%]" --notitle --logx=2 -f $(@)_download $? > $(@)_download.log 2>&1
-	./compare -r -s -k "powerof2" -n 3 -a "hardware,inplace" --xlabel="Signal_Size_[bytes]" --ymetric="100.*(Time_Upload)/Time_Total" --ylabel="Upload/Total_[%]" --notitle --logx=2 -f $(@)_upload $? > $(@)_upload.log 2>&1
+	./compare -r -s -k "powerof2" -n 3 -a "hardware,inplace" --nolegend --ylimit=0,100 --xlabel="Signal_Size_[bytes]" --ymetric="100.*(Time_Download+Time_Upload)/Time_Total" --ylabel="(Upload+Download)/Total_[\%]" --notitle --logx=2 -f $(@)a $? > $(@)a.log 2>&1
+	./compare -r -s -k "powerof2" -n 3 -a "hardware,inplace" --xlabel="Signal_Size_[bytes]" --ymetric="100.*(Time_Download)/Time_Total" --ylabel="Download/Total_[\%]" --notitle --logx=2 -f $(@)_download $? > $(@)_download.log 2>&1
+	./compare -r -s -k "powerof2" -n 3 -a "hardware,inplace" --xlabel="Signal_Size_[bytes]" --ymetric="100.*(Time_Upload)/Time_Total" --ylabel="Upload/Total_[\%]" --notitle --logx=2 -f $(@)_upload $? > $(@)_upload.log 2>&1
 	@echo "input: $(clfft_gpu_files)"	
-	./compare -r -s -k "powerof2" -n 3 -a "hardware,inplace" --nolegend --ylimit=0,100 --xlabel="Signal_Size_[bytes]" --ymetric="100.*(Time_Download+Time_Upload)/Time_Total" --ylabel="(Upload+Download)/Total_[%]" --notitle --logx=2 -f $(@)b $(clfft_gpu_files) > $(@)b.log 2>&1
-	./compare -r -s -k "powerof2" -n 3 -a "hardware,inplace" --legend-only --ylimit=0,100 --xlabel="Signal_Size_[bytes]" --ymetric="100.*(Time_Download+Time_Upload)/Time_Total" --ylabel="(Upload+Download)/Total_[%]" --notitle --logx=2 -f $(@)_legend $? > $(@)_legend.log 2>&1
+	./compare -r -s -k "powerof2" -n 3 -a "hardware,inplace" --nolegend --ylimit=0,100 --xlabel="Signal_Size_[bytes]" --ymetric="100.*(Time_Download+Time_Upload)/Time_Total" --ylabel="(Upload+Download)/Total_[\%]" --notitle --logx=2 -f $(@)b $(clfft_gpu_files) > $(@)b.log 2>&1
+	./compare -r -s -k "powerof2" -n 3 -a "hardware,inplace" --legend-only --ylimit=0,100 --xlabel="Signal_Size_[bytes]" --ymetric="100.*(Time_Download+Time_Upload)/Time_Total" --ylabel="(Upload+Download)/Total_[\%]" --notitle --logx=2 -f $(@)_legend $? > $(@)_legend.log 2>&1
 
 
 results_figure5 : $(cufft8_files) $(clfft_gpu_files) $(measure_fftw_files)

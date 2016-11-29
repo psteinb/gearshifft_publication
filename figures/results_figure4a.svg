@@ -961,5 +961,5 @@
 <g clip-path='url(#cp2)'><text x='430.68' y='461.38' style='font-size: 9.80pt; fill: #4D4D4D; font-family: Arial;'>1</text></g>
 <g clip-path='url(#cp2)'><text x='438.10' y='461.38' style='font-size: 9.80pt; fill: #4D4D4D; font-family: Arial;'>0</text></g>
 <g clip-path='url(#cp2)'><text x='186.19' y='495.15' style='font-size: 20.00pt; font-family: Arial;'>Signal Size [MB]</text></g>
-<g clip-path='url(#cp2)'><text transform='translate(24.56,400.70) rotate(-90)' style='font-size: 20.00pt; font-family: Arial;'>(Upload+Download)/Total [%]</text></g>
+<g clip-path='url(#cp2)'><text transform='translate(24.56,404.41) rotate(-90)' style='font-size: 20.00pt; font-family: Arial;'>(Upload+Download)/Total [\%]</text></g>
 </svg>
