@@ -33,7 +33,7 @@ library(gridExtra)
 ' -> doc
 
 opts <- docopt(doc)
-
+opts
 
 open_gearshifft_csv <- function (fname){
 
@@ -123,7 +123,6 @@ filter_dim <- as.integer(opts[["ndims"]])
 
 ####################################### FILTER ##############################################
 succeeded <- gearshifft_data %>% filter(success == "Success")
-glimpse(succeeded)
 
 filtered_by <- c("success")
 
@@ -159,8 +158,6 @@ if ( length(filter_dim) > 0){
 
 cat("total rows filtered: \t",nrow(succeeded),"\n")
 data_colnames = colnames(succeeded)
-glimpse(succeeded)
-
 
 ##############################################################################
                                         # extracting ymetric expression
@@ -195,12 +192,12 @@ if( length(ymetric_keywords) == 1  ){
 }
 
 if(exists('ylabel', where=opts) && !is.null(opts[["ylabel"]])) {
-    
-    cat("[ylabel] using ylabel: ",opts[["ylabel"]],"\n")
+        
     if( nchar(opts[["ylabel"]]) > 1){
         name_of_ymetric = gsub("_"," ",opts[["ylabel"]])
     }
 }
+cat("[ylabel] using ylabel: ",name_of_ymetric,"\n")
 
 succeeded_ymetric_of_interest  = new_values
 ################################################################################
@@ -209,7 +206,7 @@ succeeded_ymetric_of_interest  = new_values
                                         # extracting xmetric expression
 if(grep(opts[["xmetric"]],data_colnames) == 0){
     
-    stop(cat(opts[["xmetric"]], "for x not found in available columns \n",data_colnames,"\n"))
+    stop(paste(opts[["xmetric"]], "for x not found in available columns \n",data_colnames,"\n"))
 }
 
 
@@ -217,12 +214,13 @@ succeeded_xmetric_of_interest  <- succeeded %>% select(contains(opts[["xmetric"]
 name_of_xmetric <- colnames(succeeded_xmetric_of_interest)[1]
 if(exists('xlabel', where=opts) && !is.null(opts[["xlabel"]])) {
     
-    cat("[xlabel] using xlabel: ",opts[["xlabel"]],"\n")
+    
     if( nchar(opts[["xlabel"]]) > 1){
-        name_of_xmetric = gsub("_"," ",opts[["xlabel"]])
+        name_of_xmetric = opts[["xlabel"]]
     }
 }
-
+cat("[xlabel] using xlabel: ",name_of_xmetric,"\n")
+colnames(succeeded_xmetric_of_interest) <- c("xmoi")
 ################################################################################
 
 
@@ -231,7 +229,7 @@ succeeded_factors <- succeeded %>% select(-ends_with("]"))
 succeeded_reduced <- bind_cols(succeeded_factors,
                                succeeded_xmetric_of_interest,
                                succeeded_ymetric_of_interest)
-names(succeeded_reduced)[names(succeeded_reduced) == name_of_xmetric] <- "xmoi"
+#names(succeeded_reduced)[names(succeeded_reduced) == name_of_xmetric] <- "xmoi"
 
 
 cat("calculating mean,median and sd of ",name_of_ymetric," versus ",name_of_xmetric,"\n")
