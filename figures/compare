@@ -20,7 +20,8 @@ library(gridExtra)
  --notitle              Do not add a title to the plot [default: FALSE]
  --legend-only           Only save the legend to file [default: FALSE]
  -y --ymetric=YMETRIC 	Use metric YMETRIC for plotting along y, this can now be a valid R expression that computes a derived value [default: Time_Total]
- --ylabel=YLABEL 	Use YLABEL for labelling the ymetric, note that underscores will be replaced by white spaces as white spaces are not correctly handled currently [default: ]
+ --ylabel=YLABEL 	Use YLABEL for labelling the ymetric, note that underscores will be replaced by white spaces as white spaces are not correctly handled through the CLI [default: ]
+ --xlabel=XLABEL 	Use XLABEL for labelling the ymetric, note that underscores will be replaced by white spaces as white spaces are not correctly handled through the CLI [default: ]
  --logy=LOGYVALUE       Use log scale on y-axis [default: 1]
  -x --xmetric=XMETRIC 	Use metric XMETRIC for plotting along y [default: Size_DeviceBuffer]
  --logx=LOGXVALUE       Use log scale on x-axis [default: 1]
@@ -214,6 +215,14 @@ if(grep(opts[["xmetric"]],data_colnames) == 0){
 
 succeeded_xmetric_of_interest  <- succeeded %>% select(contains(opts[["xmetric"]]))
 name_of_xmetric <- colnames(succeeded_xmetric_of_interest)[1]
+if(exists('xlabel', where=opts) && !is.null(opts[["xlabel"]])) {
+    
+    cat("[xlabel] using xlabel: ",opts[["xlabel"]],"\n")
+    if( nchar(opts[["xlabel"]]) > 1){
+        name_of_xmetric = gsub("_"," ",opts[["xlabel"]])
+    }
+}
+
 ################################################################################
 
 
