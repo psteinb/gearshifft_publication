@@ -3,8 +3,9 @@
 library(docopt)
 library(ggplot2)
 library(readr)
-library(dplyr, warn.conflicts=F)
+library(dplyr, warn.conflicts=FALSE)
 library(gridExtra)
+library(scales)
 
 'Usage:
    compare [options] <csv-files>...
@@ -20,7 +21,8 @@ library(gridExtra)
  --notitle              Do not add a title to the plot [default: FALSE]
  --legend-only           Only save the legend to file [default: FALSE]
  -y --ymetric=YMETRIC 	Use metric YMETRIC for plotting along y, this can now be a valid R expression that computes a derived value [default: Time_Total]
- --ylabel=YLABEL 	Use YLABEL for labelling the ymetric, note that underscores will be replaced by white spaces as white spaces are not correctly handled currently [default: ]
+ --ylabel=YLABEL 	Use YLABEL for labelling the ymetric, note that underscores will be replaced by white spaces as white spaces are not correctly handled through the CLI [default: ]
+ --xlabel=XLABEL 	Use XLABEL for labelling the ymetric, note that underscores will be replaced by white spaces as white spaces are not correctly handled through the CLI [default: ]
  --logy=LOGYVALUE       Use log scale on y-axis [default: 1]
  -x --xmetric=XMETRIC 	Use metric XMETRIC for plotting along y [default: Size_DeviceBuffer]
  --logx=LOGXVALUE       Use log scale on x-axis [default: 1]
@@ -32,7 +34,7 @@ library(gridExtra)
 ' -> doc
 
 opts <- docopt(doc)
-
+opts
 
 open_gearshifft_csv <- function (fname){
 
@@ -41,27 +43,42 @@ open_gearshifft_csv <- function (fname){
     colnames(local_frame) <- gsub(' ','_',colnames(local_frame))
     #extracting card info
     lines <- readLines(fname)
-    lines[[1]] <- gsub(' "','',lines[[1]])
-    lines[[1]] <- gsub('"','',lines[[1]])
-    lines[[1]] <- gsub(';','',lines[[1]])
+    line_1 = lines[[1]]
+    line_1 <- gsub(' "','',line_1)
+    line_1 <- gsub('"','',line_1)
+    line_1 <- gsub(';','',line_1)
     colnames(local_frame) <- gsub('ID','id',colnames(local_frame))
+
     
-    line_1 <- strsplit(c(lines[[1]]),",")
+    line_1_splited <- strsplit(line_1,",")
     gpu_model <- ""
     nrw <- nrow(local_frame)
-    #cat(paste(line_1),typeof(line_1),"\t",length(line_1),"\n\n")
-    if(grepl("clfft", line_1[[1]][1], ignore.case = TRUE)){
-        gpu_model <- line_1[[1]][3]
-        
+    
+    if(grepl("clfft", line_1_splited[[1]][1], ignore.case = TRUE)){
+        gpu_model <- line_1_splited[[1]][3]
+        flags = "None"
         cat("THIS IS CLFFT ",gpu_model,"\twith ",nrw,"\n")
-    }
-    else {
-        gpu_model <- line_1[[1]][1]
-        cat("THIS IS cuFFT ",gpu_model,"\twith ",nrw,"\n")
+    } else {
+
+        if(grepl("CUDA Runtime", line_1, ignore.case = TRUE)) {
+            gpu_model <- line_1_splited[[1]][1]
+            flags = "None"
+            cat("THIS IS cuFFT ",gpu_model,"\twith ",nrw,"\n")
+            
+        }
+
+        if(grepl("SupportedThreads", line_1, ignore.case = TRUE)) {
+            gpu_model <- paste("E5-2680v3 ",line_1_splited[[1]][4],"c",sep="")
+            flags = gsub("_","-",line_1_splited[[1]][8])
+            cat("THIS IS fftw ",gpu_model,"\twith ",nrw,"(",flags,")\n")
+            
+        }
 
     }
-
+    
     local_frame$hardware <- gpu_model
+    local_frame$flags <- flags
+    
     return(local_frame)
 }
 
@@ -89,7 +106,7 @@ if(opts[["fp64"]]){
 }
 
 if(opts[["fp32"]]){
-    filter_prec <- "single"
+    filter_prec <- "float"
 }
 
 
@@ -107,6 +124,7 @@ filter_dim <- as.integer(opts[["ndims"]])
 
 ####################################### FILTER ##############################################
 succeeded <- gearshifft_data %>% filter(success == "Success")
+
 filtered_by <- c("success")
 
 if ( nchar(filter_mode) > 0){
@@ -142,7 +160,6 @@ if ( length(filter_dim) > 0){
 cat("total rows filtered: \t",nrow(succeeded),"\n")
 data_colnames = colnames(succeeded)
 
-
 ##############################################################################
                                         # extracting ymetric expression
 
@@ -170,17 +187,18 @@ new_values = eval(parse(text=ymetric_expression))
 colnames(new_values) <- c("ymoi")
 
 name_of_ymetric = opts[["ymetric"]]
-if(exists('ylabel', where=opts) && !is.null(opts[["ylabel"]])) {
-    
-    cat("[ylabel] using ylabel: ",opts[["ylabel"]],"\n")
-    if( nchar(opts[["ylabel"]]) > 1){
-        name_of_ymetric = gsub("_"," ",opts[["ylabel"]])
-    }
-}
 
 if( length(ymetric_keywords) == 1  ){
     name_of_ymetric = data_colnames[grep(ymetric_keywords[1], data_colnames)[1]] 
 }
+
+if(exists('ylabel', where=opts) && !is.null(opts[["ylabel"]])) {
+        
+    if( nchar(opts[["ylabel"]]) > 1){
+        name_of_ymetric = gsub("_"," ",opts[["ylabel"]])
+    }
+}
+cat("[ylabel] using ylabel: ",name_of_ymetric,"\n")
 
 succeeded_ymetric_of_interest  = new_values
 ################################################################################
@@ -189,12 +207,21 @@ succeeded_ymetric_of_interest  = new_values
                                         # extracting xmetric expression
 if(grep(opts[["xmetric"]],data_colnames) == 0){
     
-    stop(cat(opts[["xmetric"]], "for x not found in available columns \n",data_colnames,"\n"))
+    stop(paste(opts[["xmetric"]], "for x not found in available columns \n",data_colnames,"\n"))
 }
 
 
 succeeded_xmetric_of_interest  <- succeeded %>% select(contains(opts[["xmetric"]]))
 name_of_xmetric <- colnames(succeeded_xmetric_of_interest)[1]
+if(exists('xlabel', where=opts) && !is.null(opts[["xlabel"]])) {
+    
+    
+    if( nchar(opts[["xlabel"]]) > 1){
+        name_of_xmetric = opts[["xlabel"]]
+    }
+}
+cat("[xlabel] using xlabel: ",name_of_xmetric,"\n")
+colnames(succeeded_xmetric_of_interest) <- c("xmoi")
 ################################################################################
 
 
@@ -203,7 +230,7 @@ succeeded_factors <- succeeded %>% select(-ends_with("]"))
 succeeded_reduced <- bind_cols(succeeded_factors,
                                succeeded_xmetric_of_interest,
                                succeeded_ymetric_of_interest)
-names(succeeded_reduced)[names(succeeded_reduced) == name_of_xmetric] <- "xmoi"
+#names(succeeded_reduced)[names(succeeded_reduced) == name_of_xmetric] <- "xmoi"
 
 
 cat("calculating mean,median and sd of ",name_of_ymetric," versus ",name_of_xmetric,"\n")
@@ -246,8 +273,10 @@ my_theme <-  theme_bw() + theme(axis.title.x = element_text(size=20),
 my_theme <- my_theme + theme(legend.title = element_text(size=18, face="bold"),
                              legend.text = element_text( size = 18),
                              legend.position="top",
-                             legend.direction="horizontal",
+                             legend.direction="vertical",
                              legend.box ="horizontal",
+                             legend.box.just ="top",
+                             
                              legend.background = element_rect(colour = 'white', fill = 'white', size = 0., linetype='dashed'),
                              legend.key = element_rect(colour = 'white', fill = 'white', size = 0., linetype='dashed')
                              ) 
@@ -261,7 +290,11 @@ for(i in 1:length(aesthetics_keys)) {
     
     if( i <= length(aesthetics_from_cli[[1]]) ){
         cat("ggplot aesthetics : ",aesthetics_keys[i]," = ",
-            aesthetics_from_cli[[1]][i],"\n")
+            aesthetics_from_cli[[1]][i]," possible values: ",
+            eval(parse(text=paste("levels(as.factor(data_for_plotting$",
+                           aesthetics_from_cli[[1]][i],"))",
+                           sep=""))),
+            "\n")
         aesthetics_to_use[[aesthetics_keys[i]]] <- as.symbol(aesthetics_from_cli[[1]][i])
     }
 }
@@ -294,8 +327,6 @@ if(opts[["nolegend"]]){
 }
 
 
-
-
 logy_value <- as.integer(opts[["logy"]])
 logx_value <- as.integer(opts[["logx"]])
 
@@ -308,42 +339,20 @@ ymax <- max(data_for_plotting$moi_mean)
 
 if(logy_value > 1) {
 
-    
-    new_trans <- paste("log",logy_value,sep="")
-    min_logy <- eval(parse(text=paste("log",logy_value,"(",ymin,")" ,sep="")))
-    max_logy <- eval(parse(text=paste("log",logy_value,"(",ymax,")" ,sep="")))
-    new_breaks <- logy_value^(as.integer(min_logy):as.integer(max_logy))
-    cat("new y breaks: ", paste(new_breaks),"\n")
-    cat("applying ",new_trans,"scale on y\n")
-    
-    moi_plot <- moi_plot + scale_y_continuous(breaks = new_breaks,
-                                              trans=new_trans)
+    breaks_y = function(x) logy_value^x
+    format_expr_y = eval(parse(text=paste("math_format(",logy_value,"^.x)",sep="")))
+    moi_plot <- moi_plot + scale_y_continuous(trans = log_trans(base=logy_value),
+                                              breaks = trans_breaks(paste("log",logy_value,sep=""), breaks_y),
+                                              labels = trans_format(paste("log",logy_value,sep=""), format_expr_y))
 }
 
 if(logx_value > 1) {
 
-    cat("applying log",logx_value,"scale on x\n")
-    new_trans <- paste("log",logx_value,sep="")
-    min_logx <- eval(parse(text=paste("log",logx_value,"(",xmin,")" ,sep="")))
-    max_logx <- eval(parse(text=paste("log",logx_value,"(",xmax,")" ,sep="")))
-    new_breaks <- logx_value^(as.integer(min_logx):as.integer(max_logx))
-    if(length(new_breaks)>8){
-        new_breaks <- new_breaks[seq(1,length(new_breaks),4)]
-    }
-    if(length(new_breaks)>8){
-        new_breaks <- new_breaks[seq(1,length(new_breaks),4)]
-    }
-
-    print_log <- function(x){ return(paste(logx_value,"^",eval(parse(text=paste("log",logx_value,"(",x,")",sep=""))),sep=""));}
-    new_labels <- sapply(new_breaks,print_log)
-    
-    cat("new x breaks: ", paste(new_breaks),"\nnew x labels: ",new_labels,"\n")
-    cat("applying ",new_trans,"scale on x\n")
-
-    moi_plot <- moi_plot + scale_x_continuous(breaks=new_breaks,
-                                              labels=new_labels,
-                                              trans=new_trans)
-
+    breaks_x = function(x) logx_value^x
+    format_expr_x = eval(parse(text=paste("math_format(",logx_value,"^.x)",sep="")))
+    moi_plot <- moi_plot + scale_x_continuous(trans = log_trans(base=logx_value),
+                                              breaks = trans_breaks(paste("log",logx_value,sep=""), breaks_x),
+                                              labels = trans_format(paste("log",logx_value,sep=""), format_expr_x))
 }
 
 cat(opts[["aspect"]],"\n")
@@ -381,13 +390,17 @@ if(opts[["legend-only"]]){
 #                             legend.justification=c(0,0),
                              legend.key = element_rect(colour = 'white', fill = 'white', size = 0., linetype='dashed')
                              )
-    moi_plot = moi_plot + my_theme
+    moi_plot = moi_plot + my_theme + guides(col = guide_legend(nrow = 2))
     legend <- g_legend(moi_plot)
     ## grid.draw(legend)
-    ggsave(paste(opts[["filename"]],".svg",sep=""),legend)
-    ggsave(paste(opts[["filename"]],".png",sep=""),legend)
+    ggsave(paste(opts[["filename"]],".svg",sep=""),legend,width=12,height=1.25)
+    ggsave(paste(opts[["filename"]],".png",sep=""),legend,width=12,height=1.25)
 
 } else {
+
+    if ( length(aesthetics_from_cli[[1]]) > 1 ) {
+        moi_plot = moi_plot + guides(col = guide_legend(ncol= length(aesthetics_from_cli[[1]]), nrow = 2))
+    }
     ggsave(paste(opts[["filename"]],".png",sep=""),moi_plot)
     ggsave(paste(opts[["filename"]],".svg",sep=""),moi_plot)
     

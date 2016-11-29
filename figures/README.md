@@ -14,8 +14,9 @@ with packages:
     - docopt
     - ggplot2
     - readr
-    - dplyr, warn.conflicts=F
+    - dplyr
     - gridExtra
+    - scales
 
 ## inkscape
 
