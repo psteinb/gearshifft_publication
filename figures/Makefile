@@ -20,9 +20,9 @@ all : $(TARGETS)
 
 results_figure1 : $(cufft8_files) $(estimate_fftw_files)
 	@echo "input: $(?)"
-	./compare -r -s -o -k "powerof2" -n 3 -a "hardware,library" --xlabel="Signal_Size_[bytes]" --notitle --nolegend -f $(@)a $? > $(@)a.log 2>&1
-	./compare -r -s -o -k "powerof2" -n 3 -a "hardware,library" --xlabel="Signal_Size_[bytes]" --notitle --nolegend --logy=10 --logx=2 -f $(@)b $? > $(@)b.log 2>&1
-	./compare -r -s -o -k "powerof2" -n 3 -a "hardware,library" --notitle --legend-only -f $(@)_legend $? > $(@)_legend.log 2>&1
+	./compare -r -s -o -k "powerof2" -n 3 -a "hardware,library" --xlabel="Signal_Size_[bytes]" --notitle --nolegend $(ARG) -f $(@)a $? > $(@)a.log 2>&1
+	./compare -r -s -o -k "powerof2" -n 3 -a "hardware,library" --xlabel="Signal_Size_[bytes]" --notitle --nolegend --logy=10 --logx=2 $(ARG) -f $(@)b $? > $(@)b.log 2>&1
+	./compare -r -s -o -k "powerof2" -n 3 -a "hardware,library" --notitle --legend-only $(ARG) -f $(@)_legend $? > $(@)_legend.log 2>&1
 	#./compare -r -s -o -k "powerof2" -n 3 -a "hardware,library" --notitle -f $(@)_check $? > $(@)a_check.log 2>&1
 
 results_figure2 : $(estimate_fftw_files) $(measure_fftw_files) $(wisdom_fftw_files)
