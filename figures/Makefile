@@ -34,8 +34,8 @@ results_figure2 : $(estimate_fftw_files) $(measure_fftw_files) $(wisdom_fftw_fil
 results_figure3 : $(clfft_K80_gpu_files) $(cufft8_K80_files) $(estimate_fftw_files) $(measure_fftw_files) $(wisdom_fftw_files)
 	@echo "input: $(?)"
 	./compare -r -s -o -k "powerof2" -n 3 -a "plan_flags,library" --xlabel="Signal_Size_[bytes]" --ymetric="Time_PlanInitFwd" --ylabel="Time_for_Planning_[ms]" --notitle --logy=10 --logx=2 -f $(@)a $? > $(@)a.log 2>&1
-	./compare -r -s -o -k "powerof2" -n 1 -a "plan_flags,library" --xlabel="Signal_Size_[bytes]" --ymetric="Time_PlanInitFwd" --ylabel="Time_for_Planning_[ms]" --notitle --logy=10 --logx=2 -f $(@)b $? > $(@)b.log 2>&1
-	./compare -r -s -o -k "powerof2" -n 3 -a "plan_flags,library" --notitle --legend-only -f $(@)_legend $? > $(@)_legend.log 2>&1
+	./compare -r -s -o -k "powerof2" -n 1 -a "plan_flags" --xlabel="Signal_Size_[bytes]" --ymetric="Time_PlanInitFwd" --ylabel="Time_for_Planning_[ms]" --notitle --logy=10 --logx=2 -f $(@)b  $(estimate_fftw_files) $(measure_fftw_files) $(wisdom_fftw_files) > $(@)b.log 2>&1
+	#./compare -r -s -o -k "powerof2" -n 1 -a "plan_flags,library" --notitle --legend-only -f $(@)_legend $? > $(@)_legend.log 2>&1
 
 # k80_cuda8_3d : $(k80_files)
 # 	./compare -r -k "oddshape" -n 3 -a "library,precision,inplace" --notitle --nolegend -f $(@)_oddshape_real $? > $(@)_oddshape_real_compare.log 2>&1
