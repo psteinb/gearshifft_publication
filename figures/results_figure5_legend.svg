@@ -1,0 +1,56 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' viewBox='0 0 864.00 90.00'>
+<defs>
+  <style type='text/css'><![CDATA[
+    line, polyline, path, rect, circle {
+      fill: none;
+      stroke: #000000;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-miterlimit: 10.00;
+    }
+  ]]></style>
+</defs>
+<rect width='100%' height='100%' style='stroke: none; fill: #FFFFFF;'/>
+<rect x='115.78' y='12.71' width='534.33' height='64.58' style='stroke-width: 0.00; stroke: #FFFFFF; stroke-dasharray: 0,0; fill: #FFFFFF;' />
+<text x='121.45' y='35.10' style='font-size: 20.00pt; font-weight: bold; font-family: Arial;'>hardware</text>
+<rect x='121.45' y='37.06' width='17.28' height='17.28' style='stroke-width: 0.00; stroke: #FFFFFF; stroke-dasharray: 0,0; fill: #FFFFFF;' />
+<line x1='123.18' y1='45.70' x2='137.00' y2='45.70' style='stroke-width: 2.13; stroke: #F8766D; stroke-linecap: butt;' />
+<circle cx='130.09' cy='45.70' r='2.49pt' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<line x1='123.18' y1='45.70' x2='137.00' y2='45.70' style='stroke-width: 1.07; stroke: #F8766D; stroke-linecap: butt;' />
+<rect x='121.45' y='54.34' width='17.28' height='17.28' style='stroke-width: 0.00; stroke: #FFFFFF; stroke-dasharray: 0,0; fill: #FFFFFF;' />
+<line x1='123.18' y1='62.98' x2='137.00' y2='62.98' style='stroke-width: 2.13; stroke: #A3A500; stroke-linecap: butt;' />
+<circle cx='130.09' cy='62.98' r='2.49pt' style='stroke-width: 0.71; stroke: #A3A500; fill: #A3A500;' />
+<line x1='123.18' y1='62.98' x2='137.00' y2='62.98' style='stroke-width: 1.07; stroke: #A3A500; stroke-linecap: butt;' />
+<rect x='299.58' y='37.06' width='17.28' height='17.28' style='stroke-width: 0.00; stroke: #FFFFFF; stroke-dasharray: 0,0; fill: #FFFFFF;' />
+<line x1='301.30' y1='45.70' x2='315.13' y2='45.70' style='stroke-width: 2.13; stroke: #00BF7D; stroke-linecap: butt;' />
+<circle cx='308.22' cy='45.70' r='2.49pt' style='stroke-width: 0.71; stroke: #00BF7D; fill: #00BF7D;' />
+<line x1='301.30' y1='45.70' x2='315.13' y2='45.70' style='stroke-width: 1.07; stroke: #00BF7D; stroke-linecap: butt;' />
+<rect x='299.58' y='54.34' width='17.28' height='17.28' style='stroke-width: 0.00; stroke: #FFFFFF; stroke-dasharray: 0,0; fill: #FFFFFF;' />
+<line x1='301.30' y1='62.98' x2='315.13' y2='62.98' style='stroke-width: 2.13; stroke: #00B0F6; stroke-linecap: butt;' />
+<circle cx='308.22' cy='62.98' r='2.49pt' style='stroke-width: 0.71; stroke: #00B0F6; fill: #00B0F6;' />
+<line x1='301.30' y1='62.98' x2='315.13' y2='62.98' style='stroke-width: 1.07; stroke: #00B0F6; stroke-linecap: butt;' />
+<rect x='427.05' y='37.06' width='17.28' height='17.28' style='stroke-width: 0.00; stroke: #FFFFFF; stroke-dasharray: 0,0; fill: #FFFFFF;' />
+<line x1='428.78' y1='45.70' x2='442.60' y2='45.70' style='stroke-width: 2.13; stroke: #E76BF3; stroke-linecap: butt;' />
+<circle cx='435.69' cy='45.70' r='2.49pt' style='stroke-width: 0.71; stroke: #E76BF3; fill: #E76BF3;' />
+<line x1='428.78' y1='45.70' x2='442.60' y2='45.70' style='stroke-width: 1.07; stroke: #E76BF3; stroke-linecap: butt;' />
+<text x='140.89' y='54.29' style='font-size: 18.00pt; font-family: Arial;'>E5-2680v3 24c</text>
+<text x='140.89' y='71.57' style='font-size: 18.00pt; font-family: Arial;'>GeForce GTX 1080</text>
+<text x='319.02' y='54.29' style='font-size: 18.00pt; font-family: Arial;'>Tesla K20Xm</text>
+<text x='319.02' y='71.57' style='font-size: 18.00pt; font-family: Arial;'>Tesla K80</text>
+<text x='446.49' y='54.29' style='font-size: 18.00pt; font-family: Arial;'>Tesla P100-PCIE-16GB</text>
+<rect x='661.45' y='4.07' width='86.78' height='81.86' style='stroke-width: 0.00; stroke: #FFFFFF; stroke-dasharray: 0,0; fill: #FFFFFF;' />
+<text x='667.11' y='26.46' style='font-size: 20.00pt; font-weight: bold; font-family: Arial;'>library</text>
+<rect x='667.11' y='28.42' width='17.28' height='17.28' style='stroke-width: 0.00; stroke: #FFFFFF; stroke-dasharray: 0,0; fill: #FFFFFF;' />
+<line x1='668.84' y1='37.06' x2='682.67' y2='37.06' style='stroke-width: 2.13; stroke-linecap: butt;' />
+<line x1='668.84' y1='37.06' x2='682.67' y2='37.06' style='stroke-width: 1.07; stroke-linecap: butt;' />
+<rect x='667.11' y='45.70' width='17.28' height='17.28' style='stroke-width: 0.00; stroke: #FFFFFF; stroke-dasharray: 0,0; fill: #FFFFFF;' />
+<line x1='668.84' y1='54.34' x2='682.67' y2='54.34' style='stroke-width: 2.13; stroke-dasharray: 4,4; stroke-linecap: butt;' />
+<line x1='668.84' y1='54.34' x2='682.67' y2='54.34' style='stroke-width: 1.07; stroke-dasharray: 2,2; stroke-linecap: butt;' />
+<rect x='667.11' y='62.98' width='17.28' height='17.28' style='stroke-width: 0.00; stroke: #FFFFFF; stroke-dasharray: 0,0; fill: #FFFFFF;' />
+<line x1='668.84' y1='71.62' x2='682.67' y2='71.62' style='stroke-width: 2.13; stroke-dasharray: 8,4; stroke-linecap: butt;' />
+<line x1='668.84' y1='71.62' x2='682.67' y2='71.62' style='stroke-width: 1.07; stroke-dasharray: 4,2; stroke-linecap: butt;' />
+<text x='686.55' y='45.65' style='font-size: 18.00pt; font-family: Arial;'>ClFFT</text>
+<text x='686.55' y='62.93' style='font-size: 18.00pt; font-family: Arial;'>CuFFT</text>
+<text x='686.55' y='80.21' style='font-size: 18.00pt; font-family: Arial;'>Fftw</text>
+</svg>
