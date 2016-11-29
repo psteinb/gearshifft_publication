@@ -6,7 +6,9 @@ cufft8_files = $(wildcard ../results/*/cuda-8.0.44/cufft*.[0-9].csv)
 
 clfft_cpu_files = $(wildcard ../results/haswell/clfft*/*csv)
 clfft_gpu_files = $(wildcard ../results/[A-Z]*/clfft-2.12.2/*csv)
+
 cufft8_K80_files = $(wildcard ../results/K80/cuda-8*/*csv)
+cufft8_P100_files = $(wildcard ../results/P100*/cuda-8*/cufft*.[0-9].csv)
 
 estimate_fftw_files = $(wildcard ../results/haswell/fftw-3.3.5/fftw_estimate*csv)
 measure_fftw_files = $(wildcard ../results/haswell/fftw-3.3.5/fftw_gcc*csv)
@@ -48,6 +50,13 @@ results_figure5 : $(cufft8_files) $(clfft_gpu_files) $(measure_fftw_files)
 	./compare -r -o -s -k "powerof2" -n 3 -a "hardware,library" --xlabel="Signal_Size_[bytes]" --ymetric="Time_FFT" --nolegend --notitle --logy=10 --logx=2 -f $(@)a $? > $(@)a.log 2>&1
 	./compare -r -o -s -k "powerof2" -n 1 -a "hardware,library" --xlabel="Signal_Size_[bytes]" --ymetric="Time_FFT" --nolegend --notitle --logy=10 --logx=2 -f $(@)b $? > $(@)b.log 2>&1
 	./compare -r -o -s -k "powerof2" -n 1 -a "hardware,library" --xlabel="Signal_Size_[bytes]" --ymetric="Time_FFT" --legend-only --notitle --logy=10 --logx=2 -f $(@)_legend $? > $(@)_legend.log 2>&1
+
+results_figure6 : $(cufft8_K80_files) $(cufft8_P100_files) $(measure_fftw_files)
+	@echo "input: $(?)"
+	./compare -k "all" -r -o -s -n 3 -a "hardware,kind,library" --xlabel="Signal_Size_[bytes]" --ymetric="Time_FFT" --nolegend --notitle --logy=10 --logx=2 -f $(@)a $? > $(@)a.log 2>&1
+	./compare -k "all" -r -o -s -n 3 -a "hardware,kind,library" --xlabel="Signal_Size_[bytes]" --ylabel="Time_for_Planning_[ms]" --ymetric="Time_PlanInitFwd" --nolegend --notitle --logy=10 --logx=2 -f $(@)b $? > $(@)b.log 2>&1
+	./compare -k "all" -r -o -s -n 1 -a "hardware,kind,library" --xlabel="Signal_Size_[bytes]" --ymetric="Time_FFT" --legend-only --notitle --logy=10 --logx=2 -f $(@)_legend $? > $(@)_legend.log 2>&1
+
 
 K80 : k80_cuda8_3d 	k80_cuda8_2d 	k80_cuda8_1d k80_cuda8
 
