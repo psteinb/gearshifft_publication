@@ -44,22 +44,20 @@ fftw_plan r2c_plan = fftw_plan_dft_r2c(3,                       //rank, here 3D
 fftwf_execute(r2c_plan);
 \end{lstlisting}
 
-\cref{lst:fftw_example} illustrates the fftw API for a single precision real-to-complex out-of-place transform. It is important to note that fftw offers the user the freedom to choose the degree of optimisation for finding the most optimal FFT implementation for the signal at hand. \cref{lst:fftw_example} uses the \texttt{FFTW_ESTIMATE} flag, which is described by the fftw manual \cite{fftw_manual} as:
+\cref{lst:fftw_example} illustrates the fftw API for a single precision real-to-complex out-of-place transform. It is important to note that fftw offers the user the freedom to choose the degree of optimisation for finding the most optimal FFT implementation for the signal at hand. \cref{lst:fftw_example} uses the \texttt{FFTW\_ESTIMATE} flag, which is described by the fftw manual \cite{fftw_manual} as:
 
 \begin{center}
-  ``\texttt{FFTW_ESTIMATE} specifies that, instead of actual measurements of different algorithms, a simple heuristic is used to pick a (probably sub-optimal) plan quickly. With this flag, the input/output arrays are not overwritten during planning.''
+  ``\texttt{FFTW\_ESTIMATE} specifies that, instead of actual measurements of different algorithms, a simple heuristic is used to pick a (probably sub-optimal) plan quickly. With this flag, the input/output arrays are not overwritten during planning.''
 \end{center}
 
-Fftw offers five levels for this planning flag in total. As covering all of them in this study is impractical, we selected two more: \texttt{FFTW_MEASURE} and \texttt{FFTW_WISDOM_ONLY}. The fftw manual describes them as:
+Fftw offers five levels for this planning flag in total. As covering all of them in this study is impractical, we selected two more: \texttt{FFTW\_MEASURE} and \texttt{FFTW\_WISDOM\_ONLY}. The fftw manual describes them as:
 
 \begin{center}
-  ``\texttt{FFTW_MEASURE} tells FFTW to find an optimized plan by actually computing several FFTs and measuring their execution time. Depending on your machine, this can take some time (often a few seconds). FFTW_MEASURE is the default planning option.\newline
-  \texttt{FFTW_WISDOM_ONLY} is a special planning mode in which the plan is only created if wisdom is available for the given problem, and otherwise a NULL plan is returned.''
+  ``\texttt{FFTW\_MEASURE} tells FFTW to find an optimized plan by actually computing several FFTs and measuring their execution time. Depending on your machine, this can take some time (often a few seconds). FFTW\_MEASURE is the default planning option.\newline
+  \texttt{FFTW\_WISDOM\_ONLY} is a special planning mode in which the plan is only created if wisdom is available for the given problem, and otherwise a NULL plan is returned.''
 \end{center}
 
-In fftw terminology, wisdom is a persistent data structure that `fftw_widsom` binary in the fftw install tree can generate. It is meant to allow users to generate the plan for specific input data shapes offline to their application. The stored 'wisdom' can then be read from disk through the fftw wisdom API. 
-
-As discussed above, the studied GPU based FFT implementations follow this design structure without the planning flags however. This becomes evided in \cref{lst:cufft_example}. 
+In fftw terminology, wisdom is a persistent data structure that \texttt{fftw\_widsom} binary in the fftw install tree can generate. It is meant to allow users to generate the plan for specific input data shapes offline to their application. The stored 'wisdom' can then be read from disk through the fftw wisdom API. 
 
 \begin{lstlisting}[caption={Minimal usage example of the cuFFT single precision real-to-complex planner API. Memory management is omitted.},label={lst:cufft_example}]
 int N = 32;
@@ -70,6 +68,7 @@ cufftPlan3d(&plan, N, N, N, CUFFT_R2C);
 cufftExecC2C(plan, input_buffer, output, CUFFT_FORWARD);
 \end{lstlisting}
 
+As discussed above, the studied GPU based FFT implementations follow this design structure without the planning flags however. This becomes evided in \cref{lst:cufft_example}. 
 
 \subsection{Time To Solution}
 \label{ssec:tts}
@@ -85,11 +84,11 @@ We begin the discussion with the classical use case for developers that might be
   \hfill
   \def\svgwidth{0.45\columnwidth}
   \subfloat[Fig B.]{\input{figures/results_figure1b.pdf_tex}\label{fig:f1b}}
-  \caption{Time-to-solution for power-of-2 3D single-precision real-to-complex forward transforms using fftw (\texttt{FFTW_ESTIMATE}) and cufft. \cref{fig:f1b} shows the same data as \cref{fig:f1a} but in a log10-log2 scale.}
+  \caption{Time-to-solution for power-of-2 3D single-precision real-to-complex forward transforms using fftw (\texttt{FFTW\_ESTIMATE}) and cufft. \cref{fig:f1b} shows the same data as \cref{fig:f1a} but in a log10-log2 scale.}
   \label{fig:tts}
 \end{figure}
 
-\cref{fig:tts} reports a comparison of runtime results of power-of-2 single-precision real-to-complex forward transforms from fftw and cufft. It is evident that given the largest device memory available of $\unit[16]{GB}$, the GPU data does not yield any points higher than $\unit[8]{GB}$. Note that the total time reflects the time to set up a plan, allocate memory on device, perform the data transfer onto the device, execute the FFT, transfer the result back to the host and clean up the used plan and the allocated memory. \cref{fig:f1a} shows that the oldest GPU generation used in this comparison yields the slowest results for input signals in the order of $\unit[1-2]{GB}$. All other and more recent GPU models supersede fftw using all available cores in this node. Any judgement on the superiority of cufft over fftw can be considered premature at this point, as fftw was used with the \texttt{FFTW_ESTIMATE} planner flag.
+\cref{fig:tts} reports a comparison of runtime results of power-of-2 single-precision real-to-complex forward transforms from fftw and cufft. It is evident that given the largest device memory available of  \SI{16}{\gibi\byte}, the GPU data does not yield any points higher than $\SI{8}{\gibi\byte}$. Note that the total time reflects the time to set up a plan, allocate memory on device, perform the data transfer onto the device, execute the FFT, transfer the result back to the host and clean up the used plan and the allocated memory. \cref{fig:f1a} shows that the oldest GPU generation used in this comparison yields the slowest results for input signals in the order of $\SIrange{1}{2}{\gibi\byte}$. All other and more recent GPU models supersede fftw using all available cores in this node. Any judgement on the superiority of cufft over fftw can be considered premature at this point, as fftw was used with the \texttt{FFTW\_ESTIMATE} planner flag.
 
 \begin{figure}[!tbp]
   \centering
@@ -100,11 +99,11 @@ We begin the discussion with the classical use case for developers that might be
   \hfill
   \def\svgwidth{0.45\columnwidth}
   \subfloat[Fig B.]{\input{figures/results_figure2b.pdf_tex}\label{fig:f2b}}
-  \caption{Time-to-solution for power-of-2 3D single-precision real-to-complex forward transforms using fftw (\texttt{FFTW_ESTIMATE}) and cufft. \cref{fig:f2a} report the complete time to solution, whereas \cref{fig:f2b} is limited to the time spent for the execution of the forward transform only. Both figures use a in a log10-log2 scale.}
+  \caption{Time-to-solution for power-of-2 3D single-precision real-to-complex forward transforms using fftw (\texttt{FFTW\_ESTIMATE}) and cufft. \cref{fig:f2a} report the complete time to solution, whereas \cref{fig:f2b} is limited to the time spent for the execution of the forward transform only. Both figures use a in a log10-log2 scale.}
   \label{fig:fftw_plan_flags}
 \end{figure}
 
-\cref{fig:fftw_plan_flags} compares the time-to-solution to the actual time spent for the FFT operation itself. This illustration makes the cost and the benefit of higher planning flags than \texttt{FFTW_ESTIMATE} obvious. Where \texttt{FFTW_MEASURE} imposes a runtime penalty of 1 to 2 orders of magnitude with respect to \texttt{FFTW_ESTIMATE}, it offers superior performance. The careful observer has noticed that the planning times for \texttt{FFTW_MEASURE} become prohibitively large for large input data sizes and reach minutes for data sets in the Gigabyte range. This is a well-known feature of fftw as the authors note in \cite{FFTW05}:
+\cref{fig:fftw_plan_flags} compares the time-to-solution to the actual time spent for the FFT operation itself. This illustration makes the cost and the benefit of higher planning flags than \texttt{FFTW\_ESTIMATE} obvious. Where \texttt{FFTW\_MEASURE} imposes a runtime penalty of 1 to 2 orders of magnitude with respect to \texttt{FFTW\_ESTIMATE}, it offers superior performance. The careful observer has noticed that the planning times for \texttt{FFTW\_MEASURE} become prohibitively large for large input data sizes and reach minutes for data sets in the Gigabyte range. This is a well-known feature of fftw as the authors note in \cite{FFTW05}:
 
 \begin{center}
   ``In performance critical applications, many transforms of the same
@@ -121,11 +120,11 @@ We begin the discussion with the classical use case for developers that might be
   \hfill
   \def\svgwidth{0.45\columnwidth}
   \subfloat[Fig B.]{\input{figures/results_figure3b.pdf_tex}\label{fig:f3b}}
-  \caption{Time-to-plan for power-of-2 single-precision real-to-complex forward transforms using fftw, cufft and clfft. \cref{fig:f3a} reports the complete time to plan for 3D transforms, whereas \cref{fig:f3b} is limited to 1D transforms. Both figures use a in a log10-log2 scale.}
+  \caption{Time-to-plan for power-of-2 single-precision real-to-complex forward transforms using fftw, cufft and clfft. \cref{fig:f3a} reports the complete time to plan for 3D transforms, whereas \cref{fig:f3b} is limited to 1D transforms. Both figures use a log10-log2 scale.}
   \label{fig:plan_time_only}
 \end{figure}
 
-\cref{fig:plan_time_only} illustrates the problem to it's full extent. \texttt{FFTW_MEASURE} consumes up to 3-4 orders of magnitude more time to produce a plan than a standard (GPU based libraries) or \texttt{FFTW_ESTIMATE} based planner call especially for large input shapes, see \cref{fig:f3a}. We observed that fftw wisdom cannot be generated for 2D or 3D out-of-place transforms. Therefor, we compare the 3D planning with it's counterpart in 1D in \cref{fig:f3b}. At input sizes of $\unit[128]{MB}$ in 1D, the planning phase exceeds durations of $\unit[100]{s}$. In practise, this imposes a challenge on the client to the fftw API. Not only is the time to solution affected by this behavior which is a crucial quantity if FFT-heavy applications are run in an HPC environment. Here the runtime of applications needs to be know to some extent in order to allow efficient and rapid job placement in a cluster. Further, the developer interfacing with fftw has to create infrastructure (thread-safe static singleton objects or similar come to mind) in order to perform the planning of fftw only once and reuse the result as much as possible.
+\cref{fig:plan_time_only} illustrates the problem to it's full extent. \texttt{FFTW\_MEASURE} consumes up to 3-4 orders of magnitude more time to produce a plan than a standard (GPU based libraries) or \texttt{FFTW\_ESTIMATE} based planner call especially for large input shapes, see \cref{fig:f3a}. We observed that fftw wisdom cannot be generated for 2D or 3D out-of-place transforms. Therefor, we compare the 3D planning with it's counterpart in 1D in \cref{fig:f3b}. At input sizes of $\SI{128}{\mebi\byte}$ in 1D, the planning phase exceeds durations of $\SI{100}{\s}$. In practise, this imposes a challenge on the client to the fftw API. Not only is the time to solution affected by this behavior which is a crucial quantity if FFT-heavy applications are run in an HPC environment. Here the runtime of applications needs to be know to some extent in order to allow efficient and rapid job placement in a cluster. Further, the developer interfacing with fftw has to create infrastructure (thread-safe static singleton objects or similar come to mind) in order to perform the planning of fftw only once and reuse the result as much as possible.
 
 
 
