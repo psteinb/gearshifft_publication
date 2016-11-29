@@ -2,7 +2,7 @@ Based on the experiences made for \cite{preibisch2014efficient, schmid2015real},
 
 Expeditions into other use cases will be made where appropriate. The curious reader may rest assured that a more comprehensive study is easily possible with \gearshifft{}, however the mere multiplicity of all possible combinations and use cases of FFT render it neither feasible nor practical to discuss 1D or 2D in a comprehensive fashion as well.
 
-For this study, we will concentrate on three modern and current FFT implementations available free of charge: fftw (on x86 CPUs), cufft (on nVidia GPUs) and clfft (on x86 CPUs or nVidia GPUs). We consider this the natural starting point of developers beyond possible domain specific implementations. It should be noted, that this will infer not only a study in terms of hardware performance, but also how well the APIs designed by the authors of fftw, clFFT and cuFFT are documented, understood and used in practise. We consider both hardware and cognitive performance a virtue of almost equal importance.
+For this study, we will concentrate on three modern and current FFT implementations available free of charge: fftw ($3.3.5$, on x86 CPUs), cufft ($8.0.44$, on nVidia GPUs) and clfft ($2.12.2$, on x86 CPUs or nVidia GPUs). We consider this the natural starting point of developers beyond possible domain specific implementations. It should be noted, that this will infer not only a study in terms of hardware performance, but also how well the APIs designed by the authors of fftw, clFFT and cuFFT are documented, understood and used in practise. We consider both hardware and cognitive/developer performance a virtue of equal importance.
 
 \subsection{Experimental Environment}
 \label{ssec:env}
@@ -21,23 +21,55 @@ The results presented in the following sections were collected on three systems:
   2x Intel(R) Xeon(R) CPU E5-2640 v3 @ 2.60GHz, 64 GB RAM, 1x NVIDIA GeForce GTX 1080 (8 GB GDDR5X RAM)
 \end{itemize}
 
-As presented above, all used systems operated on a variant of 64-bit Linux and were accessed via an ssh session without running a graphical user interface of any kind. All measurements used the GNU compiler collection (GCC, \cite{stallman2001using}) version 5.3.0 as the underlying compiler if not stated otherwise. 
-
-The FFT implementations evaluated were:
-
-\begin{itemize}
-\item fftw \cite{FFTW05}, version 3.3.5
-\item cuFFT from CUDA 8.0.44
-\item clFFT 2.12.2
-\end{itemize}
-
-All used nVidia GPU implementations interfaced with the proprietary driver provided by the vendor. 
+As presented above, all used systems operated on a variant of 64-bit Linux and were accessed via an ssh session without running a graphical user interface of any kind. All measurements used the GNU compiler collection (GCC, \cite{stallman2001using}) version 5.3.0 as the underlying compiler if not stated otherwise. All used GPU implementations on nVidia hardware interfaced with the proprietary driver provided by the vendor $367.48$ (K20Xm, K80, P100) and $367.57$ (GTX1080). 
 
 In order to generate one data set, a set arrays of arbitrary shapes is provided to a specific FFT API. The configuration files thereof can be accessed via \cite{gearshifft_github}. The shape configurations are separated in groups: \texttt{powerof2} (all dimensions are powers of $2$), \texttt{radix357} (all dimenions are either powers of $3$, $5$ or $7$) and \texttt{oddshape} (all dimenions are powers of $19$ in order to emulated very uncommon signal sizes). These configurations were generated in order to probe the FFT implementations for a wide spectrum of possible applications.  
 
 The FFT calls to benchmark are executed five times each. From this, the arithmetic mean and sample standard deviations are used for figures presented below. As the number of repititions is a configurable parameter of \gearshifft{}, we leave it to the user to produce a more comprehensive data set than used for this publication. We consider five repetitions enough at this point to show and discuss several aspects of performance and usability of \gearshifft{} and the FFT libraries under study.  
 
 %TODO: why maximum size of transforms?
+\subsection{Using a modern FFT Library}
+\label{ssec:modern_ffts}
+
+The design of many FFT libraries is based on the architecture and API of fftw $3.0$. Beyond memory management to allocate and fill the input signals and prepare the output signal arrays if needed, there are two interactions that any client to fftw has to perform in order to execute an FFT on the aforementioned input signal. First a plan data structure has to be created and filled using a planner. For this, the FFT problem is defined in terms of rank (1D, 2D or 3D), shape of the input signal, type of the input signal (single or double precision of real or complex inputs), type of the transformation (real-to-complex, complex-to-complex, real-to-real) and memory mode of the transformation (inplace versus out-of-place). The FFT problem description is then used as input parameters to the planner. The planner is a piece of code inside fftw that henceforth tries to find the best suited radix factorisation based on the shape of the input signal. It then performs several FFTs on the input data to sample the runtime of different FFT implementations available inside fftw. The sample of runtimes is then used to find the optimal implementation of the FFT. After the plan has been created, it is used to execute the FFT itself.
+
+\begin{lstlisting}[caption={Minimal usage example of the FFTW single precision real-to-complex planner API. Memory management is omitted.},label={lst:fftw_example}]
+int shape[] = {32,32,32};
+fftw_plan r2c_plan = fftw_plan_dft_r2c(3,                       //rank, here 3D 
+                                       shape,                   //shape of the input
+                                       (float *) input_buffer,  //input data array
+                                       (fftwf_complex *) output,//output data array
+                                       FFTW_ESTIMATE            //planner flag
+                                       );
+fftwf_execute(r2c_plan);
+\end{lstlisting}
+
+\cref{lst:fftw_example} illustrates the fftw API for a single precision real-to-complex out-of-place transform. It is important to note that fftw offers the user the freedom to choose the degree of optimisation for finding the most optimal FFT implementation for the signal at hand. \cref{lst:fftw_example} uses the \texttt{FFTW_ESTIMATE} flag, which is described by the fftw manual \cite{fftw_manual} as:
+
+\begin{center}
+  ``\texttt{FFTW_ESTIMATE} specifies that, instead of actual measurements of different algorithms, a simple heuristic is used to pick a (probably sub-optimal) plan quickly. With this flag, the input/output arrays are not overwritten during planning.''
+\end{center}
+
+Fftw offers five levels for this planning flag in total. As covering all of them in this study is impractical, we selected two more: \texttt{FFTW_MEASURE} and \texttt{FFTW_WISDOM_ONLY}. The fftw manual describes them as:
+
+\begin{center}
+  ``\texttt{FFTW_MEASURE} tells FFTW to find an optimized plan by actually computing several FFTs and measuring their execution time. Depending on your machine, this can take some time (often a few seconds). FFTW_MEASURE is the default planning option.\newline
+  \texttt{FFTW_WISDOM_ONLY} is a special planning mode in which the plan is only created if wisdom is available for the given problem, and otherwise a NULL plan is returned.''
+\end{center}
+
+In fftw terminology, wisdom is a persistent data structure that `fftw_widsom` binary in the fftw install tree can generate. It is meant to allow users to generate the plan for specific input data shapes offline to their application. The stored 'wisdom' can then be read from disk through the fftw wisdom API. 
+
+As discussed above, the studied GPU based FFT implementations follow this design structure without the planning flags however. This becomes evided in \cref{lst:cufft_example}. 
+
+\begin{lstlisting}[caption={Minimal usage example of the cuFFT single precision real-to-complex planner API. Memory management is omitted.},label={lst:cufft_example}]
+int N = 32;
+
+cufftHandle plan;
+cufftPlan3d(&plan, N, N, N, CUFFT_R2C);
+
+cufftExecC2C(plan, input_buffer, output, CUFFT_FORWARD);
+\end{lstlisting}
+
 
 \subsection{Time To Solution}
 \label{ssec:tts}
@@ -84,19 +116,16 @@ We begin the discussion with the classical use case for developers that might be
 
 \begin{figure}[!tbp]
   \centering
-  \def\svgwidth{0.95\columnwidth}
-  \input{figures/results_figure3a.pdf_tex}}
-  \caption{Time-to-plan for power-of-2 3D single-precision real-to-complex forward transforms using fftw, clfft and cufft. The figure uses a log10-log2 scale.}
+  \def\svgwidth{0.45\columnwidth}
+  \subfloat[Fig A.]{\input{figures/results_figure3a.pdf_tex}\label{fig:f3a}}
+  \hfill
+  \def\svgwidth{0.45\columnwidth}
+  \subfloat[Fig B.]{\input{figures/results_figure3b.pdf_tex}\label{fig:f3b}}
+  \caption{Time-to-plan for power-of-2 single-precision real-to-complex forward transforms using fftw, cufft and clfft. \cref{fig:f3a} reports the complete time to plan for 3D transforms, whereas \cref{fig:f3b} is limited to 1D transforms. Both figures use a in a log10-log2 scale.}
   \label{fig:plan_time_only}
 \end{figure}
 
-\cref{fig:plan_time_only} illustrates the problem to it's full extent. \texttt{FFTW_MEASURE} consumes up to 3-4 orders of magnitude more time to produce a plan than a standard (GPU based libraries) or \texttt{FFTW_ESTIMATE} based planner call. We can only hypothesize that this is due to the fact that:
-
-\begin{itemize}
-\item the factorization of the radix found during planning takes a lot of time
-\item the available parameter space of possible FFT implementations for a given radix factorisation becomes very large on the CPU
-\item the optimisation to find the optimal implementation for a given radix is too time consuming 
-\end{itemize}
+\cref{fig:plan_time_only} illustrates the problem to it's full extent. \texttt{FFTW_MEASURE} consumes up to 3-4 orders of magnitude more time to produce a plan than a standard (GPU based libraries) or \texttt{FFTW_ESTIMATE} based planner call especially for large input shapes, see \cref{fig:f3a}. We observed that fftw wisdom cannot be generated for 2D or 3D out-of-place transforms. Therefor, we compare the 3D planning with it's counterpart in 1D in \cref{fig:f3b}. At input sizes of $\unit[128]{MB}$ in 1D, the planning phase exceeds durations of $\unit[100]{s}$. In practise, this imposes a challenge on the client to the fftw API. Not only is the time to solution affected by this behavior which is a crucial quantity if FFT-heavy applications are run in an HPC environment. Here the runtime of applications needs to be know to some extent in order to allow efficient and rapid job placement in a cluster. Further, the developer interfacing with fftw has to create infrastructure (thread-safe static singleton objects or similar come to mind) in order to perform the planning of fftw only once and reuse the result as much as possible.
 
 
 
