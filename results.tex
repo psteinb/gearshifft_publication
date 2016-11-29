@@ -124,10 +124,57 @@ We begin the discussion with the classical use case for developers that might be
   \label{fig:plan_time_only}
 \end{figure}
 
-\cref{fig:plan_time_only} illustrates the problem to it's full extent. \texttt{FFTW\_MEASURE} consumes up to 3-4 orders of magnitude more time to produce a plan than a standard (GPU based libraries) or \texttt{FFTW\_ESTIMATE} based planner call especially for large input shapes, see \cref{fig:f3a}. We observed that fftw wisdom cannot be generated for 2D or 3D out-of-place transforms. Therefor, we compare the 3D planning with it's counterpart in 1D in \cref{fig:f3b}. At input sizes of $\SI{128}{\mebi\byte}$ in 1D, the planning phase exceeds durations of $\SI{100}{\s}$. In practise, this imposes a challenge on the client to the fftw API. Not only is the time to solution affected by this behavior which is a crucial quantity if FFT-heavy applications are run in an HPC environment. Here the runtime of applications needs to be know to some extent in order to allow efficient and rapid job placement in a cluster. Further, the developer interfacing with fftw has to create infrastructure (thread-safe static singleton objects or similar come to mind) in order to perform the planning of fftw only once and reuse the result as much as possible.
+\cref{fig:plan_time_only} illustrates the problem to it's full extent. \texttt{FFTW\_MEASURE} consumes up to 3-4 orders of magnitude more time to produce a plan than a standard (GPU based libraries) or \texttt{FFTW\_ESTIMATE} based planner call especially for large input shapes, see \cref{fig:f3a}. We observed that fftw wisdom cannot be generated for 2D or 3D out-of-place transforms. Therefor, we compare the 3D planning with it's counterpart in 1D in \cref{fig:f3b}. At input sizes of $\SI{128}{\mebi\byte}$ in 1D, the planning phase exceeds durations of $\SI{100}{\s}$. In practise, this imposes a challenge on the client to the fftw API. Not only is the time to solution affected by this behavior which is a crucial quantity if FFT-heavy applications are run in an HPC environment. Here the runtime of applications needs to be know to some extent in order to allow efficient and rapid job placement in a cluster. Further, the developer interfacing with fftw has to create infrastructure (thread-safe static singleton objects or similar come to mind) in order to perform the planning of fftw only once and reuse the resulting plan as much as possible.
 
+\subsection{Comparing CPU versus GPU runtimes}
+\label{ssec:cpu_vs_gpu}
 
+The last section finished by discussing a design artifact, that the fftw authors introduced in their API and which the other FFT libraries discussed here adopted. Another important question typically asked is if GPU accelerated FFT implementations are really faster than their CPU equivalents. Although this question cannot be answered comprehensively in our study, we would like to point out several aspects of it. First of all, modern GPU are connected via the PCIe bus to the host system in order to transfer data, receive instructions and to be supplied with power. This imposes a severe bottleneck to data transfer and is sometimes neglected during library design. 
 
-% - analysis starting from 3D
-% + inplace versus outplace
-% + real vs complex-as-real
+\begin{figure}[!tbp]
+  \centering
+  \def\svgwidth{0.95\columnwidth}
+  \input{figures/results_figure4_legend.pdf_tex}
+  
+  \def\svgwidth{0.5\columnwidth}
+  \subfloat[cufft 8.0.44]{\input{figures/results_figure4a.pdf_tex}\label{fig:f4a}}
+  
+  \hfill
+
+  \def\svgwidth{0.5\columnwidth}
+  \subfloat[clfft 2.12.2]{\input{figures/results_figure4b.pdf_tex}\label{fig:f4b}}
+  \caption{Time for upload plus time for download divided by the total time needed measured for power-of-2 single-precision real-to-complex forward transforms using cufft \cref{fig:f4a} and clfft \cref{fig:f4b}. Both figures use a linear-versus-log2 scale.}
+  \label{fig:device_transfer}
+\end{figure}
+
+\cref{fig:device_transfer} compares the time consumed by upload and download of input and output data for inplace and out-of-place FFT transforms using cufft \cref{fig:f4a} and clfft \cref{fig:f4b}. It is not surprising to see that the ratio of transfer times amounts to up to \SIrange{75}{80}{\percent} for large input data sizes for cufft. This is caused by the use of paged memory for the input and output buffers. This forces the operating system and hence the GPU driver to check if the a given memory page needs to be stored to disk or not before it can be written or read. This introduces a severe overhead on the PCIe transfer. The reason for this choice was comparability during the design phase of \gearshifft{}. Using pinned or page-locked memory in CUDA is straight forward, doing the same in OpenCL is challenging and must be postponed to future releases. Another observation of \cref{fig:device_transfer} is that the measured runtimes become subject to stronger jitter  which is due to the host system mediating the transfer across the system hardware. As more software and hardware components are involved, these stochastic fluctuations accumulate. 
+
+Besides the use of paged memory in \gearshifft{} which is not optimal in terms of performance but the natural choice for novice programmers, \cref{fig:device_transfer} illustrates that with increasing input signal size, the memory transfer can become a bottleneck. This still holds even if pinned or page-locked memory is used \cite{steinbach_gtc2015}.
+
+\begin{figure}[!tbp]
+  \centering
+  \def\svgwidth{0.95\columnwidth}
+  \input{figures/results_figure5_legend.pdf_tex}
+  
+  \def\svgwidth{0.5\columnwidth}
+  \subfloat[3D transforms]{\input{figures/results_figure5a.pdf_tex}\label{fig:f5a}}
+  
+  \hfill
+
+  \def\svgwidth{0.5\columnwidth}
+  \subfloat[1D transforms]{\input{figures/results_figure5b.pdf_tex}\label{fig:f5b}}
+  \caption{Time for computing power-of-2 single-precision real-to-complex forward transforms using the 3D API \cref{fig:f5a} and the 1D API clfft \cref{fig:f5b}. Both figures use a log10-versus-log2 scale.}
+  \label{fig:r2c_fwd}
+\end{figure}
+
+\cref{fig:r2c_fwd} shows the runtime spent for computing only the forward FFT for real single precision input data. This illustration is a direct measure for the quality of the implmentation and the hardware underneath. For the 3D case in \cref{fig:f5a}, we see that at the time of writing, fftw on a double socket Haswell Intel Xeon E5 CPU provides very compelling performance if the input data is not larger than \SI{1}{\mebi\byte}. Above this limit, the GPU implementations offer a clear advantage by up to one order of magnitude. The current Pascal generation GPUs used with cufft provide the best performance, which does not come by surprise as both cards are equipped with GDDR5X or HBM2 memory which are clearly beneficial for an operation that yields low computational complexity such as the FFT. In the 1D case of \cref{fig:f5b}, the same observations must be made with even more certainty. The cross-over of fftw and the GPU libraries occurs at an earlier point of \SI{64}{\kibi\byte}.  
+
+\subsection{Non-power-of-2 transforms}
+\label{ssec:nonpowerof2}
+
+\subsection{Memory Modes}
+\label{ssec:mem_mode}
+
+\subsection{Data Types}
+\label{ssec:data_types}
+
