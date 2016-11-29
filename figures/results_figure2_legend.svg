@@ -12,16 +12,16 @@
   ]]></style>
 </defs>
 <rect width='100%' height='100%' style='stroke: none; fill: #FFFFFF;'/>
-<rect x='290.59' y='22.05' width='282.82' height='45.90' style='stroke-width: 0.00; stroke: #FFFFFF; stroke-dasharray: 0,0; fill: #FFFFFF;' />
-<text x='296.26' y='54.54' style='font-size: 20.00pt; font-weight: bold; font-family: Arial;'>plan_flags</text>
-<rect x='399.30' y='27.72' width='17.28' height='17.28' style='stroke-width: 0.00; stroke: #FFFFFF; stroke-dasharray: 0,0; fill: #FFFFFF;' />
-<line x1='401.03' y1='36.36' x2='414.85' y2='36.36' style='stroke-width: 2.13; stroke: #F8766D; stroke-linecap: butt;' />
-<circle cx='407.94' cy='36.36' r='2.49pt' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
-<line x1='401.03' y1='36.36' x2='414.85' y2='36.36' style='stroke-width: 1.07; stroke: #F8766D; stroke-linecap: butt;' />
-<rect x='399.30' y='45.00' width='17.28' height='17.28' style='stroke-width: 0.00; stroke: #FFFFFF; stroke-dasharray: 0,0; fill: #FFFFFF;' />
-<line x1='401.03' y1='53.64' x2='414.85' y2='53.64' style='stroke-width: 2.13; stroke: #00BFC4; stroke-linecap: butt;' />
-<circle cx='407.94' cy='53.64' r='2.49pt' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
-<line x1='401.03' y1='53.64' x2='414.85' y2='53.64' style='stroke-width: 1.07; stroke: #00BFC4; stroke-linecap: butt;' />
-<text x='418.74' y='44.95' style='font-size: 18.00pt; font-family: Arial;'>FFTW_ESTIMATE</text>
-<text x='418.74' y='62.23' style='font-size: 18.00pt; font-family: Arial;'>FFTW_MEASURE</text>
+<rect x='342.11' y='12.71' width='179.78' height='64.58' style='stroke-width: 0.00; stroke: #FFFFFF; stroke-dasharray: 0,0; fill: #FFFFFF;' />
+<text x='347.78' y='35.10' style='font-size: 20.00pt; font-weight: bold; font-family: Arial;'>plan_flags</text>
+<rect x='347.78' y='37.06' width='17.28' height='17.28' style='stroke-width: 0.00; stroke: #FFFFFF; stroke-dasharray: 0,0; fill: #FFFFFF;' />
+<line x1='349.51' y1='45.70' x2='363.33' y2='45.70' style='stroke-width: 2.13; stroke: #F8766D; stroke-linecap: butt;' />
+<circle cx='356.42' cy='45.70' r='2.49pt' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<line x1='349.51' y1='45.70' x2='363.33' y2='45.70' style='stroke-width: 1.07; stroke: #F8766D; stroke-linecap: butt;' />
+<rect x='347.78' y='54.34' width='17.28' height='17.28' style='stroke-width: 0.00; stroke: #FFFFFF; stroke-dasharray: 0,0; fill: #FFFFFF;' />
+<line x1='349.51' y1='62.98' x2='363.33' y2='62.98' style='stroke-width: 2.13; stroke: #00BFC4; stroke-linecap: butt;' />
+<circle cx='356.42' cy='62.98' r='2.49pt' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
+<line x1='349.51' y1='62.98' x2='363.33' y2='62.98' style='stroke-width: 1.07; stroke: #00BFC4; stroke-linecap: butt;' />
+<text x='367.22' y='54.29' style='font-size: 18.00pt; font-family: Arial;'>FFTW_ESTIMATE</text>
+<text x='367.22' y='71.57' style='font-size: 18.00pt; font-family: Arial;'>FFTW_MEASURE</text>
 </svg>
