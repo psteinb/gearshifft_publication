@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' viewBox='0 0 864.00 90.00'>
+<defs>
+  <style type='text/css'><![CDATA[
+    line, polyline, path, rect, circle {
+      fill: none;
+      stroke: #000000;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-miterlimit: 10.00;
+    }
+  ]]></style>
+</defs>
+<rect width='100%' height='100%' style='stroke: none; fill: #FFFFFF;'/>
+<rect x='171.50' y='12.71' width='102.81' height='64.58' style='stroke-width: 0.00; stroke: #FFFFFF; stroke-dasharray: 0,0; fill: #FFFFFF;' />
+<text x='177.17' y='35.10' style='font-size: 20.00pt; font-weight: bold; font-family: Arial;'>inplace</text>
+<rect x='177.17' y='37.06' width='17.28' height='17.28' style='stroke-width: 0.00; stroke: #FFFFFF; stroke-dasharray: 0,0; fill: #FFFFFF;' />
+<line x1='178.89' y1='45.70' x2='192.72' y2='45.70' style='stroke-width: 2.13; stroke-linecap: butt;' />
+<line x1='178.89' y1='45.70' x2='192.72' y2='45.70' style='stroke-width: 1.07; stroke-linecap: butt;' />
+<rect x='177.17' y='54.34' width='17.28' height='17.28' style='stroke-width: 0.00; stroke: #FFFFFF; stroke-dasharray: 0,0; fill: #FFFFFF;' />
+<line x1='178.89' y1='62.98' x2='192.72' y2='62.98' style='stroke-width: 2.13; stroke-dasharray: 4,4; stroke-linecap: butt;' />
+<line x1='178.89' y1='62.98' x2='192.72' y2='62.98' style='stroke-width: 1.07; stroke-dasharray: 2,2; stroke-linecap: butt;' />
+<text x='196.61' y='54.29' style='font-size: 18.00pt; font-family: Arial;'>Inplace</text>
+<text x='196.61' y='71.57' style='font-size: 18.00pt; font-family: Arial;'>Outplace</text>
+<rect x='285.65' y='12.71' width='406.85' height='64.58' style='stroke-width: 0.00; stroke: #FFFFFF; stroke-dasharray: 0,0; fill: #FFFFFF;' />
+<text x='291.32' y='35.10' style='font-size: 20.00pt; font-weight: bold; font-family: Arial;'>hardware</text>
+<rect x='291.32' y='37.06' width='17.28' height='17.28' style='stroke-width: 0.00; stroke: #FFFFFF; stroke-dasharray: 0,0; fill: #FFFFFF;' />
+<line x1='293.05' y1='45.70' x2='306.87' y2='45.70' style='stroke-width: 2.13; stroke: #F8766D; stroke-linecap: butt;' />
+<circle cx='299.96' cy='45.70' r='2.49pt' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<line x1='293.05' y1='45.70' x2='306.87' y2='45.70' style='stroke-width: 1.07; stroke: #F8766D; stroke-linecap: butt;' />
+<rect x='291.32' y='54.34' width='17.28' height='17.28' style='stroke-width: 0.00; stroke: #FFFFFF; stroke-dasharray: 0,0; fill: #FFFFFF;' />
+<line x1='293.05' y1='62.98' x2='306.87' y2='62.98' style='stroke-width: 2.13; stroke: #7CAE00; stroke-linecap: butt;' />
+<circle cx='299.96' cy='62.98' r='2.49pt' style='stroke-width: 0.71; stroke: #7CAE00; fill: #7CAE00;' />
+<line x1='293.05' y1='62.98' x2='306.87' y2='62.98' style='stroke-width: 1.07; stroke: #7CAE00; stroke-linecap: butt;' />
+<rect x='469.45' y='37.06' width='17.28' height='17.28' style='stroke-width: 0.00; stroke: #FFFFFF; stroke-dasharray: 0,0; fill: #FFFFFF;' />
+<line x1='471.18' y1='45.70' x2='485.00' y2='45.70' style='stroke-width: 2.13; stroke: #00BFC4; stroke-linecap: butt;' />
+<circle cx='478.09' cy='45.70' r='2.49pt' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
+<line x1='471.18' y1='45.70' x2='485.00' y2='45.70' style='stroke-width: 1.07; stroke: #00BFC4; stroke-linecap: butt;' />
+<rect x='469.45' y='54.34' width='17.28' height='17.28' style='stroke-width: 0.00; stroke: #FFFFFF; stroke-dasharray: 0,0; fill: #FFFFFF;' />
+<line x1='471.18' y1='62.98' x2='485.00' y2='62.98' style='stroke-width: 2.13; stroke: #C77CFF; stroke-linecap: butt;' />
+<circle cx='478.09' cy='62.98' r='2.49pt' style='stroke-width: 0.71; stroke: #C77CFF; fill: #C77CFF;' />
+<line x1='471.18' y1='62.98' x2='485.00' y2='62.98' style='stroke-width: 1.07; stroke: #C77CFF; stroke-linecap: butt;' />
+<text x='310.76' y='54.29' style='font-size: 18.00pt; font-family: Arial;'>GeForce GTX 1080</text>
+<text x='310.76' y='71.57' style='font-size: 18.00pt; font-family: Arial;'>Tesla K20Xm</text>
+<text x='488.89' y='54.29' style='font-size: 18.00pt; font-family: Arial;'>Tesla K80</text>
+<text x='488.89' y='71.57' style='font-size: 18.00pt; font-family: Arial;'>Tesla P100-PCIE-16GB</text>
+</svg>
