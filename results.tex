@@ -125,13 +125,10 @@ The last section finished by discussing a design artifact, that the fftw authors
 
 \begin{figure}[!tbp]
   \centering
-  \def\svgwidth{0.95\columnwidth}
-  \input{figures/results_figure4_legend.pdf_tex}
-  \def\svgwidth{0.45\columnwidth}
-  \subfloat[cufft 8.0.44]{\input{figures/results_figure4a.pdf_tex}\label{fig:f4a}}
+  \includegraphics[width=\textwidth]{figures/results_figure4_legend.pdf}
+  \subfloat[cufft 8.0.44]{\includegraphics[width=0.45\textwidth]{figures/results_figure4a.pdf}\label{fig:f4a}}
   \hfill
-  \def\svgwidth{0.45\columnwidth}
-  \subfloat[clfft 2.12.2]{\input{figures/results_figure4b.pdf_tex}\label{fig:f4b}}
+  \subfloat[clfft 2.12.2]{\includegraphics[width=0.45\textwidth]{figures/results_figure4b.pdf}\label{fig:f4b}}
   \caption{Time for upload plus time for download divided by the total time needed measured for power-of-2 single-precision real-to-complex forward transforms using cufft \cref{fig:f4a} and clfft \cref{fig:f4b}. Both figures use a linear-versus-log2 scale.}
   \label{fig:device_transfer}
 \end{figure}
@@ -142,13 +139,10 @@ Besides the use of paged memory in \gearshifft{} which is not optimal in terms o
 
 \begin{figure}[!tbp]
   \centering
-  \def\svgwidth{0.95\columnwidth}
-  \input{figures/results_figure5_legend.pdf_tex}
-  \def\svgwidth{0.5\columnwidth}
-  \subfloat[3D transforms]{\input{figures/results_figure5a.pdf_tex}\label{fig:f5a}}
+  \includegraphics[width=\textwidth]{figures/results_figure5_legend.pdf}
+  \subfloat[3D transforms]{\includegraphics[width=0.45\textwidth]{figures/results_figure5a.pdf}\label{fig:f5a}}
   \hfill
-  \def\svgwidth{0.5\columnwidth}
-  \subfloat[1D transforms]{\input{figures/results_figure5b.pdf_tex}\label{fig:f5b}}
+  \subfloat[1D transforms]{\includegraphics[width=0.45\textwidth]{figures/results_figure5b.pdf}\label{fig:f5b}}
   \caption{Time for computing power-of-2 single-precision real-to-complex forward transforms using the 3D API \cref{fig:f5a} and the 1D API clfft \cref{fig:f5b}. Both figures use a log10-versus-log2 scale.}
   \label{fig:r2c_fwd}
 \end{figure}
