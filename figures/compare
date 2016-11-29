@@ -3,8 +3,9 @@
 library(docopt)
 library(ggplot2)
 library(readr)
-library(dplyr, warn.conflicts=F)
+library(dplyr, warn.conflicts=FALSE)
 library(gridExtra)
+library(scales)
 
 'Usage:
    compare [options] <csv-files>...
@@ -338,42 +339,20 @@ ymax <- max(data_for_plotting$moi_mean)
 
 if(logy_value > 1) {
 
-    
-    new_trans <- paste("log",logy_value,sep="")
-    min_logy <- eval(parse(text=paste("log",logy_value,"(",ymin,")" ,sep="")))
-    max_logy <- eval(parse(text=paste("log",logy_value,"(",ymax,")" ,sep="")))
-    new_breaks <- logy_value^(as.integer(min_logy):as.integer(max_logy))
-    cat("new y breaks: ", paste(new_breaks),"\n")
-    cat("applying ",new_trans,"scale on y\n")
-    
-    moi_plot <- moi_plot + scale_y_continuous(breaks = new_breaks,
-                                              trans=new_trans)
+    breaks_y = function(x) logy_value^x
+    format_expr_y = eval(parse(text=paste("math_format(",logy_value,"^.x)",sep="")))
+    moi_plot <- moi_plot + scale_y_continuous(trans = log_trans(base=logy_value),
+                                              breaks = trans_breaks(paste("log",logy_value,sep=""), breaks_y),
+                                              labels = trans_format(paste("log",logy_value,sep=""), format_expr_y))
 }
 
 if(logx_value > 1) {
 
-    cat("applying log",logx_value,"scale on x\n")
-    new_trans <- paste("log",logx_value,sep="")
-    min_logx <- eval(parse(text=paste("log",logx_value,"(",xmin,")" ,sep="")))
-    max_logx <- eval(parse(text=paste("log",logx_value,"(",xmax,")" ,sep="")))
-    new_breaks <- logx_value^(as.integer(min_logx):as.integer(max_logx))
-    if(length(new_breaks)>8){
-        new_breaks <- new_breaks[seq(1,length(new_breaks),4)]
-    }
-    if(length(new_breaks)>8){
-        new_breaks <- new_breaks[seq(1,length(new_breaks),4)]
-    }
-
-    print_log <- function(x){ return(paste(logx_value,"^",eval(parse(text=paste("log",logx_value,"(",x,")",sep=""))),sep=""));}
-    new_labels <- sapply(new_breaks,print_log)
-    
-    cat("new x breaks: ", paste(new_breaks),"\nnew x labels: ",new_labels,"\n")
-    cat("applying ",new_trans,"scale on x\n")
-
-    moi_plot <- moi_plot + scale_x_continuous(breaks=new_breaks,
-                                              labels=new_labels,
-                                              trans=new_trans)
-
+    breaks_x = function(x) logx_value^x
+    format_expr_x = eval(parse(text=paste("math_format(",logx_value,"^.x)",sep="")))
+    moi_plot <- moi_plot + scale_x_continuous(trans = log_trans(base=logx_value),
+                                              breaks = trans_breaks(paste("log",logx_value,sep=""), breaks_x),
+                                              labels = trans_format(paste("log",logx_value,sep=""), format_expr_x))
 }
 
 cat(opts[["aspect"]],"\n")
