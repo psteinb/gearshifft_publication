@@ -12,9 +12,7 @@ estimate_fftw_files = $(wildcard ../results/haswell/fftw-3.3.5/fftw_estimate*csv
 measure_fftw_files = $(wildcard ../results/haswell/fftw-3.3.5/fftw_gcc*csv)
 wisdom_fftw_files = $(wildcard ../results/haswell/fftw-3.3.5/fftw_wisdom*csv)
 
-svg_files = $(wildcard *.svg)
-
-TARGETS = results_figure1 results_figure2 results_figure3 results_figure4
+TARGETS = results_figure1 results_figure2 results_figure3 results_figure4 results_figure5
 
 all : $(TARGETS)
 
@@ -50,9 +48,6 @@ results_figure5 : $(cufft8_files) $(clfft_gpu_files) $(measure_fftw_files)
 	./compare -r -o -s -k "powerof2" -n 3 -a "hardware,library" --xlabel="Signal_Size_[bytes]" --ymetric="Time_FFT" --nolegend --notitle --logy=10 --logx=2 -f $(@)a $? > $(@)a.log 2>&1
 	./compare -r -o -s -k "powerof2" -n 1 -a "hardware,library" --xlabel="Signal_Size_[bytes]" --ymetric="Time_FFT" --nolegend --notitle --logy=10 --logx=2 -f $(@)b $? > $(@)b.log 2>&1
 	./compare -r -o -s -k "powerof2" -n 1 -a "hardware,library" --xlabel="Signal_Size_[bytes]" --ymetric="Time_FFT" --legend-only --notitle --logy=10 --logx=2 -f $(@)_legend $? > $(@)_legend.log 2>&1
-
-svg2pdf : $(svg_files)
-	$(foreach f,$^,inkscape -z -D --file=$(f) --export-pdf=$(basename $(f)).pdf --export-latex;)
 
 K80 : k80_cuda8_3d 	k80_cuda8_2d 	k80_cuda8_1d k80_cuda8
 

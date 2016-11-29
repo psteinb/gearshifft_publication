@@ -265,11 +265,16 @@ data_for_plotting <- succeeded_reduced %>%
 
 glimpse(data_for_plotting)
 
+
+##### plotting part
+
+
 my_theme <-  theme_bw() + theme(axis.title.x = element_text(size=20),
                                 axis.title.y = element_text(size=20),
                                 axis.text.x = element_text(size=14),
                                 axis.text.y = element_text(size=14)#,
-                                #axis.text.x  = element_text()
+                                        #axis.text.x  = element_text()
+                                ,plot.margin = unit(c(8,10,1,1), "pt") # required otherwise labels are clipped in pdf output
                                 ) 
 my_theme <- my_theme + theme(legend.title = element_text(size=18, face="bold"),
                              legend.text = element_text( size = 18),
@@ -406,9 +411,11 @@ if(opts[["legend-only"]]){
     moi_plot = moi_plot + my_theme + guides(col = guide_legend(nrow = 2))
     legend <- g_legend(moi_plot)
     ## grid.draw(legend)
-    ggsave(paste(opts[["filename"]],".svg",sep=""),legend,width=12,height=1.25)
     ggsave(paste(opts[["filename"]],".png",sep=""),legend,width=12,height=1.25)
-
+    ggsave(paste(opts[["filename"]],".svg",sep=""),legend,width=12,height=1.25)
+    cairo_pdf(paste(opts[["filename"]],".pdf",sep=""),width=12,height=1.15)
+    grid.arrange(legend,ncol=1)
+    dev.off()
 } else {
 
     if ( length(aesthetics_from_cli[[1]]) > 2 ) {
@@ -416,7 +423,10 @@ if(opts[["legend-only"]]){
     }
     ggsave(paste(opts[["filename"]],".png",sep=""),moi_plot)
     ggsave(paste(opts[["filename"]],".svg",sep=""),moi_plot)
-    
+    cairo_pdf(paste(opts[["filename"]],".pdf",sep=""),width=5,height=4)
+    print(moi_plot)
+    dev.off()
 }
+
 ## succeeded_by_ID <- succeeded %>% group_by(id)
 ## head(succeeded_by_ID)
