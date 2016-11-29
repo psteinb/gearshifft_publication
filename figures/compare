@@ -22,6 +22,7 @@ library(scales)
  --legend-only           Only save the legend to file [default: FALSE]
  -y --ymetric=YMETRIC 	Use metric YMETRIC for plotting along y, this can now be a valid R expression that computes a derived value [default: Time_Total]
  --ylabel=YLABEL 	Use YLABEL for labelling the ymetric, note that underscores will be replaced by white spaces as white spaces are not correctly handled through the CLI [default: ]
+ --ylimit=YLIMIT 	Use YLIMIT for marking the lowest and highest value shown on the y axis [default: 0,0]
  --xlabel=XLABEL 	Use XLABEL for labelling the ymetric, note that underscores will be replaced by white spaces as white spaces are not correctly handled through the CLI [default: ]
  --logy=LOGYVALUE       Use log scale on y-axis [default: 1]
  -x --xmetric=XMETRIC 	Use metric XMETRIC for plotting along y [default: Size_DeviceBuffer]
@@ -323,8 +324,20 @@ if( opts[["notitle"]] == F ) {
     moi_plot <- moi_plot + ggtitle(paste(filtered_by,collapse=" "))
 }
 
+
 moi_plot <- moi_plot + ylab(gsub("_"," ",name_of_ymetric)) + xlab(gsub("_"," ",name_of_xmetric))
 moi_plot <- moi_plot + my_theme 
+
+ylimit_splitted = unlist(strsplit(opts[["ylimit"]],","))
+ylimit_pair = sapply(ylimit_splitted, function(x) as.numeric(x))
+
+if( length(ylimit_pair) == 2 ) {
+
+    if(ylimit_pair[1] != 0 || ylimit_pair[2]!=0){
+        cat("[ylimit] setting to ",paste(ylimit_splitted))
+        moi_plot <- moi_plot + ylim(ylimit_pair[1],ylimit_pair[2])
+    }
+}
 
 
 if(opts[["nolegend"]]){
@@ -405,7 +418,7 @@ if(opts[["legend-only"]]){
     dev.off()
 } else {
 
-    if ( length(aesthetics_from_cli[[1]]) > 1 ) {
+    if ( length(aesthetics_from_cli[[1]]) > 2 ) {
         moi_plot = moi_plot + guides(col = guide_legend(ncol= length(aesthetics_from_cli[[1]]), nrow = 2))
     }
     ggsave(paste(opts[["filename"]],".png",sep=""),moi_plot)
