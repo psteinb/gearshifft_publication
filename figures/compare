@@ -419,7 +419,9 @@ if(opts[["legend-only"]]){
 
 } else {
 
-    moi_plot = moi_plot + guides(col = guide_legend(ncol= length(aesthetics_from_cli[[1]]), nrow = 2))
+    if ( length(aesthetics_from_cli[[1]]) > 1 ) {
+        moi_plot = moi_plot + guides(col = guide_legend(ncol= length(aesthetics_from_cli[[1]]), nrow = 2))
+    }
     ggsave(paste(opts[["filename"]],".png",sep=""),moi_plot)
     ggsave(paste(opts[["filename"]],".svg",sep=""),moi_plot)
     
