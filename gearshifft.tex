@@ -15,12 +15,14 @@
 \usetikzlibrary{matrix}
 %% \usetikzlibrary{shapes}
 %% \usetikzlibrary{decorations.pathreplacing}
-%% \usetikzlibrary{positioning}
+\usetikzlibrary{trees}
+\usetikzlibrary{positioning}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \usepackage{listings}
+\lstset{numberbychapter=false}
 \usepackage{textcomp}
 % preserve ttdefault
 \edef\oldtt{\ttdefault}
@@ -58,6 +60,7 @@
 
 \newcommand{\todo}[1]{\textcolor{red}{(TODO #1)}}
 \newcommand{\gearshifft}{\texttt{gearshifft}}
+\newcommand{\mc}[1]{\lstinline!#1!}
 
 \newcommand{\Title}{gearshifft -- The FFT Benchmark Suite for Heterogeneous Platforms}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -172,6 +175,8 @@ sorting=nyt
 \section{Summary}
 \label{sec:summary}
 \input{summary}
+
+\paragraph{Acknowledgements.} This work was funded by Nvidia through the GPU Center of Excellence (GCOE) at the Center for Information Services and High Performance Computing (ZIH), TU Dresden, where the K20Xm and K80 GPU cluster Taurus was used.
 
 \printbibliography
 
