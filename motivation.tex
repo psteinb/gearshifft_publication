@@ -12,8 +12,9 @@ with $k$ being an integer index within $0 \le k < n$. This operation was found t
   X[k_1 + k_2n_1] = \sum_{j_2=0}^{n_2-1} \left( \left( \sum_{j_1=0}^{n_1-1} x[j_1n_2 + j_2] e^{\frac{-2\pi\sqrt{-1}j_1k_1}{n_1}} \right) e^{\frac{-2\pi\sqrt{-1}j_2k_1}{n}} \right) e^{\frac{-2\pi\sqrt{-1}j_2k_2}{n_2}}
 \end{equation}
 
-Equation \cref{eq:cooley-turkey} describes a decomposition that can be performed recursively. Here, $n_1$ would be denoted as \emph{radix} which refers to $n_1$ transforms of size $n_2$. These smaller transforms are combined by a \emph{butterfly} graph with $n_2$ DFTs of size $n_1$ on the outputs of the corresponding sub-transforms.
-For $n$ being a power of two, that radix-2 DFT is rather simple and implemented by the Cooley-Tukey algorithm \cite{cooley1965algorithm}.
+\cref{eq:cooley-turkey} describes a decomposition that can be performed recursively \cite{FFTW05}. Here, $n_1$ would be denoted as \emph{radix} which refers to $n_1$ transforms of size $n_2$. These smaller transforms are combined by a \emph{butterfly} graph with $n_2$ DFTs of size $n_1$ on the outputs of the corresponding sub-transforms.
+A radix-2 DFT ($n$ being a power of two) can be implemented with the Cooley-Tukey algorithm \cite{cooley1965algorithm}.
+To avoid incoherent memory access, Stockham's formulations of the FFT can be applied \cite{FFTW05}.
 Arbitrary and mixed radices are more complicated and can be tackled with the prime-factorization or Chirp Z-transform implemented by the Bluestein's algorithm \cite{bluestein}.
 Due to these differences, we classify the FFT extent shapes into \emph{powerof2} (radix-2), \emph{radix357} (mixed-radix of primes 3, 5 and 7) and into \emph{oddshape} (arbitrary radices excluding the previous cases).
 This mathematical discussion has essential consequences for the design and implementation of libraries that perform FFTs in various hardware environments, which shall become evident later.

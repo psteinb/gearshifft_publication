@@ -9,18 +9,19 @@
 \subsection{Using a Modern FFT Library}
 
 \gearshifft{} is developed as an open-source framework using C++14 standard and Boost Unit Test Framework (UTF) for managing the tree of all the different benchmark cases.
-Before discussing the design of \gearshifft{} in detail, it is instructive to provide a brief introduction to state of the FFT libraries that will be subject to the study in \cref{sec:results},
+Before discussing the design of \gearshifft{} in detail, it is instructive to provide a brief introduction to state of the FFT libraries that will be subject to the study in \cref{sec:results}.
 
 \label{ssec:modern_ffts}
-The design of many FFT libraries is based on the architecture and API of FFTW $3.0$. Beyond memory management to allocate and fill the input signals and prepare the output signal arrays if needed, there are two interactions that any client to FFTW has to perform in order to execute an FFT on the aforementioned input signal. First a plan data structure has to be created and filled using a planner. For this, the FFT problem is defined in terms of rank (1D, 2D or 3D), shape of the input signal, type of the input signal (single or double precision of real or complex inputs), type of the transformation (real-to-complex, complex-to-complex, real-to-real) and memory mode of the transformation (inplace versus out-of-place). The FFT problem description is then used as input parameters to the planner. The planner is a piece of code inside FFTW that henceforth tries to find the best suited radix factorization based on the shape of the input signal. It then performs several FFTs on the input data to sample the runtime of different FFT implementations available inside FFTW. The sample of runtimes is then used to find the optimal implementation of the FFT. After the plan has been created, it is used to execute the FFT itself.
+The design of many FFT libraries is based on the architecture and API of FFTW $3.0$. There are typical interactions that any client to FFTW has to perform in order to execute an FFT on signal data. First a plan data structure has to be created and filled using a planner. For this, the FFT problem is defined in terms of rank (1D, 2D or 3D), shape of the input signal, type of the input signal (single or double precision of real or complex inputs), type of the transformation (real-to-complex, complex-to-complex, real-to-real) and memory mode of the transformation (inplace versus out-of-place). The FFT problem description is then used as input parameters to the planner. The planner is a piece of code inside FFTW that henceforth tries to find the best suited radix factorization based on the shape of the input signal. It then performs several FFTs on the input data to sample the runtime of different FFT implementations available inside FFTW. The sample of runtimes is then used to find the optimal implementation of the FFT. After the plan has been created, it is used to execute the FFT itself.
+Depending on the number of plan executions one should spend certain amount of time in the planning phase in order to minimize planning  and execution times altogether.
 \begin{lstlisting}[caption={Minimal usage example of the FFTW single precision real-to-complex planner API. Memory management is omitted.},label={lst:fftw_example}]
 int shape[] = {32,32,32};
 fftw_plan r2c_plan = fftw_plan_dft_r2c(
-  3, //rank, here 3D
-  shape, //shape of the input
-  (float *) input_buffer, //input data array
+  3,                       //rank, here 3D
+  shape,                   //shape of the input
+  (float *) input_buffer,  //input data array
   (fftwf_complex *) output,//output data array
-  FFTW_ESTIMATE //planner flag
+  FFTW_ESTIMATE            //plan-rigor flag
 );
 fftwf_execute(r2c_plan);
 \end{lstlisting}
@@ -30,10 +31,9 @@ fftwf_execute(r2c_plan);
 ``\texttt{FFTW\_ESTIMATE} specifies that, instead of actual measurements of different algorithms, a simple heuristic is used to pick a (probably sub-optimal) plan quickly. With this flag, the input/output arrays are not overwritten during planning.''
 \end{quote}
 %
-Fftw offers five levels for this planning flag in total. As covering all of them in this study is impractical, we selected two more: \texttt{FFTW\_MEASURE} and \texttt{FFTW\_WISDOM\_ONLY}. The FFTW manual describes them as:
-%
+Fftw offers five levels for this planning flag in total. As covering all of them in this study is impractical, we selected two more:
 \begin{quote}
-``\texttt{FFTW\_MEASURE} tells FFTW to find an optimized plan by actually computing several FFTs and measuring their execution time. Depending on your machine, this can take some time (often a few seconds). FFTW\_MEASURE is the default planning option.\newline
+``\texttt{FFTW\_MEASURE} tells FFTW to find an optimized plan by actually computing several FFTs and measuring their execution time. Depending on your machine, this can take some time (often a few seconds).\newline
 \texttt{FFTW\_WISDOM\_ONLY} is a special planning mode in which the plan is only created if wisdom is available for the given problem, and otherwise a NULL plan is returned.''
 \end{quote}
 %
@@ -46,7 +46,7 @@ cufftPlan3d(&plan, N, N, N, CUFFT_R2C);
 cufftExecC2C(plan, input_buffer, output, CUFFT_FORWARD);
 \end{lstlisting}
 %
-As discussed above, the studied GPU based FFT implementations follow this design structure without the planning flags however. This becomes evident in \cref{lst:cufft_example}.
+As discussed above, the studied GPU based FFT implementations follow this design structure without the plan-rigor flags however. This becomes evident in \cref{lst:cufft_example}.
 
 \subsection{The Architecture of \gearshifft{}}
 \label{ssec:gearshifft_arch}
