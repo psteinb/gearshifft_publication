@@ -23,9 +23,9 @@ library(scales)
  -y --ymetric=YMETRIC 	Use metric YMETRIC for plotting along y, this can now be a valid R expression that computes a derived value [default: Time_Total]
  --ylabel=YLABEL 	Use YLABEL for labelling the ymetric, note that underscores will be replaced by white spaces as white spaces are not correctly handled through the CLI [default: ]
  --ylimit=YLIMIT 	Use YLIMIT for marking the lowest and highest value shown on the y axis [default: 0,0]
- --xlabel=XLABEL 	Use XLABEL for labelling the ymetric, note that underscores will be replaced by white spaces as white spaces are not correctly handled through the CLI [default: ]
+ --xlabel=XLABEL 	Use XLABEL for labelling the ymetric, note that underscores will be replaced by white spaces as white spaces are not correctly handled through the CLI [default: Signal_Size_[bytes] ]
  --logy=LOGYVALUE       Use log scale on y-axis [default: 1]
- -x --xmetric=XMETRIC 	Use metric XMETRIC for plotting along y [default: Size_DeviceBuffer]
+ -x --xmetric=XMETRIC 	Use metric XMETRIC for plotting along y [default: nbytes]
  --logx=LOGXVALUE       Use log scale on x-axis [default: 1]
  --aspect=ASPECTRATIO   Use ASPECTRATIO as value for plot boundaries [default: ]
  -a --aesthetics=AES    plot these aesthetics, comma separated list with up to 3 elements [default: library,hardware]
@@ -76,7 +76,12 @@ open_gearshifft_csv <- function (fname){
         }
 
     }
-    
+
+    local_frame = local_frame %>%
+        mutate(nx = ifelse(nx==0,1,nx) ) %>%
+            mutate(ny = ifelse(ny==0,1,ny) ) %>%
+                mutate(nz = ifelse(nz==0,1,nz) )
+    local_frame = local_frame %>% mutate( nbytes = ifelse("float" %in% precision,4,8)*nx*ny*nz )
     local_frame$hardware <- gpu_model
     local_frame$flags <- flags
     
@@ -269,8 +274,8 @@ glimpse(data_for_plotting)
 ##### plotting part
 
 
-my_theme <-  theme_bw() + theme(axis.title.x = element_text(size=20),
-                                axis.title.y = element_text(size=20),
+my_theme <-  theme_bw() + theme(axis.title.x = element_text(size=18),
+                                axis.title.y = element_text(size=18),
                                 axis.text.x = element_text(size=14),
                                 axis.text.y = element_text(size=14)#,
                                         #axis.text.x  = element_text()

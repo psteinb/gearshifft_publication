@@ -9,65 +9,53 @@ For this study, we will concentrate on three modern and current FFT implementati
 
 The results presented in the following sections were collected on three systems:
 
-\begin{itemize}
-\item \emph{Taurus HPC cluster}\cite{taurus} running RHEL 7.2
-  \begin{itemize}
-  \item \emph{K80 node}: 2x Intel(R) Xeon(R) CPU E5-2680 v3 (12 cores) @ 2.50GHz, 64 GB RAM, 4x NVIDIA Tesla K80 (12 GB GDDR5 RAM) GPUs 
-  \item \emph{K20X node}: 2x Intel(R) Xeon(R) CPU E5-2450 (8 cores) @ 2.10GHz, 48 GB RAM, 2x NVIDIA Tesla K20x (6 GB GDDR RAM) GPUs 
-  \end{itemize}
-\item \emph{Hypnos HPC cluster}\cite{hypnos} running Ubuntu 14.04.3:\newline
-  2x Intel(R) Xeon(R) CPU E5-2603 v3 @ 1.60GHz, 64 GB RAM (2.67 GB per core), 1x NVIDIA Tesla P100 (16 GB HBM2 RAM) GPUs via PCIe 
-\item  \emph{Dell workstation} running CentOS 7.2:\newline 
-  2x Intel(R) Xeon(R) CPU E5-2640 v3 @ 2.60GHz, 64 GB RAM, 1x NVIDIA GeForce GTX 1080 (8 GB GDDR5X RAM)
-\end{itemize}
+\begin{table}[htp]
+  \centering
+  \caption{Benchmark Hardware}
+  \label{tab:hardware}
+  \begin{tabular}{l|llll}
+    \toprule
+               & \multicolumn{2}{c}{\textbf{Taurus}}           & \textbf{Hypnos}           & \textbf{Islay}                            \\
+               & \multicolumn{2}{c}{HPC Cluster \cite{taurus}} & HPC Cluster \cite{hypnos} & Workstation                               \\
+               & K80 node                                      & K20Xm node                &                     &                     \\
+    \midrule
+    CPU vendor & Intel                                         & Intel                     & Intel               & Intel               \\
+    CPU family & Haswell Xeon                                  & Sandybridge Xeon          & Haswell Xeon        & Haswell Xeon        \\
+    CPU model  & E5-2680 v3                                    & E5-2450                   & E5-2603 v3          & E5-2640 v3          \\
+    sockets    & $2$                                           & $2$                       & $2$                 & $2$                 \\
+    RAM        & \SI{64}{\gibi\byte}                           & \SI{48}{\gibi\byte}       & \SI{64}{\gibi\byte} & \SI{64}{\gibi\byte} \\
+    \midrule
+    GPU vendor & NVIDIA                                        & NVIDIA                    & NVIDIA              & NVIDIA              \\
+    GPU family & Tesla                                         & Tesla                     & Tesla               & GeForce             \\
+    GPU        & 4x K80                                        & 2x K20x                   & 1x P100             & 1x GTX 1080         \\
+    GPU memory & 8x \SI{12}{\gibi\byte}                        & \SI{6}{\gibi\byte}        & \SI{16}{\gibi\byte} & \SI{8}{\gibi\byte}  \\
+    GPU driver & $367.48$                                      & $367.48$                  & $367.48$            & $367.57$            \\
+    \midrule
+    OS         & RHEL $7.2$                                    & RHEL $7.2$                & Ubuntu $14.04.3$    & CentOS $7.2$        \\
+               & 64-bit                                        & 64-bit                    & 64-bit              & 64-bit              \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
-As presented above, all used systems operated on a variant of 64-bit Linux and were accessed via an ssh session without running a graphical user interface of any kind. All measurements used the GNU compiler collection (GCC, \cite{stallman2001using}) version 5.3.0 as the underlying compiler if not stated otherwise. All used GPU implementations on nVidia hardware interfaced with the proprietary driver provided by the vendor $367.48$ (K20Xm, K80, P100) and $367.57$ (GTX1080). 
+% \begin{itemize}
+% \item \emph{Taurus HPC cluster}\cite{taurus} running RHEL 7.2
+%   \begin{itemize}
+%   \item \emph{K80 node}: 2x Intel(R) Xeon(R) CPU E5-2680 v3 (12 cores) @ 2.50GHz, 64 GB RAM, 4x NVIDIA Tesla K80 (12 GB GDDR5 RAM) GPUs 
+%   \item \emph{K20X node}: 2x Intel(R) Xeon(R) CPU E5-2450 (8 cores) @ 2.10GHz, 48 GB RAM, 2x NVIDIA Tesla K20x (6 GB GDDR RAM) GPUs 
+%   \end{itemize}
+% \item \emph{Hypnos HPC cluster}\cite{hypnos} running Ubuntu 14.04.3:\newline
+%   2x Intel(R) Xeon(R) CPU E5-2603 v3 @ 1.60GHz, 64 GB RAM (2.67 GB per core), 1x NVIDIA Tesla P100 (16 GB HBM2 RAM) GPUs via PCIe 
+% \item  \emph{Dell workstation} running CentOS 7.2:\newline 
+%   2x Intel(R) Xeon(R) CPU E5-2640 v3 @ 2.60GHz, 64 GB RAM, 1x NVIDIA GeForce GTX 1080 (8 GB GDDR5X RAM)
+% \end{itemize}
+
+All systems presented in \cref{tab:hardware} will be used for the benchmarks in this section. Access was performed via a \texttt{ssh} session without running a graphical user interface running on the target system. All measurements used the GNU compiler collection (GCC, \cite{stallman2001using}) version 5.3.0 as the underlying compiler if not stated otherwise. All used GPU implementations on nVidia hardware interfaced with the proprietary driver listed in \cref{tab:hardware} and used the infrastructure provided by CUDA $8.0.44$ if not stated otherwise. 
 
 In order to generate one data set, a set arrays of arbitrary shapes is provided to a specific FFT API. The configuration files thereof can be accessed via \cite{gearshifft_github}. The shape configurations are separated in groups: \texttt{powerof2} (all dimensions are powers of $2$), \texttt{radix357} (all dimensions are either powers of $3$, $5$ or $7$) and \texttt{oddshape} (all dimensions are powers of $19$ in order to emulated very uncommon signal sizes). These configurations were generated in order to probe the FFT implementations for a wide spectrum of possible applications.  
 
 The FFT calls to benchmark are executed five times each. From this, the arithmetic mean and sample standard deviations are used for figures presented below. As the number of repetitions is a configurable parameter of \gearshifft{}, we leave it to the user to produce a more comprehensive data set than used for this publication. We consider five repetitions enough at this point to show and discuss several aspects of performance and usability of \gearshifft{} and the FFT libraries under study.  
 
 %TODO: why maximum size of transforms?
-\subsection{Using a modern FFT Library}
-\label{ssec:modern_ffts}
-
-The design of many FFT libraries is based on the architecture and API of FFTW $3.0$. Beyond memory management to allocate and fill the input signals and prepare the output signal arrays if needed, there are two interactions that any client to FFTW has to perform in order to execute an FFT on the aforementioned input signal. First a plan data structure has to be created and filled using a planner. For this, the FFT problem is defined in terms of rank (1D, 2D or 3D), shape of the input signal, type of the input signal (single or double precision of real or complex inputs), type of the transformation (real-to-complex, complex-to-complex, real-to-real) and memory mode of the transformation (inplace versus out-of-place). The FFT problem description is then used as input parameters to the planner. The planner is a piece of code inside FFTW that henceforth tries to find the best suited radix factorization based on the shape of the input signal. It then performs several FFTs on the input data to sample the runtime of different FFT implementations available inside FFTW. The sample of runtimes is then used to find the optimal implementation of the FFT. After the plan has been created, it is used to execute the FFT itself.
-
-\begin{lstlisting}[caption={Minimal usage example of the FFTW single precision real-to-complex planner API. Memory management is omitted.},label={lst:fftw_example}]
-int shape[] = {32,32,32};
-fftw_plan r2c_plan = fftw_plan_dft_r2c(
- 3,                       //rank, here 3D 
- shape,                   //shape of the input
- (float *) input_buffer,  //input data array
- (fftwf_complex *) output,//output data array
- FFTW_ESTIMATE            //planner flag
- );
-fftwf_execute(r2c_plan);
-\end{lstlisting}
-
-\cref{lst:fftw_example} illustrates the FFTW API for a single precision real-to-complex out-of-place transform. It is important to note that FFTW offers the user the freedom to choose the degree of optimization for finding the most optimal FFT implementation for the signal at hand. \cref{lst:fftw_example} uses the \texttt{FFTW\_ESTIMATE} flag, which is described by the FFTW manual \cite{fftw_manual} as:
-%
-\begin{quote}
-  ``\texttt{FFTW\_ESTIMATE} specifies that, instead of actual measurements of different algorithms, a simple heuristic is used to pick a (probably sub-optimal) plan quickly. With this flag, the input/output arrays are not overwritten during planning.''
-\end{quote}
-%
-Fftw offers five levels for this planning flag in total. As covering all of them in this study is impractical, we selected two more: \texttt{FFTW\_MEASURE} and \texttt{FFTW\_WISDOM\_ONLY}. The FFTW manual describes them as:
-%
-\begin{quote}
-  ``\texttt{FFTW\_MEASURE} tells FFTW to find an optimized plan by actually computing several FFTs and measuring their execution time. Depending on your machine, this can take some time (often a few seconds). FFTW\_MEASURE is the default planning option.\newline
-  \texttt{FFTW\_WISDOM\_ONLY} is a special planning mode in which the plan is only created if wisdom is available for the given problem, and otherwise a NULL plan is returned.''
-\end{quote}
-%
-In FFTW terminology, wisdom is a persistent data structure that \texttt{fftw\_wisdom} binary in the FFTW install tree can generate. It is meant to allow users to generate the plan for specific input data shapes offline to their application. The stored 'wisdom' can then be read from disk through the FFTW wisdom API. 
-%
-\begin{lstlisting}[caption={Minimal usage example of the cuFFT single precision real-to-complex planner API. Memory management is omitted.},label={lst:cufft_example}]
-int N = 32;
-cufftHandle plan;
-cufftPlan3d(&plan, N, N, N, CUFFT_R2C);
-cufftExecC2C(plan, input_buffer, output, CUFFT_FORWARD);
-\end{lstlisting}
-%
-As discussed above, the studied GPU based FFT implementations follow this design structure without the planning flags however. This becomes evident in \cref{lst:cufft_example}. 
 
 \subsection{Time To Solution}
 \label{ssec:tts}
