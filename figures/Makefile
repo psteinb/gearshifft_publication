@@ -61,8 +61,7 @@ results_non_power_of_2 : $(cufft8_K80_files) $(cufft8_P100_files) $(measure_fftw
 results_placiness : $(cufft8_P100_files) $(measure_fftw_files)
 	@echo "input: $(?)"
 	./compare -k "powerof2" -r -s -n 3 -a "hardware,inplace" --xlabel="Signal_Size_[bytes]" --ymetric="Time_FFT" --notitle --logy=10 --logx=2 -f $(@) $? > $(@).log 2>&1
-	./compare -k "powerof2" -c -s -n 3 -a "hardware,inplace" --xlabel="Signal_Size_[bytes]" --ymetric="Time_FFT" --notitle --logy=10 --logx=2 -f $(@)_b $? > $(@)_b.log 2>&1
-	./compare -k "powerof2" -r -d -n 3 -a "hardware,inplace" --xlabel="Signal_Size_[bytes]" --ymetric="Time_FFT" --notitle --logy=10 --logx=2 -f $(@)_c $? > $(@)_c.log 2>&1	
+	./compare -k "powerof2" -c -s -n 3 -a "hardware,inplace" --xlabel="Signal_Size_[bytes]" --ymetric="Time_FFT" --notitle --logy=10 --logx=2 -f $(@)_b $? $(cufft8_K80_files) $(cufft8_GTX1080_files) > $(@)_b.log 2>&1
 
 clean :
 	rm -vf  *tex
