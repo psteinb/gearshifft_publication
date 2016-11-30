@@ -8,5 +8,8 @@ all : gearshifft.pdf
 	pdflatex $*
 	pdflatex $*	
 
+quick : gearshifft.tex
+  pdflatex $^
+
 clean :
 	rm -fv *.bbl *.blg *.aux *.bcf *.run.xml *.log *.pdf
