@@ -9,19 +9,47 @@ For this study, we will concentrate on three modern and current FFT implementati
 
 The results presented in the following sections were collected on three systems:
 
-\begin{itemize}
-\item \emph{Taurus HPC cluster}\cite{taurus} running RHEL 7.2
-  \begin{itemize}
-  \item \emph{K80 node}: 2x Intel(R) Xeon(R) CPU E5-2680 v3 (12 cores) @ 2.50GHz, 64 GB RAM, 4x NVIDIA Tesla K80 (12 GB GDDR5 RAM) GPUs 
-  \item \emph{K20X node}: 2x Intel(R) Xeon(R) CPU E5-2450 (8 cores) @ 2.10GHz, 48 GB RAM, 2x NVIDIA Tesla K20x (6 GB GDDR RAM) GPUs 
-  \end{itemize}
-\item \emph{Hypnos HPC cluster}\cite{hypnos} running Ubuntu 14.04.3:\newline
-  2x Intel(R) Xeon(R) CPU E5-2603 v3 @ 1.60GHz, 64 GB RAM (2.67 GB per core), 1x NVIDIA Tesla P100 (16 GB HBM2 RAM) GPUs via PCIe 
-\item  \emph{Dell workstation} running CentOS 7.2:\newline 
-  2x Intel(R) Xeon(R) CPU E5-2640 v3 @ 2.60GHz, 64 GB RAM, 1x NVIDIA GeForce GTX 1080 (8 GB GDDR5X RAM)
-\end{itemize}
+\begin{table}[htp]
+  \centering
+  \caption{Benchmark Hardware}
+  \label{tab:hardware}
+  \begin{tabular}{l|llll}
+    \toprule
+               & \multicolumn{2}{c}{\textbf{Taurus}}           & \textbf{Hypnos}           & \textbf{Islay}                            \\
+               & \multicolumn{2}{c}{HPC Cluster \cite{taurus}} & HPC Cluster \cite{hypnos} & Workstation                               \\
+               & K80 node                                      & K20Xm node                &                     &                     \\
+    \midrule
+    CPU vendor & Intel                                         & Intel                     & Intel               & Intel               \\
+    CPU family & Haswell Xeon                                  & Sandybridge Xeon          & Haswell Xeon        & Haswell Xeon        \\
+    CPU model  & E5-2680 v3                                    & E5-2450                   & E5-2603 v3          & E5-2640 v3          \\
+    sockets    & $2$                                           & $2$                       & $2$                 & $2$                 \\
+    RAM        & \SI{64}{\gibi\byte}                           & \SI{48}{\gibi\byte}       & \SI{64}{\gibi\byte} & \SI{64}{\gibi\byte} \\
+    \midrule
+    GPU vendor & NVIDIA                                        & NVIDIA                    & NVIDIA              & NVIDIA              \\
+    GPU family & Tesla                                         & Tesla                     & Tesla               & GeForce             \\
+    GPU        & 4x K80                                        & 2x K20x                   & 1x P100             & 1x GTX 1080         \\
+    GPU memory & 8x \SI{12}{\gibi\byte}                        & \SI{6}{\gibi\byte}        & \SI{16}{\gibi\byte} & \SI{8}{\gibi\byte}  \\
+    GPU driver & $367.48$                                      & $367.48$                  & $367.48$            & $367.57$            \\
+    \midrule
+    OS         & RHEL $7.2$                                    & RHEL $7.2$                & Ubuntu $14.04.3$    & CentOS $7.2$        \\
+               & 64-bit                                        & 64-bit                    & 64-bit              & 64-bit              \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
-As presented above, all used systems operated on a variant of 64-bit Linux and were accessed via an ssh session without running a graphical user interface of any kind. All measurements used the GNU compiler collection (GCC, \cite{stallman2001using}) version 5.3.0 as the underlying compiler if not stated otherwise. All used GPU implementations on nVidia hardware interfaced with the proprietary driver provided by the vendor $367.48$ (K20Xm, K80, P100) and $367.57$ (GTX1080). 
+% \begin{itemize}
+% \item \emph{Taurus HPC cluster}\cite{taurus} running RHEL 7.2
+%   \begin{itemize}
+%   \item \emph{K80 node}: 2x Intel(R) Xeon(R) CPU E5-2680 v3 (12 cores) @ 2.50GHz, 64 GB RAM, 4x NVIDIA Tesla K80 (12 GB GDDR5 RAM) GPUs 
+%   \item \emph{K20X node}: 2x Intel(R) Xeon(R) CPU E5-2450 (8 cores) @ 2.10GHz, 48 GB RAM, 2x NVIDIA Tesla K20x (6 GB GDDR RAM) GPUs 
+%   \end{itemize}
+% \item \emph{Hypnos HPC cluster}\cite{hypnos} running Ubuntu 14.04.3:\newline
+%   2x Intel(R) Xeon(R) CPU E5-2603 v3 @ 1.60GHz, 64 GB RAM (2.67 GB per core), 1x NVIDIA Tesla P100 (16 GB HBM2 RAM) GPUs via PCIe 
+% \item  \emph{Dell workstation} running CentOS 7.2:\newline 
+%   2x Intel(R) Xeon(R) CPU E5-2640 v3 @ 2.60GHz, 64 GB RAM, 1x NVIDIA GeForce GTX 1080 (8 GB GDDR5X RAM)
+% \end{itemize}
+
+All systems presented in \cref{tab:hardware} will be used for the benchmarks in this section. Access was performed via a \texttt{ssh} session without running a graphical user interface running on the target system. All measurements used the GNU compiler collection (GCC, \cite{stallman2001using}) version 5.3.0 as the underlying compiler if not stated otherwise. All used GPU implementations on nVidia hardware interfaced with the proprietary driver listed in \cref{tab:hardware} and used the infrastructure provided by CUDA $8.0.44$ if not stated otherwise. 
 
 In order to generate one data set, a set arrays of arbitrary shapes is provided to a specific FFT API. The configuration files thereof can be accessed via \cite{gearshifft_github}. The shape configurations are separated in groups: \texttt{powerof2} (all dimensions are powers of $2$), \texttt{radix357} (all dimensions are either powers of $3$, $5$ or $7$) and \texttt{oddshape} (all dimensions are powers of $19$ in order to emulated very uncommon signal sizes). These configurations were generated in order to probe the FFT implementations for a wide spectrum of possible applications.  
 
