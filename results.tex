@@ -142,9 +142,22 @@ Even though our findings in \cref{fig:non_power_of_2} are restricted to FFTW and
 \subsection{Data Types}
 \label{ssec:data_types}
 
-In this section we would like to address r2c versus c2c!
+It is a common practice that complex-to-complex transforms are considered more performant than real-to-complex transforms. So, in order to transform a real input array, a complex array is allocated and the real part of each datum is filled with the signal. The imaginary part of each datum is left at $0$.
+
+\begin{figure}[!tbp]
+  \centering
+  \includegraphics[width=\textwidth]{figures/results_r2c_vs_c2c_legend.pdf}
+  \subfloat[single precision]{\includegraphics[width=0.45\textwidth]{figures/results_r2c_vs_c2c_a.pdf}\label{fig:r2c_vs_c2c_a}}
+  \hfill
+  \subfloat[real-to-complex]{\includegraphics[width=0.45\textwidth]{figures/results_r2c_vs_c2c_b.pdf}\label{fig:r2c_vs_c2c_b}}
+  \caption{Time for computing a forward FFT transform using 3D power-of-2 input signals using fftw and cufft on respective hardware. \cref{fig:r2c_vs_c2c_a} computes a real-to-complex transform and compares it to a complex-to-complex transform for single precision input data, whereas \cref{fig:r2c_vs_c2c_b} shows a real-to-complex transform for either single or double precision. Both figures use a log2-versus-log2 scale.}
+  \label{fig:r2c_vs_c2c}
+\end{figure}
+
+\cref{fig:r2c_vs_c2c} restricts itself to larger signal sizes in order to aid the visualisation. Note that in \cref{fig:r2c_vs_c2c_a}, a data point at the same signal size does have equal shape compared to real and complex data due to complex data having double the items than real inputs. If one compares for example the entry at $\SI{2^8}{\mebi\byte}$ for real input to the entry for $\SI{2^9}{\mebi\byte}$ of complex type, it is clearly visible that the runtime difference amounts to \numrange{4}{8} fold regressions (not that \cref{fig:r2c_vs_c2c_a} uses a log2-log2 scale). This is equally true for FFTW on the CPU as well as for cufft on the P100. Thus, using a complex-to-complex transform to perform an FFT on real input proves to be slower than the real-to-complex operation.
+
+\cref{fig:r2c_vs_c2c_b} tries to answer the question, what gain can be expected if double precision is not needed for computing an FFT. On the high grade server GPU, the Nvidia Tesla P100, the performance difference remains below $2x$. The results for FFTW vary more around \numrange{1.5}{2.5} fold regressions. 
 
 \subsection{Memory Modes}
 \label{ssec:mem_mode}
 
-In this section we would like to address inplace versus out-of-place transforms!
