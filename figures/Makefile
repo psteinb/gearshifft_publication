@@ -14,7 +14,7 @@ estimate_fftw_files = $(wildcard ../results/haswell/fftw-3.3.5/fftw_estimate*csv
 measure_fftw_files = $(wildcard ../results/haswell/fftw-3.3.5/fftw_gcc*csv)
 wisdom_fftw_files = $(wildcard ../results/haswell/fftw-3.3.5/fftw_wisdom*csv)
 
-TARGETS = results_figure1 results_figure2 results_figure3 results_figure4 results_figure5
+TARGETS = results_figure1 results_figure2 results_figure3 results_figure4 results_figure5 results_figure6
 
 all : $(TARGETS)
 
