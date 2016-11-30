@@ -22,7 +22,7 @@
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \usepackage{listings}
-\lstset{numberbychapter=false}
+\lstset{numberbychapter=false} % listings absolute counter
 \usepackage{textcomp}
 % preserve ttdefault
 \edef\oldtt{\ttdefault}
@@ -97,7 +97,6 @@ TU Dresden, 01062 Dresden, Germany\\
 citestyle=numeric-comp,
 url=true,
 natbib=true,
-bibstyle=ieee,
 maxnames=3,
 bibencoding=utf8,
 sorting=nyt
@@ -108,7 +107,7 @@ sorting=nyt
 \addbibresource{gearshifft_references.bib}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+\pdfsuppresswarningpagegroup=1
 %
 \begin{document}
 %
@@ -177,7 +176,9 @@ sorting=nyt
 \input{summary}
 
 \paragraph{Acknowledgements.} This work was funded by Nvidia through the GPU Center of Excellence (GCOE) at the Center for Information Services and High Performance Computing (ZIH), TU Dresden, where the K20Xm and K80 GPU cluster Taurus was used.
-
+% allows to break urls at each point
+\setcounter{biburllcpenalty}{7000}
+\setcounter{biburlucpenalty}{8000}
 \printbibliography
 
 \end{document}
