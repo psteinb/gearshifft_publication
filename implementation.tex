@@ -13,7 +13,7 @@ Before discussing the design of \gearshifft{} in detail, it is instructive to pr
 
 \label{ssec:modern_ffts}
 The design of many FFT libraries is based on the architecture and API of FFTW $3.0$. There are typical interactions that any client to FFTW has to perform in order to execute an FFT on signal data. First a plan data structure has to be created and filled using a planner. For this, the FFT problem is defined in terms of rank (1D, 2D or 3D), shape of the input signal, type of the input signal (single or double precision of real or complex inputs), type of the transformation (real-to-complex, complex-to-complex, real-to-real) and memory mode of the transformation (inplace versus out-of-place). The FFT problem description is then used as input parameters to the planner. The planner is a piece of code inside FFTW that henceforth tries to find the best suited radix factorization based on the shape of the input signal. It then performs several FFTs on the input data to sample the runtime of different FFT implementations available inside FFTW. The sample of runtimes is then used to find the optimal implementation of the FFT. After the plan has been created, it is used to execute the FFT itself.
-Depending on the number of plan executions one should spend certain amount of time in the planning phase in order to minimize planning  and execution times altogether.
+Depending on the number of plan executions one should spend certain amount of time in the planning phase to minimize planning and execution times altogether.
 \begin{lstlisting}[caption={Minimal usage example of the FFTW single precision real-to-complex planner API. Memory management is omitted.},label={lst:fftw_example}]
 int shape[] = {32,32,32};
 fftw_plan r2c_plan = fftw_plan_dft_r2c(
@@ -21,8 +21,7 @@ fftw_plan r2c_plan = fftw_plan_dft_r2c(
   shape,                   //shape of the input
   (float *) input_buffer,  //input data array
   (fftwf_complex *) output,//output data array
-  FFTW_ESTIMATE            //plan-rigor flag
-);
+  FFTW_ESTIMATE );         //plan-rigor flag
 fftwf_execute(r2c_plan);
 \end{lstlisting}
 \cref{lst:fftw_example} illustrates the FFTW API for a single precision real-to-complex out-of-place transform. It is important to note that FFTW offers the user the freedom to choose the degree of optimization for finding the most optimal FFT implementation for the signal at hand. \cref{lst:fftw_example} uses the \texttt{FFTW\_ESTIMATE} flag, which is described by the FFTW manual \cite{fftw_manual} as:
@@ -38,7 +37,7 @@ Fftw offers five levels for this planning flag in total. As covering all of them
 \end{quote}
 %
 In FFTW terminology, wisdom is a persistent data structure that \texttt{fftw\_wisdom} binary in the FFTW install tree can generate. It is meant to allow users to generate the plan for specific input data shapes offline to their application. The stored 'wisdom' can then be read from disk through the FFTW wisdom API.
-%
+The studied GPU based FFT implementations follow this design structure without the plan-rigor flags and wisdoms however, see \cref{lst:cufft_example}.
 \begin{lstlisting}[caption={Minimal usage example of the cuFFT single precision real-to-complex planner API. Memory management is omitted.},label={lst:cufft_example}]
 int N = 32;
 cufftHandle plan;
@@ -46,8 +45,6 @@ cufftPlan3d(&plan, N, N, N, CUFFT_R2C);
 cufftExecC2C(plan, input_buffer, output, CUFFT_FORWARD);
 \end{lstlisting}
 %
-As discussed above, the studied GPU based FFT implementations follow this design structure without the plan-rigor flags however. This becomes evident in \cref{lst:cufft_example}.
-
 \subsection{The Architecture of \gearshifft{}}
 \label{ssec:gearshifft_arch}
 
@@ -61,14 +58,12 @@ However, the benchmark runtime environment allocates memory for samples and perf
 struct Context {
   /// title for all benchmarks associated with this context
   static std::string title();
-  /// list all compute devices
+  /// list all compute devices with their IDs
   static std::string get_device_list();
-  /// information for current device
+  /// information of current device
   std::string get_used_device_properties();
-  /// creates context
-  void create();
-  /// destroys context
-  void destroy();
+  void create();  // create context
+  void destroy(); // destroy context
 };
 \end{lstlisting}
 
@@ -107,12 +102,14 @@ struct MyFFTClient { // ...
 \begin{table}[ht]
 \centering
 \caption{FFT client implementation required by gearshifft frontend API}\label{tab:implfft}
- \begin{tabular}{*{3}{p{0.3\textwidth}}}
+\begin{tabular}{*{3}{p{0.3\textwidth}}}
+  \toprule
   \mc{constructor} & \mc{get_alloc_size}    & \mc{execute_forward} \\
   \mc{destructor}  & \mc{get_transfer_size} & \mc{execute_inverse} \\
   \mc{allocate}    & \mc{get_plan_size}     & \mc{upload} \\
   \mc{destroy}     & \mc{init_forward}      & \mc{download} \\
-                   & \mc{init_inverse}      &
+                   & \mc{init_inverse}      & \\
+  \bottomrule
  \end{tabular}
 \end{table}
 
@@ -297,47 +294,50 @@ destroy\\
  \label{fig:framework}
 \end{figure}
 
-Currently, \gearshifft{} comes with three different FFT libraries, namely cuFFT (CUDA) for nVidia GPUs \cite{nvidia2010cufft}, clFFT (OpenCL) from AMD \cite{clfft} and FFTW \cite{FFTW97, FFTW05}.
+Currently, \gearshifft{} comes with three different FFT libraries, namely cuFFT (CUDA) for nVidia GPUs \cite{nvidia2010cufft}, clFFT (OpenCL) from AMD \cite{clfft} and FFTW \cite{FFTW05}.
 % cuFFT is NVIDIA CUDA GPU-only using the Cooley-Tukey and Bluestein algorithms \cite{cooley65,bluestein}.
 % clFFT implements a variation of Cooley-Tukey and Stockham algorithm in OpenCL to run on heterogeneous platforms.
 % FFTW is CPU-only and primarily uses Cooley-Tukey supporting various SIMD (SSE, AVX, \ldots) optimizations.
 By this selection, an accelerator-, mixed and a CPU-optimized library is covered.
 %
-As build system we use \texttt{cmake} to configure the includes and the executables according to the FFT libraries found by \texttt{cmake} in the user environment. There also options\footnote{Use \mc{ccmake .} in the build directory for customizing the settings.} for disabling FFT libraries or FFTW planning time limit. The project structure is depicted in \cref{fig:projstruct}. The common build procedure is to use a build directory (release, debug) for makefile generation with \mc{cmake ..}.
+As build system we use \texttt{cmake} to configure the includes and the executables according to the FFT libraries found by \texttt{cmake} in the user environment. There are options\footnote{Use \mc{ccmake .} in the build directory for customizing the settings.} for disabling FFT libraries or FFTW planning time limit.
+%The project structure is depicted in \cref{fig:projstruct}.
+The common build procedure is to use a build directory (release, debug) for makefile generation with \mc{cmake ..}.
+%
+%% \begin{figure}[!htp]
+%%   \centering
+%% \begin{tikzpicture}
+%% \begin{scope}[grow via three points={one child at (0.4,-0.4) and
+%%   two children at (0.4,-0.4) and (0.4,-0.8)},
+%%   edge from parent path={(\tikzparentnode.south) |- (\tikzchildnode.west)},
+%%   every node/.style={anchor=west,font=\ttfamily}%
+%% ]
+%% \node {gearshifft}
+%%     child { node (cfg) {config}}		
+%%     child { node (inc) {inc}
+%%       child { node (core) {core}}
+%%       child { node (lib) {libraries}}
+%%     }
+%%     child [missing] {}				
+%%     child [missing] {}
+%%     child { node (scripts) {scripts}}
+%%     child { node (src) {src}}; 
+%% \end{scope}
+%% \begin{scope}[every node/.style={anchor=west}]
+%% \coordinate (d) at (4.1,0);
+%% \draw[dotted] (cfg) -- (cfg-|d) node { config files for extents (extents.csv, \ldots)};
+%% \draw[dotted] (inc) -- (inc-|d) node { header files};
+%% \draw[dotted] (core) -- (core-|d) node { gearshifft core headers (benchmark.hpp, \ldots};
+%% \draw[dotted] (lib) -- (lib-|d) node { FFT client directories with headers (fftw/fftw.hpp, \ldots)};
+%% \draw[dotted] (scripts) -- (scripts-|d) node { python scripted config generator};
+%% \draw[dotted] (src) -- (src-|d) node { gearshifft source files (benchmark.cpp, options.cpp)}; 
+%% \end{scope}
+%% \end{tikzpicture}
+%%  \caption{gearshifft project structure.}
+%%  \label{fig:projstruct}
+%% \end{figure}
 
-\begin{figure}[htp]
-\begin{tikzpicture}
-\begin{scope}[grow via three points={one child at (0.4,-0.4) and
-  two children at (0.4,-0.4) and (0.4,-0.8)},
-  edge from parent path={(\tikzparentnode.south) |- (\tikzchildnode.west)},
-  every node/.style={anchor=west,font=\ttfamily}%
-]
-\node {gearshifft}
-    child { node (cfg) {config}}		
-    child { node (inc) {inc}
-      child { node (core) {core}}
-      child { node (lib) {libraries}}
-    }
-    child [missing] {}				
-    child [missing] {}
-    child { node (scripts) {scripts}}
-    child { node (src) {src}}; 
-\end{scope}
-\begin{scope}[every node/.style={anchor=west}]
-\coordinate (d) at (4.1,0);
-\draw[dotted] (cfg) -- (cfg-|d) node { config files for extents (extents.csv, \ldots)};
-\draw[dotted] (inc) -- (inc-|d) node { header files};
-\draw[dotted] (core) -- (core-|d) node { gearshifft core headers (benchmark.hpp, \ldots};
-\draw[dotted] (lib) -- (lib-|d) node { FFT client directories with headers (fftw/fftw.hpp, \ldots)};
-\draw[dotted] (scripts) -- (scripts-|d) node { python scripted config generator};
-\draw[dotted] (src) -- (src-|d) node { gearshifft source files (benchmark.cpp, options.cpp)}; 
-\end{scope}
-\end{tikzpicture}
- \caption{gearshifft project structure.}
- \label{fig:projstruct}
-\end{figure}
-
-\vspace{-2em}
+%% \vspace{-2em}
 
 \begin{table}[htp]
  \centering
@@ -371,6 +371,6 @@ Flag & [Flag] Argument & Description \\
 
 For the command-line arguments Boost is utilized, particularly for benchmark lists and selection. The \gearshifft{} program options are given in \cref{tab:cmdargs}.\linebreak
 \verb!gearshifft_clfft -e 16,16 8x8x8 -r */float/*/Inplace_Real -d cpu!\linebreak
-runs clfft benchmarks with inplace real-to-complex / complex-to-real transform on an $8\times8\times8$ FFT and $16\times16$ FFT at single-precision. The default setting implies to use all CPU cores and to dump the results to result.csv (if already existent, it will be overwritten).
+would run clfft benchmarks with real inplace real-to-complex / complex-to-real transform on an $8\times8\times8$ FFT and $16\times16$ FFT at single-precision. The default setting implies to use all CPU cores and to dump the results to result.csv (if already existent, it will be overwritten).
 The first wildcard \mc{*} relates to the title of the FFT client, where the second one refers to the extents.
 

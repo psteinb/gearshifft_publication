@@ -9,30 +9,30 @@ For this study, we will concentrate on three modern and current FFT implementati
 
 The results presented in the following sections were collected on three systems:
 
-\begin{table}[htp]
+\begin{table}[tbp]
   \centering
   \caption{Benchmark Hardware}
   \label{tab:hardware}
-  \begin{tabular}{l|llll}
+  \begin{tabular}{lllll}
     \toprule
                & \multicolumn{2}{c}{\textbf{Taurus}}           & \textbf{Hypnos}           & \textbf{Islay}                            \\
                & \multicolumn{2}{c}{HPC Cluster \cite{taurus}} & HPC Cluster \cite{hypnos} & Workstation                               \\
-               & K80 node                                      & K20Xm node                &                     &                     \\
+%               & K80 node                                      & K20Xm node                &                     &                     \\
     \midrule
-    CPU vendor & Intel                                         & Intel                     & Intel               & Intel               \\
-    CPU family & Haswell Xeon                                  & Sandybridge Xeon          & Haswell Xeon        & Haswell Xeon        \\
-    CPU model  & E5-2680 v3                                    & E5-2450                   & E5-2603 v3          & E5-2640 v3          \\
-    sockets    & $2$                                           & $2$                       & $2$                 & $2$                 \\
-    RAM        & \SI{64}{\gibi\byte}                           & \SI{48}{\gibi\byte}       & \SI{64}{\gibi\byte} & \SI{64}{\gibi\byte} \\
-    \midrule
-    GPU vendor & NVIDIA                                        & NVIDIA                    & NVIDIA              & NVIDIA              \\
-    GPU family & Tesla                                         & Tesla                     & Tesla               & GeForce             \\
-    GPU        & 4x K80                                        & 2x K20x                   & 1x P100             & 1x GTX 1080         \\
-    GPU memory & 8x \SI{12}{\gibi\byte}                        & \SI{6}{\gibi\byte}        & \SI{16}{\gibi\byte} & \SI{8}{\gibi\byte}  \\
-    GPU driver & $367.48$                                      & $367.48$                  & $367.48$            & $367.57$            \\
-    \midrule
-    OS         & RHEL $7.2$                                    & RHEL $7.2$                & Ubuntu $14.04.3$    & CentOS $7.2$        \\
-               & 64-bit                                        & 64-bit                    & 64-bit              & 64-bit              \\
+%    CPU vendor & Intel                                         & Intel                     & Intel               & Intel               \\
+    \textbf{CPU family} & Haswell Xeon                                  & Sandybridge Xeon          & Haswell Xeon        & Haswell Xeon        \\
+    \textbf{CPU model } & $2{\times}$ E5-2680 v3                        & $2{\times}$ E5-2450       & $2{\times}$ E5-2603 v3 & $2{\times}$ E5-2640 v3          \\
+%    sockets    & $2$                                           & $2$                       & $2$                 & $2$                 \\
+    \textbf{RAM       } & \SI{64}{\gibi\byte}                           & \SI{48}{\gibi\byte}       & \SI{64}{\gibi\byte} & \SI{64}{\gibi\byte} \\
+%    \midrule
+%    GPU vendor & NVIDIA                                        & NVIDIA                    & NVIDIA              & NVIDIA              \\
+    \textbf{GPU family} & Tesla                                         & Tesla                     & Tesla               & GeForce             \\
+    \textbf{GPU       } & 4x K80                                        & 2x K20x                   & 1x P100             & 1x GTX 1080         \\
+    \textbf{GPU memory} & 4x \SI{12}{\gibi\byte}                        & \SI{6}{\gibi\byte}        & \SI{16}{\gibi\byte} & \SI{8}{\gibi\byte}  \\
+    \textbf{GPU driver} & $367.48$                                      & $367.48$                  & $367.48$            & $367.57$            \\
+%    \midrule
+    \textbf{OS}         & RHEL $7.2$                                    & RHEL $7.2$                & Ubuntu $14.04.3$    & CentOS $7.2$        \\
+%               & 64-bit                                        & 64-bit                    & 64-bit              & 64-bit              \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -62,9 +62,9 @@ The FFT calls to benchmark are executed five times each. From this, the arithmet
 
 We begin the discussion with the classical use case for developers that might be accustomed to small size transforms. As such, an out-of-place transform with \texttt{powerof2} signal shapes will be assumed. The memory volume required for this operation amounts to the real input array plus an equally shaped complex output array.   
 
-\begin{figure}[!tbp]
+\begin{figure}[!htbp]
   \centering
-  \includegraphics[width=\textwidth]{figures/results_tts_legend.pdf}
+  \includegraphics[width=\textwidth]{figures/results_tts_legend.pdf}\vspace{-1em}
   \subfloat[linear scale]{\includegraphics[width=0.45\textwidth]{figures/results_tts_a.pdf}\label{fig:tts_a}}
   \hfill
   \subfloat[log10-log2 scale]{\includegraphics[width=0.45\textwidth]{figures/results_tts_b.pdf}\label{fig:tts_b}}
@@ -74,9 +74,9 @@ We begin the discussion with the classical use case for developers that might be
 
 \cref{fig:tts} reports a comparison of runtime results of power-of-2 single-precision real-to-complex forward transforms from FFTW and cuFFT. It is evident that given the largest device memory available of  \SI{16}{\gibi\byte}, the GPU data does not yield any points higher than \SI{8}{\gibi\byte}. Note that the total time reflects the time to set up a plan, allocate memory on device, perform the data transfer onto the device, execute the FFT, transfer the result back to the host and clean up the used plan and the allocated memory. \cref{fig:tts_a} shows that the oldest GPU generation used in this comparison yields the slowest results for input signals in the order of \SIrange{1}{2}{\gibi\byte}. All other and more recent GPU models supersede FFTW using all available cores in this node. Any judgment on the superiority of cuFFT over FFTW can be considered premature at this point, as FFTW was used with the \texttt{FFTW\_ESTIMATE} planner flag.
 
-\begin{figure}[!tbp]
+\begin{figure}[!htbp]
   \centering
-  \includegraphics[width=\textwidth]{figures/results_plan_flags_legend.pdf}
+  \includegraphics[width=\textwidth]{figures/results_plan_flags_legend.pdf}\vspace{-1em}
   \subfloat[time to solution]{\includegraphics[width=0.45\textwidth]{figures/results_plan_flags_a.pdf}\label{fig:plan_flags_a}}
   \hfill
   \subfloat[time for forward transform only]{\includegraphics[width=0.45\textwidth]{figures/results_plan_flags_b.pdf}\label{fig:plan_flags_b}}
@@ -85,15 +85,15 @@ We begin the discussion with the classical use case for developers that might be
 \end{figure}
 
 \cref{fig:fftw_plan_flags} compares the time-to-solution to the actual time spent for the FFT operation itself. This illustration makes the cost and the benefit of higher planning flags than \texttt{FFTW\_ESTIMATE} obvious. Where \texttt{FFTW\_MEASURE} imposes a runtime penalty of 1 to 2 orders of magnitude with respect to \texttt{FFTW\_ESTIMATE}, it offers superior performance. The careful observer has noticed that the planning times for \texttt{FFTW\_MEASURE} become prohibitively large for large input data sizes and reach minutes for data sets in the Gigabyte range. This is a well-known feature of FFTW as the authors note in \cite{FFTW05}:
-
+%
 \begin{center}
   ``In performance critical applications, many transforms of the same
   size are typically required, and therefore a large one-time cost is
   usually acceptable.''
 \end{center}
- 
+% 
 \gearshifft{} allows to dissect this problem further and isolate the planning time only.
-
+%
 \begin{figure}[!tbp]
   \centering
   \subfloat[Fig A.]{\includegraphics[width=0.45\textwidth]{figures/results_plan_time_a.pdf}\label{fig:plan_time_a}}
@@ -102,7 +102,7 @@ We begin the discussion with the classical use case for developers that might be
   \caption{Time-to-plan for power-of-2 single-precision real-to-complex forward transforms using FFTW, cuFFT and clFFT. \cref{fig:plan_time_a} reports the complete time to plan for 3D transforms, whereas \cref{fig:plan_time_b} is limited to 1D transforms. Both figures use a log10-log2 scale.}
   \label{fig:plan_time}
 \end{figure}
-
+%
 \cref{fig:plan_time} illustrates the problem to it's full extent. \texttt{FFTW\_MEASURE} consumes up to 3-4 orders of magnitude more time to produce a plan than a standard (GPU based libraries) or \texttt{FFTW\_ESTIMATE} based planner call especially for large input shapes, see \cref{fig:plan_time_a}. We observed that FFTW wisdom cannot be generated for 2D or 3D out-of-place transforms. Therefor, we compare the 3D planning with it's counterpart in 1D in \cref{fig:plan_time_b}. At input sizes of \SI{128}{\mebi\byte} in 1D, the planning phase exceeds the duration of \SI{100}{\second}. In practice, this imposes a challenge on the client to the FFTW API. Not only is the time to solution affected by this behavior which is a crucial quantity if FFT-heavy applications are run in an HPC environment. Here the runtime of applications needs to be know to some extent in order to allow efficient and rapid job placement in a cluster. Further, the developer interfacing with FFTW has to create infrastructure (thread-safe static singleton objects or similar come to mind) in order to perform the planning of FFTW only once and reuse the resulting plan as much as possible.
 
 \subsection{Comparing CPU versus GPU runtimes}
@@ -112,7 +112,7 @@ The last section finished by discussing a design artifact, that the FFTW authors
 
 \begin{figure}[!tbp]
   \centering
-  \includegraphics[width=\textwidth]{figures/results_r2c_fwd_legend.pdf}
+  \includegraphics[width=\textwidth]{figures/results_r2c_fwd_legend.pdf}\vspace{-1em}
   \subfloat[3D transforms]{\includegraphics[width=0.45\textwidth]{figures/results_r2c_fwd_a.pdf}\label{fig:r2c_fwd_a}}
   \hfill
   \subfloat[1D transforms]{\includegraphics[width=0.45\textwidth]{figures/results_r2c_fwd_b.pdf}\label{fig:r2c_fwd_b}}
@@ -129,7 +129,7 @@ As power-of-2 shaped input signals do naturally fit the memory hierarchy found o
 
 \begin{figure}[!tbp]
   \centering
-  \includegraphics[width=\textwidth]{figures/results_non_power_of_2_legend.pdf}
+  \includegraphics[width=\textwidth]{figures/results_non_power_of_2_legend.pdf}\vspace{-1em}
   \subfloat[Time for FFT]{\includegraphics[width=0.45\textwidth]{figures/results_non_power_of_2_a.pdf}\label{fig:non_power_of_2_a}}
   \hfill
   \subfloat[Time to Plan]{\includegraphics[width=0.45\textwidth]{figures/results_non_power_of_2_b.pdf}\label{fig:non_power_of_2_b}}

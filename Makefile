@@ -6,7 +6,10 @@ all : gearshifft.pdf
 	pdflatex $*
 	biber $*
 	pdflatex $*
-	pdflatex $*	
+	pdflatex $*
+
+quick : gearshifft.tex
+	pdflatex $^
 
 quick : gearshifft.tex
   pdflatex $^
