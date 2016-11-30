@@ -24,6 +24,7 @@ library(scales)
  --ylabel=YLABEL 	Use YLABEL for labelling the ymetric, note that underscores will be replaced by white spaces as white spaces are not correctly handled through the CLI [default: ]
  --ylimit=YLIMIT 	Use YLIMIT for marking the lowest and highest value shown on the y axis [default: 0,0]
  --xlabel=XLABEL 	Use XLABEL for labelling the ymetric, note that underscores will be replaced by white spaces as white spaces are not correctly handled through the CLI [default: Signal_Size_[bytes] ]
+ --xlimit=XLIMIT 	Use XLIMIT for marking the lowest and highest value shown on the x axis [default: 0,0]
  --logy=LOGYVALUE       Use log scale on y-axis [default: 1]
  -x --xmetric=XMETRIC 	Use metric XMETRIC for plotting along y [default: nbytes]
  --logx=LOGXVALUE       Use log scale on x-axis [default: 1]
@@ -81,7 +82,7 @@ open_gearshifft_csv <- function (fname){
         mutate(nx = ifelse(nx==0,1,nx) ) %>%
             mutate(ny = ifelse(ny==0,1,ny) ) %>%
                 mutate(nz = ifelse(nz==0,1,nz) )
-    local_frame = local_frame %>% mutate( nbytes = ifelse("float" %in% precision,4,8)*nx*ny*nz )
+    local_frame = local_frame %>% mutate( nbytes = ifelse("Complex" %in% complex,2,1)*ifelse("float" %in% precision,4,8)*nx*ny*nz )
     local_frame$hardware <- gpu_model
     local_frame$flags <- flags
     
@@ -296,10 +297,10 @@ aesthetics_from_cli <- strsplit(opts[["aesthetics"]],",")
 
 aesthetics_keys   <- c("colour","linetype","shape")
 aesthetics_to_use <- aes(x=xmoi)
-
+aesthetics_length <- length(aesthetics_from_cli[[1]])
 for(i in 1:length(aesthetics_keys)) {
     
-    if( i <= length(aesthetics_from_cli[[1]]) ){
+    if( i <= aesthetics_length ){
         cat("ggplot aesthetics : ",aesthetics_keys[i]," = ",
             aesthetics_from_cli[[1]][i]," possible values: ",
             eval(parse(text=paste("levels(as.factor(data_for_plotting$",
@@ -324,7 +325,7 @@ moi_plot <- moi_plot + geom_errorbar(aes(ymin = moi_mean - moi_stddev,
                                          ymax = moi_mean + moi_stddev),
                                      width=0.5)
 
-cat("filtered by",paste(filtered_by, collapse=" "),"(n aesthetics = ",paste(length(aesthetics_from_cli[[1]])),")\n")
+cat("filtered by",paste(filtered_by, collapse=" "),"(n aesthetics = ",paste(aesthetics_length),")\n")
 if( opts[["notitle"]] == F ) {
     moi_plot <- moi_plot + ggtitle(paste(filtered_by,collapse=" "))
 }
@@ -333,14 +334,29 @@ if( opts[["notitle"]] == F ) {
 moi_plot <- moi_plot + ylab(gsub("_"," ",name_of_ymetric)) + xlab(gsub("_"," ",name_of_xmetric))
 moi_plot <- moi_plot + my_theme 
 
-ylimit_splitted = unlist(strsplit(opts[["ylimit"]],","))
-ylimit_pair = sapply(ylimit_splitted, function(x) as.numeric(x))
+str_to_numeric = function( string, sep ) {
+    
+    splitted = unlist(strsplit(string,sep))
+    vec = sapply(splitted, function(x) as.numeric(x))
+    return(vec)
+}
+
+## ylimit_splitted = unlist(strsplit(opts[["ylimit"]],","))
+## ylimit_pair = sapply(ylimit_splitted, function(x) as.numeric(x))
+ylimit_pair = str_to_numeric(opts[["ylimit"]], ",")
+xlimit_pair = str_to_numeric(opts[["xlimit"]], ",")
 
 if( length(ylimit_pair) == 2 ) {
-
     if(ylimit_pair[1] != 0 || ylimit_pair[2]!=0){
-        cat("[ylimit] setting to ",paste(ylimit_splitted))
+        cat("[ylimit] setting to ",paste(ylimit_pair),"\n")
         moi_plot <- moi_plot + ylim(ylimit_pair[1],ylimit_pair[2])
+    }
+}
+
+if( length(xlimit_pair) == 2 ) {
+    if(xlimit_pair[1] != 0 || xlimit_pair[2]!=0){
+        cat("[xlimit] setting to ",paste(xlimit_pair),"\n")
+        moi_plot <- moi_plot + xlim(xlimit_pair[1],xlimit_pair[2])
     }
 }
 
@@ -364,18 +380,47 @@ if(logy_value > 1) {
 
     breaks_y = function(x) logy_value^x
     format_expr_y = eval(parse(text=paste("math_format(",logy_value,"^.x)",sep="")))
-    moi_plot <- moi_plot + scale_y_continuous(trans = log_trans(base=logy_value),
-                                              breaks = trans_breaks(paste("log",logy_value,sep=""), breaks_y),
-                                              labels = trans_format(paste("log",logy_value,sep=""), format_expr_y))
+
+    if(length(ylimit_pair) == 2 && (ylimit_pair[1] != 0 && ylimit_pair[2]!=0)){
+        scale_structure = scale_y_continuous(
+            limits = ylimit_pair,
+            trans = log_trans(base=logy_value),
+            breaks = trans_breaks(paste("log",logy_value,sep=""), breaks_y),
+            labels = trans_format(paste("log",logy_value,sep=""), format_expr_y))
+    } else {
+            scale_structure = scale_y_continuous(
+            trans = log_trans(base=logy_value),
+            breaks = trans_breaks(paste("log",logy_value,sep=""), breaks_y),
+            labels = trans_format(paste("log",logy_value,sep=""), format_expr_y))
+    
+    }
+
+    moi_plot <- moi_plot + scale_structure
 }
+
+
 
 if(logx_value > 1) {
 
     breaks_x = function(x) logx_value^x
     format_expr_x = eval(parse(text=paste("math_format(",logx_value,"^.x)",sep="")))
-    moi_plot <- moi_plot + scale_x_continuous(trans = log_trans(base=logx_value),
-                                              breaks = trans_breaks(paste("log",logx_value,sep=""), breaks_x),
-                                              labels = trans_format(paste("log",logx_value,sep=""), format_expr_x))
+    if(length(xlimit_pair) == 2 && (xlimit_pair[1] != 0 && xlimit_pair[2]!=0)){
+        scale_x_structure = scale_x_continuous(
+            limits = xlimit_pair,
+            trans = log_trans(base=logx_value),
+            breaks = trans_breaks(paste("log",logx_value,sep=""), breaks_x),
+            labels = trans_format(paste("log",logx_value,sep=""), format_expr_x)
+            )
+    } else {
+        scale_x_structure = scale_x_continuous(
+            trans = log_trans(base=logx_value),
+            breaks = trans_breaks(paste("log",logx_value,sep=""), breaks_x),
+            labels = trans_format(paste("log",logx_value,sep=""), format_expr_x)
+            )
+    
+    }
+
+    moi_plot <- moi_plot + scale_x_structure
 }
 
 cat(opts[["aspect"]],"\n")
@@ -413,22 +458,22 @@ if(opts[["legend-only"]]){
 #                             legend.justification=c(0,0),
                              legend.key = element_rect(colour = 'white', fill = 'white', size = 0., linetype='dashed')
                              )
-    moi_plot = moi_plot + my_theme + guides(col = guide_legend(nrow = 2))
+    moi_plot = moi_plot + my_theme + guides(col = guide_legend(nrow = aesthetics_length))
     legend <- g_legend(moi_plot)
     ## grid.draw(legend)
     ggsave(paste(opts[["filename"]],".png",sep=""),legend,width=12,height=1.25)
     ggsave(paste(opts[["filename"]],".svg",sep=""),legend,width=12,height=1.25)
-    cairo_pdf(paste(opts[["filename"]],".pdf",sep=""),width=12,height=1.15)
+    cairo_pdf(paste(opts[["filename"]],".pdf",sep=""),width=12,height=0.5*aesthetics_length)
     grid.arrange(legend,ncol=1)
     dev.off()
 } else {
 
-    if ( length(aesthetics_from_cli[[1]]) > 2 ) {
-        moi_plot = moi_plot + guides(col = guide_legend(ncol= length(aesthetics_from_cli[[1]]), nrow = 2))
+    if ( aesthetics_length > 2 ) {
+        moi_plot = moi_plot + guides(col = guide_legend(ncol= aesthetics_length, nrow = 2))
     }
     ggsave(paste(opts[["filename"]],".png",sep=""),moi_plot)
     ggsave(paste(opts[["filename"]],".svg",sep=""),moi_plot)
-    cairo_pdf(paste(opts[["filename"]],".pdf",sep=""),width=5,height=4)
+    cairo_pdf(paste(opts[["filename"]],".pdf",sep=""),width=5,height=3.5)
     print(moi_plot)
     dev.off()
 }

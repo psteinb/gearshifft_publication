@@ -10,12 +10,13 @@ clfft_gpu_files = $(wildcard ../results/[A-Z]*/clfft-2.12.2/*csv)
 cufft8_K20xm_files = $(wildcard ../results/K20*/cuda-8*/*csv)
 cufft8_K80_files = $(wildcard ../results/K80/cuda-8*/*csv)
 cufft8_P100_files = $(wildcard ../results/P100*/cuda-8*/cufft*.[0-9].csv)
+cufft8_GTX1080_files = $(wildcard ../results/GTX1080/cuda-8*/cufft*.[0-9].csv)
 
 estimate_fftw_files = $(wildcard ../results/haswell/fftw-3.3.5/fftw_estimate*csv)
 measure_fftw_files = $(wildcard ../results/haswell/fftw-3.3.5/fftw_gcc*csv)
 wisdom_fftw_files = $(wildcard ../results/haswell/fftw-3.3.5/fftw_wisdom*csv)
 
-TARGETS = results_tts results_plan_flags results_plan_time results_r2c_fwd results_non_power_of_2
+TARGETS = results_tts results_plan_flags results_plan_time results_r2c_fwd results_non_power_of_2 results_r2c_vs_c2c
 
 all : $(TARGETS)
 
@@ -57,8 +58,12 @@ results_non_power_of_2 : $(cufft8_K80_files) $(cufft8_P100_files) $(measure_fftw
 	./compare -k "all" -r -o -s -n 3 -a "hardware,kind,library" --xlabel="Signal_Size_[bytes]" --ymetric="Time_FFT" --nolegend --notitle --logy=10 --logx=2 -f $(@)_a $? > $(@)_a.log 2>&1
 	./compare -k "all" -r -o -s -n 3 -a "hardware,kind,library" --xlabel="Signal_Size_[bytes]" --ylabel="Time_for_Planning_[ms]" --ymetric="Time_PlanInitFwd" --nolegend --notitle --logy=10 --logx=2 -f $(@)_b $? > $(@)_b.log 2>&1
 	./compare -k "all" -r -o -s -n 1 -a "hardware,kind,library" --xlabel="Signal_Size_[bytes]" --ymetric="Time_FFT" --legend-only --notitle --logy=10 --logx=2 -f $(@)_legend $? > $(@)_legend.log 2>&1
+results_r2c_vs_c2c : $(cufft8_P100_files) $(measure_fftw_files)
+	@echo "input: $(?)"
+	./compare -k "powerof2" -s -o -n 3 -a "hardware,complex" --ylimit=0.0625,1250 --xlimit=1,4096 --xlabel="Signal_Size_[bytes]" --ymetric="Time_FFT" --notitle --logy=2 --logx=2 -f $(@)_a $? > $(@)_a.log 2>&1
+	./compare -k "powerof2" -r -o -n 3 -a "hardware,precision" --ylimit=0.0625,1250 --xlimit=1,4096 --xlabel="Signal_Size_[bytes]" --ymetric="Time_FFT" --notitle --logy=2 --logx=2 -f $(@)_b $? > $(@)_b.log 2>&1
 
-results_placiness : $(cufft8_P100_files) $(measure_fftw_files)
+results_placiness : $(cufft8_P100_files) $(cufft8_K80_files) $(measure_fftw_files)
 	@echo "input: $(?)"
 	./compare -k "powerof2" -r -s -n 3 -a "hardware,inplace" --xlabel="Signal_Size_[bytes]" --ymetric="Time_FFT" --notitle --logy=10 --logx=2 -f $(@) $? > $(@).log 2>&1
 	./compare -k "powerof2" -c -s -n 3 -a "hardware,inplace" --xlabel="Signal_Size_[bytes]" --ymetric="Time_FFT" --notitle --logy=10 --logx=2 -f $(@)_b $? $(cufft8_K80_files) $(cufft8_GTX1080_files) > $(@)_b.log 2>&1
@@ -68,6 +73,7 @@ clean :
 	rm -vf *.png
 	rm -vf *.pdf
 	rm -vf *.svg
+	rm -vf *.log
 
 distclean : clean
 	rm -vf *compare.log
