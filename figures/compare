@@ -297,10 +297,10 @@ aesthetics_from_cli <- strsplit(opts[["aesthetics"]],",")
 
 aesthetics_keys   <- c("colour","linetype","shape")
 aesthetics_to_use <- aes(x=xmoi)
-
+aesthetics_length <- length(aesthetics_from_cli[[1]])
 for(i in 1:length(aesthetics_keys)) {
     
-    if( i <= length(aesthetics_from_cli[[1]]) ){
+    if( i <= aesthetics_length ){
         cat("ggplot aesthetics : ",aesthetics_keys[i]," = ",
             aesthetics_from_cli[[1]][i]," possible values: ",
             eval(parse(text=paste("levels(as.factor(data_for_plotting$",
@@ -325,7 +325,7 @@ moi_plot <- moi_plot + geom_errorbar(aes(ymin = moi_mean - moi_stddev,
                                          ymax = moi_mean + moi_stddev),
                                      width=0.5)
 
-cat("filtered by",paste(filtered_by, collapse=" "),"(n aesthetics = ",paste(length(aesthetics_from_cli[[1]])),")\n")
+cat("filtered by",paste(filtered_by, collapse=" "),"(n aesthetics = ",paste(aesthetics_length),")\n")
 if( opts[["notitle"]] == F ) {
     moi_plot <- moi_plot + ggtitle(paste(filtered_by,collapse=" "))
 }
@@ -458,22 +458,22 @@ if(opts[["legend-only"]]){
 #                             legend.justification=c(0,0),
                              legend.key = element_rect(colour = 'white', fill = 'white', size = 0., linetype='dashed')
                              )
-    moi_plot = moi_plot + my_theme + guides(col = guide_legend(nrow = 2))
+    moi_plot = moi_plot + my_theme + guides(col = guide_legend(nrow = aesthetics_length))
     legend <- g_legend(moi_plot)
     ## grid.draw(legend)
     ggsave(paste(opts[["filename"]],".png",sep=""),legend,width=12,height=1.25)
     ggsave(paste(opts[["filename"]],".svg",sep=""),legend,width=12,height=1.25)
-    cairo_pdf(paste(opts[["filename"]],".pdf",sep=""),width=12,height=1.15)
+    cairo_pdf(paste(opts[["filename"]],".pdf",sep=""),width=12,height=0.5*aesthetics_length)
     grid.arrange(legend,ncol=1)
     dev.off()
 } else {
 
-    if ( length(aesthetics_from_cli[[1]]) > 2 ) {
-        moi_plot = moi_plot + guides(col = guide_legend(ncol= length(aesthetics_from_cli[[1]]), nrow = 2))
+    if ( aesthetics_length > 2 ) {
+        moi_plot = moi_plot + guides(col = guide_legend(ncol= aesthetics_length, nrow = 2))
     }
     ggsave(paste(opts[["filename"]],".png",sep=""),moi_plot)
     ggsave(paste(opts[["filename"]],".svg",sep=""),moi_plot)
-    cairo_pdf(paste(opts[["filename"]],".pdf",sep=""),width=5,height=4)
+    cairo_pdf(paste(opts[["filename"]],".pdf",sep=""),width=5,height=3.5)
     print(moi_plot)
     dev.off()
 }
