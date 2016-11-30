@@ -188,22 +188,6 @@
   publisher={ed}
 }
 
-@article{DBLP:journals/corr/GholamiHMB15,
-  author    = {Amir Gholami and
-               Judith Hill and
-               Dhairya Malhotra and
-               George Biros},
-  title     = {{AccFFT}: {A} library for distributed-memory {FFT} on {CPU} and {GPU}
-               architectures},
-  journal   = {CoRR},
-  volume    = {abs/1506.07933},
-  year      = {2015},
-  url       = {http://arxiv.org/abs/1506.07933},
-  timestamp = {Wed, 01 Jul 2015 15:10:24 +0200},
-  biburl    = {http://dblp.uni-trier.de/rec/bib/journals/corr/GholamiHMB15},
-  bibsource = {dblp computer science bibliography, http://dblp.org}
-}
-
 @inproceedings{shoc2010,
   title={The scalable heterogeneous computing (SHOC) benchmark suite},
   author={Danalis, Anthony and Marin, Gabriel and McCurdy, Collin and Meredith, Jeremy S and Roth, Philip C and Spafford, Kyle and Tipparaju, Vinod and Vetter, Jeffrey S},
@@ -249,18 +233,17 @@
 }
 
 
-
 @Online{benchFFT,
   author = 	 {Frigo, Matteo and Johnson, Steven G.},
   title = 	 {{benchFFT}},
   year = {2016},
-  url = {http://www.fftw.org/benchfft/}
+  url = {http://www.fftw.org/benchfft}
 }
 
 @Unpublished{fft_check,
   author = 	 {Takeshi Nishimatsu},
   title = 	 {fft\_check.F},
-  note = 	 {a three-dimensional FFT benchmark program written in Fortran},
+  note = 	 {{A three-dimensional FFT benchmark program written in Fortran}},
   url = {http://loto.sourceforge.net/feram/src/fft_check.html}
 }
 
@@ -282,23 +265,14 @@
 }
 
 @online{gearshifft_github,
-  title = 	 {gearshifft - Benchmark Suite for Heterogenuous FFT Implementations},
+  title = 	 {gearshifft: Benchmark Suite for Heterogeneous FFT Implementations},
   year = 	 {2016},
   url = {https://github.com/mpicbg-scicomp/gearshifft}
 }
 
-@inproceedings{hoefler2010parallel,
-  title={Parallel zero-copy algorithms for fast Fourier transform and conjugate gradient using MPI datatypes},
-  author={Hoefler, Torsten and Gottlieb, Steven},
-  booktitle={European MPI Users' Group Meeting},
-  pages={132--141},
-  year={2010},
-  organization={Springer}
-}
-
 @online{taurus,
 title = {Taurus},
-author = {Zentrum für Informationsdienste und Hochleistungsrechnen, TU Dresden},
+author = {{\relax Zentrum für Informationsdienste und Hochleistungsrechnen, TU Dresden}},
 url = {https://doc.zih.tu-dresden.de/hpc-wiki/bin/view/Compendium/SystemTaurus}
 }
 
@@ -327,23 +301,16 @@ url = {http://www.hzdr.de/db/Cms?pOid=12231&pNid=852}
   publisher={JSTOR}
 }
 
-
 @Book{gauss,
   author = 	 {Gauss, Carl Friedrich},
-  ALTeditor = 	 {},
   title = 	 {Theoria interpolationis methodo nova tractata},
-  publisher = 	 {Königliche Gesellschaft der Wissenschaften, Göttingen},
+  publisher = 	 {König\-liche Gesellschaft der Wissenschaften, Göttingen},
   year = 	 {1866},
+  pages = {265--327},
   OPTkey = 	 {},
-  volume = 	 {3},
-  OPTnumber = 	 {},
-  OPTseries = 	 {},
-  OPTaddress = 	 {},
-  OPTedition = 	 {},
-  OPTmonth = 	 {},
-  note = 	 {265–327},
-  OPTannote = 	 {}
+  volume = 	 {3}
 }
+
 @ARTICLE{bluestein,
 author={L. Bluestein},
 journal={IEEE Transactions on Audio and Electroacoustics},
@@ -357,22 +324,19 @@ doi={10.1109/TAU.1970.1162132},
 ISSN={0018-9278},
 month={Dec},}
 
-@article{cooley65
-,author={James W. Cooley and John W. Tukey}
-,ISSN={0025--5718}
-,journal={Mathematics of Computation}
-,MR={31:2843}
-,pages={297--301}
-,title={{An algorithm for the machine calculation of complex Fourier series}}
-,volume={19}
-,year={1965}
-}
-
-@inproceedings{hoefler2010parallel,
-  title={Parallel zero-copy algorithms for fast Fourier transform and conjugate gradient using MPI datatypes},
-  author={Hoefler, Torsten and Gottlieb, Steven},
-  booktitle={European MPI Users' Group Meeting},
-  pages={132--141},
-  year={2010},
-  organization={Springer}
-}
+@inproceedings{dftgpu,
+ author = {Govindaraju, Naga K. and Lloyd, Brandon and Dotsenko, Yuri and Smith, Burton and Manferdelli, John},
+ title = {High Performance Discrete Fourier Transforms on Graphics Processors},
+ booktitle = {Proceedings of the 2008 ACM/IEEE Conference on Supercomputing},
+ series = {SC '08},
+ year = {2008},
+ isbn = {978-1-4244-2835-9},
+ location = {Austin, Texas},
+ pages = {2:1--2:12},
+ articleno = {2},
+ numpages = {12},
+ url = {http://dl.acm.org/citation.cfm?id=1413370.1413373},
+ acmid = {1413373},
+ publisher = {IEEE Press},
+ address = {Piscataway, NJ, USA},
+} 

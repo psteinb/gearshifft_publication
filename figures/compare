@@ -248,7 +248,7 @@ if( grepl("bytes",name_of_xmetric)  ) {
     name_of_xmetric <- gsub("bytes","MB",name_of_xmetric)
 }
 
-if( grepl("bytes",name_of_xmetric) ){
+if( grepl("bytes",name_of_ymetric) ){
     succeeded_reduced$ymoi <- succeeded_reduced$ymoi / (1024*1024)
     name_of_ymetric <- gsub("bytes","MB",name_of_ymetric)
 }
