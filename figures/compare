@@ -473,7 +473,11 @@ if(opts[["legend-only"]]){
     }
     ggsave(paste(opts[["filename"]],".png",sep=""),moi_plot)
     ggsave(paste(opts[["filename"]],".svg",sep=""),moi_plot)
-    cairo_pdf(paste(opts[["filename"]],".pdf",sep=""),width=5,height=3.5)
+    if(opts[["nolegend"]]) {
+        cairo_pdf(paste(opts[["filename"]],".pdf",sep=""),width=5,height=2.5)
+    }else{
+        cairo_pdf(paste(opts[["filename"]],".pdf",sep=""),width=5,height=3.5)
+    }
     print(moi_plot)
     dev.off()
 }

@@ -86,11 +86,11 @@ We begin the discussion with the classical use case for developers that might be
 
 \cref{fig:fftw_plan_flags} compares the time-to-solution to the actual time spent for the FFT operation itself. This illustration makes the cost and the benefit of higher planning flags than \texttt{FFTW\_ESTIMATE} obvious. Where \texttt{FFTW\_MEASURE} imposes a runtime penalty of 1 to 2 orders of magnitude with respect to \texttt{FFTW\_ESTIMATE}, it offers superior performance. The careful observer has noticed that the planning times for \texttt{FFTW\_MEASURE} become prohibitively large for large input data sizes and reach minutes for data sets in the Gigabyte range. This is a well-known feature of FFTW as the authors note in \cite{FFTW05}:
 %
-\begin{center}
+\begin{quote}
   ``In performance critical applications, many transforms of the same
   size are typically required, and therefore a large one-time cost is
   usually acceptable.''
-\end{center}
+\end{quote}
 % 
 \gearshifft{} allows to dissect this problem further and isolate the planning time only.
 %
@@ -150,11 +150,11 @@ It is a common practice that complex-to-complex transforms are considered more p
   \subfloat[single precision]{\includegraphics[width=0.45\textwidth]{figures/results_r2c_vs_c2c_a.pdf}\label{fig:r2c_vs_c2c_a}}
   \hfill
   \subfloat[real-to-complex]{\includegraphics[width=0.45\textwidth]{figures/results_r2c_vs_c2c_b.pdf}\label{fig:r2c_vs_c2c_b}}
-  \caption{Time for computing a forward FFT transform using 3D power-of-2 input signals using fftw and cufft on respective hardware. \cref{fig:r2c_vs_c2c_a} computes a real-to-complex transform and compares it to a complex-to-complex transform for single precision input data, whereas \cref{fig:r2c_vs_c2c_b} shows a real-to-complex transform for either single or double precision. Both figures use a log2-versus-log2 scale.}
+  \caption{Time for computing a forward FFT transform using 3D power-of-2 input signals using FFTW and cuFFT on respective hardware. \cref{fig:r2c_vs_c2c_a} computes a real-to-complex transform and compares it to a complex-to-complex transform for single precision input data, whereas \cref{fig:r2c_vs_c2c_b} shows a real-to-complex transform for either single or double precision. Both figures use a log2-versus-log2 scale.}
   \label{fig:r2c_vs_c2c}
 \end{figure}
 
-\cref{fig:r2c_vs_c2c} restricts itself to larger signal sizes in order to aid the visualisation. Note that in \cref{fig:r2c_vs_c2c_a}, a data point at the same signal size does have equal shape compared to real and complex data due to complex data having double the items than real inputs. If one compares for example the entry at \SI[exponent-base=2]{e8}{\mebi\byte} for real input to the entry for \SI[exponent-base=2]{e9}{\mebi\byte} of complex type, it is clearly visible that the runtime difference amounts to \numrange{4}{8} fold regressions (note that \cref{fig:r2c_vs_c2c_a} uses a log2-log2 scale). This is equally true for FFTW on the CPU as well as for cufft on the P100. Thus, using a complex-to-complex transform to perform an FFT on real input proves to be slower than the real-to-complex operation.
+\cref{fig:r2c_vs_c2c} restricts itself to larger signal sizes in order to aid the visualisation. Note that in \cref{fig:r2c_vs_c2c_a}, a data point at the same signal size does have equal shape compared to real and complex data due to complex data having double the items than real inputs. If one compares for example the entry at \SI[exponent-base=2]{e8}{\mebi\byte} for real input to the entry for \SI[exponent-base=2]{e9}{\mebi\byte} of complex type, it is clearly visible that the runtime difference amounts to \numrange{4}{8} fold regressions (note that \cref{fig:r2c_vs_c2c_a} uses a log2-log2 scale). This is equally true for FFTW on the CPU as well as for cuFFT on the P100. Thus, using a complex-to-complex transform to perform an FFT on real input proves to be slower than the real-to-complex operation.
 
 \cref{fig:r2c_vs_c2c_b} tries to answer the question, what gain can be expected if double precision is not needed for computing an FFT. On the high grade server GPU, the Nvidia Tesla P100, the performance difference remains below $2{\times}$. The results for FFTW vary more around \numrange{1.5}{2.5} fold regressions. 
 
@@ -165,6 +165,7 @@ The last analysis of this study is dedicated to the performance difference of in
 
 \begin{figure}[!tbp]
   \centering
+  \includegraphics[width=\textwidth]{figures/results_placiness_legend.pdf}
   \includegraphics[width=0.45\textwidth]{figures/results_placiness_b.pdf}
   \caption{Time for computing single-precision real-to-complex forward transforms using the 3D power-of-2 input data. The figure uses a log10-versus-log2 scale.}
   \label{fig:placiness}
