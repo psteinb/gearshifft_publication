@@ -13,26 +13,26 @@ The results presented in the following sections were collected on three systems:
   \centering
   \caption{Benchmark Hardware}
   \label{tab:hardware}
-  \begin{tabular}{l|llll}
+  \begin{tabular}{lllll}
     \toprule
                & \multicolumn{2}{c}{\textbf{Taurus}}           & \textbf{Hypnos}           & \textbf{Islay}                            \\
                & \multicolumn{2}{c}{HPC Cluster \cite{taurus}} & HPC Cluster \cite{hypnos} & Workstation                               \\
                & K80 node                                      & K20Xm node                &                     &                     \\
     \midrule
-    CPU vendor & Intel                                         & Intel                     & Intel               & Intel               \\
-    CPU family & Haswell Xeon                                  & Sandybridge Xeon          & Haswell Xeon        & Haswell Xeon        \\
-    CPU model  & E5-2680 v3                                    & E5-2450                   & E5-2603 v3          & E5-2640 v3          \\
-    sockets    & $2$                                           & $2$                       & $2$                 & $2$                 \\
-    RAM        & \SI{64}{\gibi\byte}                           & \SI{48}{\gibi\byte}       & \SI{64}{\gibi\byte} & \SI{64}{\gibi\byte} \\
+%    CPU vendor & Intel                                         & Intel                     & Intel               & Intel               \\
+    \textbf{CPU family} & Haswell Xeon                                  & Sandybridge Xeon          & Haswell Xeon        & Haswell Xeon        \\
+    \textbf{CPU model } & $2{\times}$ E5-2680 v3                        & $2{\times}$ E5-2450       & $2{\times}$ E5-2603 v3 & $2{\times}$ E5-2640 v3          \\
+%    sockets    & $2$                                           & $2$                       & $2$                 & $2$                 \\
+    \textbf{RAM       } & \SI{64}{\gibi\byte}                           & \SI{48}{\gibi\byte}       & \SI{64}{\gibi\byte} & \SI{64}{\gibi\byte} \\
     \midrule
-    GPU vendor & NVIDIA                                        & NVIDIA                    & NVIDIA              & NVIDIA              \\
-    GPU family & Tesla                                         & Tesla                     & Tesla               & GeForce             \\
-    GPU        & 4x K80                                        & 2x K20x                   & 1x P100             & 1x GTX 1080         \\
-    GPU memory & 8x \SI{12}{\gibi\byte}                        & \SI{6}{\gibi\byte}        & \SI{16}{\gibi\byte} & \SI{8}{\gibi\byte}  \\
-    GPU driver & $367.48$                                      & $367.48$                  & $367.48$            & $367.57$            \\
+%    GPU vendor & NVIDIA                                        & NVIDIA                    & NVIDIA              & NVIDIA              \\
+    \textbf{GPU family} & Tesla                                         & Tesla                     & Tesla               & GeForce             \\
+    \textbf{GPU       } & 4x K80                                        & 2x K20x                   & 1x P100             & 1x GTX 1080         \\
+    \textbf{GPU memory} & 8x \SI{12}{\gibi\byte}                        & \SI{6}{\gibi\byte}        & \SI{16}{\gibi\byte} & \SI{8}{\gibi\byte}  \\
+    \textbf{GPU driver} & $367.48$                                      & $367.48$                  & $367.48$            & $367.57$            \\
     \midrule
-    OS         & RHEL $7.2$                                    & RHEL $7.2$                & Ubuntu $14.04.3$    & CentOS $7.2$        \\
-               & 64-bit                                        & 64-bit                    & 64-bit              & 64-bit              \\
+    \textbf{OS}         & RHEL $7.2$                                    & RHEL $7.2$                & Ubuntu $14.04.3$    & CentOS $7.2$        \\
+%               & 64-bit                                        & 64-bit                    & 64-bit              & 64-bit              \\
     \bottomrule
   \end{tabular}
 \end{table}
