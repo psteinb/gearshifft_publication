@@ -16,11 +16,11 @@ The design of many FFT libraries is based on the architecture and API of FFTW $3
 \begin{lstlisting}[caption={Minimal usage example of the FFTW single precision real-to-complex planner API. Memory management is omitted.},label={lst:fftw_example}]
 int shape[] = {32,32,32};
 fftw_plan r2c_plan = fftw_plan_dft_r2c(
-3, //rank, here 3D
-shape, //shape of the input
-(float *) input_buffer, //input data array
-(fftwf_complex *) output,//output data array
-FFTW_ESTIMATE //planner flag
+  3, //rank, here 3D
+  shape, //shape of the input
+  (float *) input_buffer, //input data array
+  (fftwf_complex *) output,//output data array
+  FFTW_ESTIMATE //planner flag
 );
 fftwf_execute(r2c_plan);
 \end{lstlisting}
