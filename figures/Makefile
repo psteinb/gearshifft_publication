@@ -65,6 +65,7 @@ results_r2c_vs_c2c : $(cufft8_P100_files) $(measure_fftw_files)
 	./compare -k "powerof2" -s -o -n 3 -a "hardware,complex" --ylimit=0.0625,1250 --xlimit=1,4096 --xlabel="Signal_Size_[bytes]" --ymetric="Time_FFT" --notitle --logy=2 --logx=2 -f $(@)_a $? > $(@)_a.log 2>&1
 	#./compare -k "powerof2" -r -o -n 3 -a "hardware,precision" --xlabel="Signal_Size_[bytes]" --ymetric="Time_FFT" --nolegend --notitle --logx=10 -f $(@)_b $? > $(@)_b.log 2>&1
 	./compare -k "powerof2" -r -o -n 3 -a "hardware,precision" --ylimit=0.0625,1250 --xlimit=1,4096 --xlabel="Signal_Size_[bytes]" --ymetric="Time_FFT" --notitle --logy=2 --logx=2 -f $(@)_b $? > $(@)_b.log 2>&1
+#	./compare -k "powerof2" -r -o -n 3 -a "hardware,precision" --ylimit=0.0625,1250 --xlimit=1,4096 --xlabel="Signal_Size_[bytes]" --ymetric="Time_FFT" --notitle --legend-only --logy=2 --logx=2 -f $(@)_legend $? > $(@)_legend.log 2>&1
 
 
 clean :

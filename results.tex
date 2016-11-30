@@ -49,7 +49,7 @@ The results presented in the following sections were collected on three systems:
 %   2x Intel(R) Xeon(R) CPU E5-2640 v3 @ 2.60GHz, 64 GB RAM, 1x NVIDIA GeForce GTX 1080 (8 GB GDDR5X RAM)
 % \end{itemize}
 
-All systems presented in \cref{tab:hardware} will be used for the benchmarks in this section. Access was performed via a \texttt{ssh} session without running a graphical user interface running on the target system. All measurements used the GNU compiler collection (GCC, \cite{stallman2001using}) version 5.3.0 as the underlying compiler if not stated otherwise. All used GPU implementations on nVidia hardware interfaced with the proprietary driver listed in \cref{tab:hardware} and used the infrastructure provided by CUDA $8.0.44$ if not stated otherwise. 
+All systems presented in \cref{tab:hardware} will be used for the benchmarks in this section. Access was performed via a \texttt{ssh} session without running a graphical user interface running on the target system. All measurements used the GNU compiler collection (GCC) version 5.3.0 as the underlying compiler if not stated otherwise. All used GPU implementations on nVidia hardware interfaced with the proprietary driver listed in \cref{tab:hardware} and used the infrastructure provided by CUDA $8.0.44$ if not stated otherwise. 
 
 In order to generate one data set, a set arrays of arbitrary shapes is provided to a specific FFT API. The configuration files thereof can be accessed via \cite{gearshifft_github}. The shape configurations are separated in groups: \texttt{powerof2} (all dimensions are powers of $2$), \texttt{radix357} (all dimensions are either powers of $3$, $5$ or $7$) and \texttt{oddshape} (all dimensions are powers of $19$ in order to emulated very uncommon signal sizes). These configurations were generated in order to probe the FFT implementations for a wide spectrum of possible applications.  
 
@@ -146,7 +146,7 @@ It is a common practice that complex-to-complex transforms are considered more p
 
 \begin{figure}[!tbp]
   \centering
-  \includegraphics[width=\textwidth]{figures/results_r2c_vs_c2c_legend.pdf}
+  %\includegraphics[width=\textwidth]{figures/results_r2c_vs_c2c_legend.pdf}
   \subfloat[single precision]{\includegraphics[width=0.45\textwidth]{figures/results_r2c_vs_c2c_a.pdf}\label{fig:r2c_vs_c2c_a}}
   \hfill
   \subfloat[real-to-complex]{\includegraphics[width=0.45\textwidth]{figures/results_r2c_vs_c2c_b.pdf}\label{fig:r2c_vs_c2c_b}}
@@ -154,10 +154,10 @@ It is a common practice that complex-to-complex transforms are considered more p
   \label{fig:r2c_vs_c2c}
 \end{figure}
 
-\cref{fig:r2c_vs_c2c} restricts itself to larger signal sizes in order to aid the visualisation. Note that in \cref{fig:r2c_vs_c2c_a}, a data point at the same signal size does have equal shape compared to real and complex data due to complex data having double the items than real inputs. If one compares for example the entry at $\SI{2^8}{\mebi\byte}$ for real input to the entry for $\SI{2^9}{\mebi\byte}$ of complex type, it is clearly visible that the runtime difference amounts to \numrange{4}{8} fold regressions (not that \cref{fig:r2c_vs_c2c_a} uses a log2-log2 scale). This is equally true for FFTW on the CPU as well as for cufft on the P100. Thus, using a complex-to-complex transform to perform an FFT on real input proves to be slower than the real-to-complex operation.
+\cref{fig:r2c_vs_c2c} restricts itself to larger signal sizes in order to aid the visualisation. Note that in \cref{fig:r2c_vs_c2c_a}, a data point at the same signal size does have equal shape compared to real and complex data due to complex data having double the items than real inputs. If one compares for example the entry at \SI[exponent-base=2]{e8}{\mebi\byte} for real input to the entry for \SI[exponent-base=2]{e9}{\mebi\byte} of complex type, it is clearly visible that the runtime difference amounts to \numrange{4}{8} fold regressions (note that \cref{fig:r2c_vs_c2c_a} uses a log2-log2 scale). This is equally true for FFTW on the CPU as well as for cufft on the P100. Thus, using a complex-to-complex transform to perform an FFT on real input proves to be slower than the real-to-complex operation.
 
-\cref{fig:r2c_vs_c2c_b} tries to answer the question, what gain can be expected if double precision is not needed for computing an FFT. On the high grade server GPU, the Nvidia Tesla P100, the performance difference remains below $2x$. The results for FFTW vary more around \numrange{1.5}{2.5} fold regressions. 
+\cref{fig:r2c_vs_c2c_b} tries to answer the question, what gain can be expected if double precision is not needed for computing an FFT. On the high grade server GPU, the Nvidia Tesla P100, the performance difference remains below $2{\times}$. The results for FFTW vary more around \numrange{1.5}{2.5} fold regressions. 
 
-\subsection{Memory Modes}
-\label{ssec:mem_mode}
+%% \subsection{Memory Modes}
+%% \label{ssec:mem_mode}
 
