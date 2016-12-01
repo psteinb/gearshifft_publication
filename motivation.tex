@@ -16,9 +16,7 @@ with $k$ being an integer index within $0 \le k < n$. This operation was found t
 
 Radix-2 DFTs ($n$ being a power of two) are mostly implemented with the Cooley-Tukey algorithm \cite{cooley1965algorithm}. Stockham's formulations of the FFT can be applied \cite{FFTW05} to avoid incoherent memory accesses. Arbitrary and mixed radices are more complicated and can be tackled with the prime-factorization or Chirp Z-transform implemented by the Bluestein's algorithm \cite{bluestein}. Due to these differences among the three major implementation schemas, we classify the FFT extent shapes of our benchmark data into \emph{powerof2} (radix-2), \emph{radix357} (mixed-radix of primes 3, 5 and 7) and into \emph{oddshape} (arbitrary radices excluding the previous cases). 
 
-Given the multitude of mathematical formulations and the heterogenity of hardware, our aim is to provide a set of simple commands within \gearshifft{} to run benchmarks against a community's desired FFT implementation and compare to others in an unbiased way. Further, modern GPU based FFT libraries are updated regularly: cuFFT sees around 1-2 release updates per year with every CUDA version, clFFT was updated six times during the course of 2016). Library vendors need to assess if the most recent version of their used FFT implementation yields the performance profits to justify updating their package's dependencies. Further more, new users of FFT libraries are often overwhelmed by the number of different FFT implementations and their variations in use. 
-
-Thus, \gearshifft{} approaches the challenge of benchmarking a variety of FFT libraries from a user perspective. This means, that the following parameters shall be easy to study:
+Given the multitude of mathematical formulations and the heterogenity of hardware, \gearshifft{} approaches the challenge of benchmarking a variety of FFT libraries from a user perspective. This means, that the following parameters shall be easy to study:
 
 \begin{itemize}
 \item FFT dimension and radix-type (e.g. $32{\times}32{\times}32$ as radix-2 3D FFT)
