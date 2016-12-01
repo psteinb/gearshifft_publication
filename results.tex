@@ -56,6 +56,25 @@ In order to generate one data set, a set arrays of arbitrary shapes is provided 
 The FFT calls to benchmark are executed five times each. From this, the arithmetic mean and sample standard deviations are used for figures presented below. As the number of repetitions is a configurable parameter of \gearshifft{}, we leave it to the user to produce a more comprehensive data set than used for this publication. We consider five repetitions enough at this point to show and discuss several aspects of performance and usability of \gearshifft{} and the FFT libraries under study.  
 
 %TODO: why maximum size of transforms?
+\subsection{gearshifft}
+The \gearshifft{} framework is designed as a thin wrapper, but there are still runtime information collected for the benchmark. 
+\gearshifft{} repeats after a warmup step the benchmark five times and averages the runtime. To verify the impact of \gearshifft{} a configuration file with 1 and with 100 extents is used.
+The cuFFT code measures after a warmup step the time to solution for the same roundtrip FFT, returning the average of 25 runs.
+\cref{tab:verify} indicates a zero overhead effect of \gearshifft{}, where \mc{rep.} defines the number of extents loaded by a single \gearshifft{} instance repeatedly.
+
+\begin{table}[tbp]
+  \centering
+  \caption{Verification cuFFT vs. gearshifft for inplace complex-to-complex transform (single-precision) for 16777216-point FFT on the K80 GPU}
+  \label{tab:verify}
+  \begin{tabular}{lrr}
+  \toprule
+  \textbf{rep.} & \mc{cuFFT} & \mc{gearshifft} \\
+  \midrule
+  1 & \SI{109.615}{\milli\second} & \SI{109.687}{\milli\second} \\
+  100 & -- & \SI{109.818}{\milli\second} \\
+  \bottomrule
+  \end{tabular}
+\end{table}
 
 \subsection{Time To Solution}
 \label{ssec:tts}

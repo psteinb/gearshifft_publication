@@ -182,7 +182,7 @@ The same holds for the error bound \mc{Application::ERROR_BOUND=0.00001}. After 
 Now after the frontend API has been introduced, the backend of \gearshifft{} is discussed.
 % definition might be moved into former section
 A benchmark is defined to collect performance indicators of a set of operations, and repeats the execution several times to obtain reliable statistics. Different parameters like precision, FFT extents, transform variant, device type or FFT library relate to different benchmarks.
-\gearshifft{} controls many of them by command line arguments (\cref{tab:cmdargs}). The FFT libraries are related to different \gearshifft{} binaries (\mc{gearshifft_cufft}, \ldots).
+\gearshifft{} controls many of them by command line arguments. The FFT libraries are related to different \gearshifft{} binaries (\mc{gearshifft_cufft}, \ldots).
 The backend of \gearshifft{} uses Boost Unit Test Framework to generate the benchmark instances. % @todo ref
 %
 The measurement layout and benchmark framework is illustrated in \cref{fig:framework}.
@@ -336,38 +336,39 @@ The common build procedure is to use a build directory (release, debug) for make
 
 %% \vspace{-2em}
 
-\begin{table}[htp]
- \centering
- \caption{gearshifft command-line arguments}
- \label{tab:cmdargs}
-  \begin{tabular}{llp{6.4cm}}
-\toprule
-Flag & [Flag] Argument & Description \\
-\midrule
--h&[ -{}-help ]                    &Print help messages \\
--e&[ -{}-extent ] arg              &Specific extent (eg. 1024x1024)\newline[$\ge1$ 
-                                  arguments possible] \\
--f&[ -{}-file ] arg                &File with extents (row-wise csv)\newline[$\ge1$ 
-                                  arguments possible] \\
--o&[ -{}-output ] arg (=result.csv)&Output csv file, will be overwritten! \\
--v&[ -{}-verbose ]                 &Show statistics after benchmarks finished \\
--d&[ -{}-device ] arg (=gpu)       &Compute device = (gpu|cpu|acc|<ID>). If 
-                                  device is not supported by FFT lib, then it
-                                  is ignored and default is used. \\
--n&[ -{}-ndevices ] arg (=0)       &Number of devices (0=all), if supported by 
-                                  FFT lib (e.g. clfft and fftw with n CPU 
-                                  threads). \\
--l&[ -{}-list-devices ]            &List of available compute devices with IDs,
-                                  if supported.  \\
--b&[ -{}-list-benchmarks ]         &Show registered benchmarks \\
--r&[ -{}-run-benchmarks ] arg      &Run specific benchmarks (wildcards 
-                                  possible, e.g. ClFFT/float/*/Inplace\_Real)\\
-\bottomrule
-  \end{tabular}
-\end{table}
+% \begin{table}[htp]
+%  \centering
+%  \caption{gearshifft command-line arguments}
+%  \label{tab:cmdargs}
+%   \begin{tabular}{llp{6.4cm}}
+% \toprule
+% Flag & [Flag] Argument & Description \\
+% \midrule
+% -h&[ -{}-help ]                    &Print help messages \\
+% -e&[ -{}-extent ] arg              &Specific extent (eg. 1024x1024)\newline[$\ge1$ 
+%                                   arguments possible] \\
+% -f&[ -{}-file ] arg                &File with extents (row-wise csv)\newline[$\ge1$ 
+%                                   arguments possible] \\
+% -o&[ -{}-output ] arg (=result.csv)&Output csv file, will be overwritten! \\
+% -v&[ -{}-verbose ]                 &Show statistics after benchmarks finished \\
+% -d&[ -{}-device ] arg (=gpu)       &Compute device = (gpu|cpu|acc|<ID>). If 
+%                                   device is not supported by FFT lib, then it
+%                                   is ignored and default is used. \\
+% -n&[ -{}-ndevices ] arg (=0)       &Number of devices (0=all), if supported by 
+%                                   FFT lib (e.g. clfft and fftw with n CPU 
+%                                   threads). \\
+% -l&[ -{}-list-devices ]            &List of available compute devices with IDs,
+%                                   if supported.  \\
+% -b&[ -{}-list-benchmarks ]         &Show registered benchmarks \\
+% -r&[ -{}-run-benchmarks ] arg      &Run specific benchmarks (wildcards 
+%                                   possible, e.g. ClFFT/float/*/Inplace\_Real)\\
+% \bottomrule
+%   \end{tabular}
+% \end{table}
 
-For the command-line arguments Boost is utilized, particularly for benchmark lists and selection. The \gearshifft{} program options are given in \cref{tab:cmdargs}.\linebreak
+For the command-line arguments Boost is utilized, particularly for benchmark lists and selection. There are several \gearshifft{} program options to control benchmark settings.
+A few examples will be given here, the full documentation can be found online \citep{gearshifft_github}.\newline
 \verb!gearshifft_clfft -e 16,16 8x8x8 -r */float/*/Inplace_Real -d cpu!\linebreak
-would run clfft benchmarks with real inplace real-to-complex / complex-to-real transform on an $8\times8\times8$ FFT and $16\times16$ FFT at single-precision. The default setting implies to use all CPU cores and to dump the results to result.csv (if already existent, it will be overwritten).
+would run clfft benchmarks with real inplace real-to-complex / complex-to-real transform on an $8\times8\times8$ FFT and $16\times16$ FFT at single-precision. 
+The default setting implies to use all CPU cores and to dump the results to result.csv (if already existent, it will be overwritten).
 The first wildcard \mc{*} relates to the title of the FFT client, where the second one refers to the extents.
-
