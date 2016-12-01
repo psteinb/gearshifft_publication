@@ -56,7 +56,7 @@ In order to generate one data set, a set arrays of arbitrary shapes is provided 
 The FFT calls to benchmark are executed five times each. From this, the arithmetic mean and sample standard deviations are used for figures presented below. As the number of repetitions is a configurable parameter of \gearshifft{}, we leave it to the user to produce a more comprehensive data set than used for this publication. We consider five repetitions enough at this point to show and discuss several aspects of performance and usability of \gearshifft{} and the FFT libraries under study.  
 
 %TODO: why maximum size of transforms?
-
+\newpage
 \subsection{Time To Solution}
 \label{ssec:tts}
 
@@ -96,15 +96,16 @@ We begin the discussion with the classical use case for developers that might be
 %
 \begin{figure}[!tbp]
   \centering
-  \subfloat[Fig A.]{\includegraphics[width=0.45\textwidth]{figures/results_plan_time_a.pdf}\label{fig:plan_time_a}}
+  \subfloat[3D transforms]{\includegraphics[width=0.45\textwidth]{figures/results_plan_time_a.pdf}\label{fig:plan_time_a}}
   \hfill
-  \subfloat[Fig B.]{\includegraphics[width=0.45\textwidth]{figures/results_plan_time_b.pdf}\label{fig:plan_time_b}}
+  \subfloat[1D transforms]{\includegraphics[width=0.45\textwidth]{figures/results_plan_time_b.pdf}\label{fig:plan_time_b}}
   \caption{Time-to-plan for power-of-2 single-precision real-to-complex forward transforms using FFTW, cuFFT and clFFT. \cref{fig:plan_time_a} reports the complete time to plan for 3D transforms, whereas \cref{fig:plan_time_b} is limited to 1D transforms. Both figures use a log10-log2 scale.}
   \label{fig:plan_time}
 \end{figure}
 %
 \cref{fig:plan_time} illustrates the problem to it's full extent. \texttt{FFTW\_MEASURE} consumes up to 3-4 orders of magnitude more time to produce a plan than a standard (GPU based libraries) or \texttt{FFTW\_ESTIMATE} based planner call especially for large input shapes, see \cref{fig:plan_time_a}. We observed that FFTW wisdom cannot be generated for 2D or 3D out-of-place transforms. Therefor, we compare the 3D planning with it's counterpart in 1D in \cref{fig:plan_time_b}. At input sizes of \SI{128}{\mebi\byte} in 1D, the planning phase exceeds the duration of \SI{100}{\second}. In practice, this imposes a challenge on the client to the FFTW API. Not only is the time to solution affected by this behavior which is a crucial quantity if FFT-heavy applications are run in an HPC environment. Here the runtime of applications needs to be know to some extent in order to allow efficient and rapid job placement in a cluster. Further, the developer interfacing with FFTW has to create infrastructure (thread-safe static singleton objects or similar come to mind) in order to perform the planning of FFTW only once and reuse the resulting plan as much as possible.
 
+\newpage
 \subsection{Comparing CPU versus GPU runtimes}
 \label{ssec:cpu_vs_gpu}
 
@@ -116,12 +117,14 @@ The last section finished by discussing a design artifact, that the FFTW authors
   \subfloat[3D transforms]{\includegraphics[width=0.45\textwidth]{figures/results_r2c_fwd_a.pdf}\label{fig:r2c_fwd_a}}
   \hfill
   \subfloat[1D transforms]{\includegraphics[width=0.45\textwidth]{figures/results_r2c_fwd_b.pdf}\label{fig:r2c_fwd_b}}
-  \caption{Time for computing power-of-2 single-precision real-to-complex forward transforms using the 3D API \cref{fig:r2c_fwd_a} and the 1D API clFFT \cref{fig:r2c_fwd_b}. Both figures use a log10-versus-log2 scale.}
+  \caption{Time for computing power-of-2 single-precision real-to-complex forward transforms using the 3D API (\cref{fig:r2c_fwd_a}) and the 1D API clFFT (\cref{fig:r2c_fwd_b}). Both figures use a log10-versus-log2 scale.}
   \label{fig:r2c_fwd}
 \end{figure}
 
-\cref{fig:r2c_fwd} shows the runtime spent for computing only the forward FFT for real single precision input data. This illustration is a direct measure for the quality of the implmentation and the hardware underneath. For the 3D case in \cref{fig:r2c_fwd_a}, we see that at the time of writing, FFTW on a double socket Haswell Intel Xeon E5 CPU provides very compelling performance if the input data is not larger than \SI{1}{\mebi\byte}. Above this limit, the GPU implementations offer a clear advantage by up to one order of magnitude. The current Pascal generation GPUs used with cuFFT provide the best performance, which does not come by surprise as both cards are equipped with GDDR5X or HBM2 memory which are clearly beneficial for an operation that yields low computational complexity such as the FFT. In the 1D case of \cref{fig:r2c_fwd_b}, the same observations must be made with even more certainty. The cross-over of FFTW and the GPU libraries occurs at an earlier point of \SI{64}{\kibi\byte}.  
+\cref{fig:r2c_fwd} shows the runtime spent for computing the forward FFT for real single precision input data. This illustration is a direct measure for the quality of the implmentation and the hardware underneath. For the 3D case in \cref{fig:r2c_fwd_a}, we see that at the time of writing, FFTW on a double socket Haswell Intel Xeon E5 CPU provides very compelling performance if the input data is not larger than \SI{1}{\mebi\byte}. Above this limit, the GPU implementations offer a clear advantage by up to one order of magnitude. The current Pascal generation GPUs used with cuFFT provide the best performance, which does not come by surprise as both cards are equipped with GDDR5X or HBM2 memory which are clearly beneficial for an operation that yields low computational complexity such as the FFT. In the 1D case of \cref{fig:r2c_fwd_b}, the same observations must be made with even more certainty. The cross-over of FFTW and the GPU libraries occurs at an earlier point of \SI{64}{\kibi\byte}.  
 
+Another observation in \cref{fig:r2c_fwd_a} is that the general structure of the runtime curves of GPU FFT implemetations follows an inverse roofline curve \cite{williams2009roofline}, that is for input signals smaller than the roofline turning point at \SI{1}{\mebi\byte} the FFT implementation appears to be of constant cost, i.e. to be compute bound. Above the aforementioned threshold, the implementation appears to be memory bound and hence exposes a linear growth with growing input signals. It is interesting to see that cufft performance curves apparently follow a roofline like shape the best, whereas FFTW does not - most of all in \cref{fig:r2c_fwd_b}.  We note that \gearshifft{} benchmark data could be well suited for creating roofline plots. However, the output data is currently not as detailed to produce comprehensive roofline graphs as discussed in \cite{ofenbeck2014applying} as hardware details (e.g. number of flops per cycle, number of flops per byte etc) are not contained. We would like to potentially address this issue in a future development of \gearshifft{} as this offers a unique chance to learn more about the capabilities and efficiency of the used implementation on the given hardware. 
+ 
 \subsection{Non-power-of-2 transforms}
 \label{ssec:nonpowerof2}
 

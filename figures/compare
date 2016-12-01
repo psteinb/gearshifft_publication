@@ -6,6 +6,7 @@ library(readr)
 library(dplyr, warn.conflicts=FALSE)
 library(gridExtra)
 library(scales)
+library(gtable)
 
 'Usage:
    compare [options] <csv-files>...
@@ -19,7 +20,8 @@ library(scales)
  -n --ndims=ND      	Use only ND dimensional output [default: 2], do not filter if ND=0
  --nolegend             Do not add a legend to the plot [default: FALSE]
  --notitle              Do not add a title to the plot [default: FALSE]
- --legend-only           Only save the legend to file [default: FALSE]
+ --legend-only          Only save the legend to file [default: FALSE]
+ --legend-pos=LPOS      If legend is plotted, plot it at <LPOS> [default: top]
  -y --ymetric=YMETRIC 	Use metric YMETRIC for plotting along y, this can now be a valid R expression that computes a derived value [default: Time_Total]
  --ylabel=YLABEL 	Use YLABEL for labelling the ymetric, note that underscores will be replaced by white spaces as white spaces are not correctly handled through the CLI [default: ]
  --ylimit=YLIMIT 	Use YLIMIT for marking the lowest and highest value shown on the y axis [default: 0,0]
@@ -85,6 +87,7 @@ open_gearshifft_csv <- function (fname){
     local_frame = local_frame %>% mutate( nbytes = ifelse("Complex" %in% complex,2,1)*ifelse("float" %in% precision,4,8)*nx*ny*nz )
     local_frame$hardware <- gpu_model
     local_frame$flags <- flags
+    local_frame = local_frame %>% mutate( library = tolower(library))
     
     return(local_frame)
 }
@@ -246,12 +249,12 @@ cat("calculating mean,median and sd of ",name_of_ymetric," versus ",name_of_xmet
 
 if( grepl("bytes",name_of_xmetric)  ) {
     succeeded_reduced$xmoi <- succeeded_reduced$xmoi / (1024.*1024.)
-    name_of_xmetric <- gsub("bytes","MB",name_of_xmetric)
+    name_of_xmetric <- gsub("bytes","MiB",name_of_xmetric)
 }
 
 if( grepl("bytes",name_of_ymetric) ){
     succeeded_reduced$ymoi <- succeeded_reduced$ymoi / (1024*1024)
-    name_of_ymetric <- gsub("bytes","MB",name_of_ymetric)
+    name_of_ymetric <- gsub("bytes","MiB",name_of_ymetric)
 }
 
 
@@ -282,13 +285,12 @@ my_theme <-  theme_bw() + theme(axis.title.x = element_text(size=18),
                                         #axis.text.x  = element_text()
                                 ,plot.margin = unit(c(8,10,1,1), "pt") # required otherwise labels are clipped in pdf output
                                 ) 
-my_theme <- my_theme + theme(legend.title = element_text(size=18, face="bold"),
-                             legend.text = element_text( size = 18),
+my_theme <- my_theme + theme(legend.title = element_blank(),#legend.title = element_text(size=16, face="bold"),
+                             legend.text = element_text( size = 16),
                              legend.position="top",
                              legend.direction="vertical",
                              legend.box ="horizontal",
                              legend.box.just ="top",
-                             
                              legend.background = element_rect(colour = 'white', fill = 'white', size = 0., linetype='dashed'),
                              legend.key = element_rect(colour = 'white', fill = 'white', size = 0., linetype='dashed')
                              ) 
@@ -298,14 +300,19 @@ aesthetics_from_cli <- strsplit(opts[["aesthetics"]],",")
 aesthetics_keys   <- c("colour","linetype","shape")
 aesthetics_to_use <- aes(x=xmoi)
 aesthetics_length <- length(aesthetics_from_cli[[1]])
+n_items_per_aesthetics = c()
+counter = 1
 for(i in 1:length(aesthetics_keys)) {
     
     if( i <= aesthetics_length ){
+        current_levels = eval(parse(text=paste("levels(as.factor(data_for_plotting$",
+                                        aesthetics_from_cli[[1]][i],"))",
+                                        sep="")))
+        n_items_per_aesthetics[counter] = length(current_levels)
+        counter = counter + 1
         cat("ggplot aesthetics : ",aesthetics_keys[i]," = ",
             aesthetics_from_cli[[1]][i]," possible values: ",
-            eval(parse(text=paste("levels(as.factor(data_for_plotting$",
-                           aesthetics_from_cli[[1]][i],"))",
-                           sep=""))),
+            current_levels,
             "\n")
         aesthetics_to_use[[aesthetics_keys[i]]] <- as.symbol(aesthetics_from_cli[[1]][i])
     }
@@ -330,6 +337,9 @@ if( opts[["notitle"]] == F ) {
     moi_plot <- moi_plot + ggtitle(paste(filtered_by,collapse=" "))
 }
 
+express <- function(char.expressions){
+       return(parse(text=paste(char.expressions,collapse=";")))
+   }
 
 moi_plot <- moi_plot + ylab(gsub("_"," ",name_of_ymetric)) + xlab(gsub("_"," ",name_of_xmetric))
 moi_plot <- moi_plot + my_theme 
@@ -446,24 +456,30 @@ g_legend<-function(a.gplot){
 
 
 if(opts[["legend-only"]]){
-
-    my_theme <- my_theme + theme(legend.title = element_text(size=20, face="bold"),
-                             legend.text = element_text( size = 18),
-                             ## legend.text.align=0,
-                             ## legend.title.align=0,
-                             legend.position="top",
-#                             legend.position=c(0, 1.),
-                             legend.box.just="left",
-                             legend.background = element_rect(colour = 'white', fill = 'white', size = 0., linetype='dashed'),
-#                             legend.justification=c(0,0),
-                             legend.key = element_rect(colour = 'white', fill = 'white', size = 0., linetype='dashed')
-                             )
-    moi_plot = moi_plot + my_theme + guides(col = guide_legend(nrow = aesthetics_length))
+    
+    moi_plot = moi_plot + theme(legend.title = element_blank(),
+                                 legend.position="top",
+        legend.box.just="top")
+    if( max(n_items_per_aesthetics) > 2 ) {
+        moi_plot = moi_plot + guides(col = guide_legend(nrow = 2))
+    } else {
+        moi_plot = moi_plot + guides(col = guide_legend(nrow = 1))
+    }
     legend <- g_legend(moi_plot)
-    ## grid.draw(legend)
-    ggsave(paste(opts[["filename"]],".png",sep=""),legend,width=12,height=1.25)
-    ggsave(paste(opts[["filename"]],".svg",sep=""),legend,width=12,height=1.25)
-    cairo_pdf(paste(opts[["filename"]],".pdf",sep=""),width=12,height=0.5*aesthetics_length)
+
+    print(legend)
+    print(legend$heights[3])
+    cat(typeof(legend$heights[3]),length(legend$heights[3]),paste(eval(legend$heights[3][[1]])),"\n")
+    print(legend$widths[3])
+    
+    rows_with_guides = legend$layout %>% filter(grepl("guide",name))
+    nrow_in_legend = 3#nrow(rows_with_guides)
+    cat("found",nrow_in_legend , "rows (max items: ",max(n_items_per_aesthetics),") in legend\n" )
+
+    ggsave(paste(opts[["filename"]],".png",sep=""),legend,width=12,height=.9)
+    ggsave(paste(opts[["filename"]],".svg",sep=""),legend,width=12,height=.9)
+    cairo_pdf(paste(opts[["filename"]],".pdf",sep=""),width=12,height=0.3*nrow_in_legend)
+    
     grid.arrange(legend,ncol=1)
     dev.off()
 } else {
@@ -474,9 +490,10 @@ if(opts[["legend-only"]]){
     ggsave(paste(opts[["filename"]],".png",sep=""),moi_plot)
     ggsave(paste(opts[["filename"]],".svg",sep=""),moi_plot)
     if(opts[["nolegend"]]) {
-        cairo_pdf(paste(opts[["filename"]],".pdf",sep=""),width=5,height=2.5)
+        cairo_pdf(paste(opts[["filename"]],".pdf",sep=""),width=5,height=4)
     }else{
-        cairo_pdf(paste(opts[["filename"]],".pdf",sep=""),width=5,height=3.5)
+        cairo_pdf(paste(opts[["filename"]],".pdf",sep=""),width=5,height=4.5
+                  )
     }
     print(moi_plot)
     dev.off()
