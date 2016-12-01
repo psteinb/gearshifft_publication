@@ -1,5 +1,6 @@
 /figures/*.png
 /figures/*.pdf
+/figures/*.svg
 /figures/*tex
 /figures/*.log
 /figures/.Rhistory
