@@ -124,8 +124,7 @@ template<
  typename T_ReusePlan, // can plan be reused ?
  template <typename,typename,size_t,typename... > typename T_Client,
  typename T_DeviceTimer,
- typename... T_ClientArgs
->
+ typename... T_ClientArgs >
 struct FFT : public T_FFT {
   template<typename T_Result, typename T_Vector, size_t NDim>
   void operator(/*..*/);
@@ -140,7 +139,7 @@ Most libraries allow plan reuse.
 Reusing a plan means to use only one plan handle. After forward transform has been finished the same plan handle is used for backward transform.
 This might save memory as there are no two plans allocated at the same time. FFTW already overwrites input and output buffer in the planning phase, when \mc{FFTW_MEASURE} is used. Afterwards, the buffers can be filled with data, but it means, that the plan cannot be reused at a later time, since the result buffer of the previous plan would be overwritten at the second planning stage.
 Thus, when it is not possible to reuse the plan handle, then plan handles for forward and inverse transform are allocated in the initialization phase.
-
+%
 \mc{T_Client} defines the FFT client class like \mc{CuFFTImpl} or \mc{FftwImpl}.
 The template parameters are at least the \mc{T_FFT} type (\mc{FFT_Inplace_Real}, \ldots), the precision type (float, \ldots) and the FFT dimension (1, 2 or 3). 
 If the client needs more template arguments the variadic template \mc{T_ClientArgs} is given to the \mc{T_Client} instantiation as fourth parameter (expansion of a parameter pack).
@@ -162,11 +161,9 @@ using Context           = MyFFT::Context;
 /// meta list can be extended with further types
 using FFTs              = List<MyFFT::Inplace_Real>;
 using Precisions        = List<float, double>;   
-/// if iFFT(FFT(x)) must not be divided by number of elements
-using FFT_Is_Normalized = std::false_type;       
-
-int main( int argc, char* argv[] )                       
-{                                                        
+/// do not divide iFFT(FFT(x)) by number of elements
+using FFT_Is_Normalized = std::false_type;
+int main( int argc, char* argv[] ) {                                                        
   try {                                                  
     Benchmark<Context> benchmark;
     benchmark.configure(argc, argv);                     
@@ -175,7 +172,7 @@ int main( int argc, char* argv[] )
     std::cerr << e.what() << std::endl;                  
     return 1;                                            
   }                                                      
-  return 0;                                              
+  return 0;
 }                                                        
 \end{lstlisting}
 
@@ -198,7 +195,7 @@ Furthermore, the memory footprint of the FFT client is recorded to answer the qu
 The functor \mc{FFT} contains the FFT client operations wrapped with time measurements. The input data buffer is hold by \mc{BenchmarkExecutor} and a copy is given to the \mc{FFT} functor each run.
 
 % implies plan reuse
-\begin{figure}
+\begin{figure}[t]
 \centering
 %align=center,rounded corners,inner sep=5pt,rectangle,draw,
 \tikzset{class/.style={inner sep=5pt,font=\footnotesize}}
