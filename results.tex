@@ -58,24 +58,22 @@ The FFT calls to benchmark are executed five times each. From this, the arithmet
 %TODO: why maximum size of transforms?
 
 \subsection{gearshifft}
-The \gearshifft{} framework is designed as a thin wrapper, but there are still runtime information collected for the benchmark. 
+The \gearshifft{} framework is designed as a thin wrapper, but there are still runtime information collected for each benchmark. 
 \gearshifft{} repeats after a warmup step the benchmark five times and averages the runtime. To verify the impact of \gearshifft{} a configuration file with 1 and with 100 extents is used.
-The cuFFT code measures after a warmup step the time to solution for the same roundtrip FFT, returning the average of 25 runs.
-\cref{tab:verify} indicates a zero overhead effect of \gearshifft{}, where \mc{rep.} defines the number of extents loaded by a single \gearshifft{} instance repeatedly.
+The cuFFT standalone code measures after a warmup step the time to solution for the same roundtrip FFT pattern as done in \gearshifft{}.
+Both uses 5 repetitions of the benchmark for the statistics.
+\cref{fig:verify_cufft} indicates a constant, almost zero overhead effect of \gearshifft{}.
+Even, after 100 benchmarks there is no runtime impact visible, which allows reliable measurements with large config files for the FFT extents.
 
-\begin{table}[tbp]
+\begin{figure}[!htbp]
   \centering
-  \caption{Verification cuFFT vs. gearshifft for inplace complex-to-complex transform (single-precision) for 16777216-point FFT on the K80 GPU}
-  \label{tab:verify}
-  \begin{tabular}{lrr}
-  \toprule
-  \textbf{rep.} & \mc{cuFFT} & \mc{gearshifft} \\
-  \midrule
-  1 & \SI{51.4437}{\milli\second} & \SI{51.0764}{\milli\second} \\
-  100 & -- & \SI{51.0654}{\milli\second} \\
-  \bottomrule
-  \end{tabular}
-\end{table}
+  \includegraphics[width=\textwidth]{figures/results_verify_cufft_legend.pdf}\vspace{-1em}
+  \subfloat[1024-point FFT]{\includegraphics[width=0.45\textwidth]{figures/results_verify_cufft_a.pdf}\label{fig:tts_verify_a}}
+  \hfill
+  \subfloat[16777216-point FFT]{\includegraphics[width=0.45\textwidth]{figures/results_verify_cufft_b.pdf}\label{fig:tts_verify_b}}
+  \caption{Comparison of runtimes of \gearshifft{} vs. standalone cuFFT---while the latter one was executed 250 times, \gearshifft{} processed a file with 250 rows containing the same number for the FFT extent; real-to-complex, inplace, roundtrip FFT, on Taurus K80 \cite{taurus}}
+  \label{fig:verify_cufft}
+\end{figure}
 
 
 %\newpage

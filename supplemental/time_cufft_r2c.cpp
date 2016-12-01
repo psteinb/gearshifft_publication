@@ -77,12 +77,12 @@ void check_cuda(cufftResult code, const char* msg,  const char *func, const char
 
 // _______________________________________________________
 // Outplace Complex
-template<typename T>
+template<typename TReal, typename TComplex>
 void run(int extent, int ID) {
   const auto runs = 5;
-  T* hdata = nullptr;
-  T* data;
-  T* data_transform;
+  TReal* hdata = nullptr;
+  TReal* data;
+//  TComplex* data_transform;
   cufftHandle plan;
   std::vector< std::array<size_t, 1> > vec_extents;
   vec_extents.push_back( {static_cast<size_t>(extent)} );
@@ -94,36 +94,53 @@ void run(int extent, int ID) {
   clock::time_point start;
 
   for( auto extents : vec_extents ) {
-    size_t data_size = extents[0]*sizeof(T);
-    size_t data_transform_size = extents[0]*sizeof(T);
-    size_t s = 0;
-    double time = 0.0;
+    //size_t data_size = extents[0]*sizeof(TReal);
+    //size_t data_transform_size = (extents[0]/2+1)*sizeof(TComplex);
+    size_t data_size = 2*(extents[0]/2+1)*sizeof(TReal); // for inplace R2C
 
     try {
-      hdata = new T[extents[0]];
+      hdata = new TReal[extents[0]];
+      for(auto i=0; i<extents[0]; ++i)
+        hdata[i] = 1.0f;
 
       for(auto i=0; i<=runs; ++i) {
+        CHECK_CUDA( cudaDeviceSynchronize() );
         start = clock::now();
         CHECK_CUDA( cudaMalloc(&data, data_size));
-        CHECK_CUDA( cudaMalloc(&data_transform, data_transform_size));
+//        CHECK_CUDA( cudaMalloc(&data_transform, data_transform_size));
 
-        CHECK_CUDA( cufftPlan1d(&plan, extents[0], CUFFT_C2C, 1));
+        CHECK_CUDA( cufftPlan1d(&plan, extents[0], CUFFT_R2C, 1));
 
         CHECK_CUDA( cudaMemcpy(data, hdata, data_size, cudaMemcpyHostToDevice) );
 
-        CHECK_CUDA( cufftExecC2C(plan, data, data_transform, CUFFT_FORWARD));
-        CHECK_CUDA( cufftExecC2C(plan, data_transform, data, CUFFT_INVERSE));
+//        CHECK_CUDA( cufftExecR2C(plan, data, data_transform)); // outplace
+        CHECK_CUDA( cufftExecR2C(plan,
+                                 data,
+                                 reinterpret_cast<TComplex*>(data))); // inplace
+
+        CHECK_CUDA( cufftDestroy(plan) );
+        CHECK_CUDA( cufftPlan1d(&plan, extents[0], CUFFT_C2R, 1));
+
+//        CHECK_CUDA( cufftExecC2R(plan, data_transform, data)); // outplace
+        CHECK_CUDA( cufftExecC2R(plan,
+                                 reinterpret_cast<TComplex*>(data),
+                                 data)); // inplace
 
         CHECK_CUDA( cudaMemcpy(hdata, data, data_size, cudaMemcpyDeviceToHost) );
 
         CHECK_CUDA( cudaFree(data) );
-        CHECK_CUDA( cudaFree(data_transform) );
+//        CHECK_CUDA( cudaFree(data_transform) );
         CHECK_CUDA( cufftDestroy(plan) );
-        if(i==0)
+        if(i==0) {
+          for(auto i=0; i<extents[0]; ++i)
+            if(fabs(hdata[i]/extents[0]-1.0f)>0.00001)
+              throw std::runtime_error("Mismatch.");
           continue; //i=0 => warmup
+        }
+
         auto diff = clock::now() - start;
         auto duration = std::chrono::duration<double, std::milli> (diff).count();
-        std::cout << "\"cuFFT\",\"Inplace\",\"Complex\",\"float\",1,\"powerof2\","<<extents[0]<<",0,0,"<<i<<",\"Success\",0,0,0,0,0,0,0,0,0,"<<duration<<","<<sizeof(T)*extents[0]<<",0,0,"<<ID<<std::endl;
+        std::cout << "\"cuFFT Standalone\",\"Inplace\",\"Complex\",\"float\",1,\"powerof2\","<<extents[0]<<",0,0,"<<i-1<<",\"Success\",0,0,0,0,0,0,0,0,0,"<<duration<<",0,0,0,"<<ID<<std::endl;
       }
 
       delete[] hdata;
@@ -133,7 +150,7 @@ void run(int extent, int ID) {
       std::cout << "Error for nx="<<extents[0] << std::endl;
       // cleanup
       CHECK_CUDA( cudaFree(data) );
-      CHECK_CUDA( cudaFree(data_transform) );
+//      CHECK_CUDA( cudaFree(data_transform) );
       delete[] hdata;
       if(plan) {
         CHECK_CUDA( cufftDestroy(plan) );
@@ -146,12 +163,12 @@ void run(int extent, int ID) {
 int main(int argc, char** argv) {
   int ID=atoi(argv[2]);
   if(ID==0) {
-    std::cout << "\"Tesla K80\", \"CC\", 3.7, \"Multiprocessors\", 13, \"Memory [MiB]\", 11439, \"MemoryFree [MiB]\", 11376, \"MemClock [MHz]\", 2505, \"GPUClock [MHz]\", 875, \"CUDA Runtime\", 8000, \"cufft\", 8000"<<std::endl
+    std::cout << "\"Tesla K80\", \"CC\", 3.7, \"Multiprocessors\", 13, \"Memory [MiB]\", NA, \"MemoryFree [MiB]\", NA, \"MemClock [MHz]\", NA, \"GPUClock [MHz]\", NA, \"CUDA Runtime\", NA, \"cufft\", NA"<<std::endl
             << "; \"Time_ContextCreate [ms]\", NA"<<std::endl
             << "; \"Time_ContextDestroy [ms]\", NA"<<std::endl
             << "\"library\",\"inplace\",\"complex\",\"precision\",\"dim\",\"kind\",\"nx\",\"ny\",\"nz\",\"run\",\"success\",\"0\",\"Time_Allocation [ms]\",\"Time_PlanInitFwd [ms]\",\"Time_PlanInitInv [ms]\",\"Time_Upload [ms]\",\"Time_FFT [ms]\",\"Time_iFFT [ms]\",\"Time_Download [ms]\",\"Time_PlanDestroy [ms]\",\"Time_Total [ms]\",\"Size_DeviceBuffer [bytes]\",\"Size_DevicePlan [bytes]\",\"Size_DeviceTransfer [bytes]\",\"ID\""<<std::endl;
   }
 
-  run<cufftComplex>(atoi(argv[1]),ID);
+  run<float,cufftComplex>(atoi(argv[1]),ID);
   return 0;
 }

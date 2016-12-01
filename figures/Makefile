@@ -16,7 +16,10 @@ estimate_fftw_files = $(wildcard ../results/haswell/fftw-3.3.5/fftw_estimate*csv
 measure_fftw_files = $(wildcard ../results/haswell/fftw-3.3.5/fftw_gcc*csv)
 wisdom_fftw_files = $(wildcard ../results/haswell/fftw-3.3.5/fftw_wisdom*csv)
 
-TARGETS = results_tts results_plan_flags results_plan_time results_r2c_fwd results_non_power_of_2 results_r2c_vs_c2c results_placiness
+cufft8_K80_verify_files = $(wildcard verify_cufft*_r2c_inplace.csv)
+cufft8_K80_verify_small_files = $(wildcard verify_cufft*_r2c_inplace_small.csv)
+
+TARGETS = results_tts results_plan_flags results_plan_time results_r2c_fwd results_non_power_of_2 results_r2c_vs_c2c results_placiness results_verify_cufft
 
 all : $(TARGETS)
 
@@ -68,6 +71,14 @@ results_placiness : $(cufft8_P100_files) $(cufft8_K80_files) $(measure_fftw_file
 	./compare -k "powerof2" -r -s -n 3 -a "hardware,inplace" --xlabel="signal_size_[bytes]" --ylabel="t(FFT)_[ms]" --ymetric="Time_FFT" --notitle --logy=10 --logx=2 -f $(@) $? > $(@).log 2>&1
 	./compare -k "powerof2" -c -s -n 3 -a "hardware,inplace" --xlabel="signal_size_[bytes]" --ylabel="t(FFT)_[ms]" --ymetric="Time_FFT" --nolegend --notitle --logy=10 --logx=2 -f $(@)_b $? $(cufft8_K80_files) $(cufft8_GTX1080_files) > $(@)_b.log 2>&1
 	./compare -k "powerof2" -c -s -n 3 -a "hardware,inplace" --xlabel="signal_size_[bytes]" --ylabel="t(FFT)_[ms]" --ymetric="Time_FFT" --legend-only --notitle --logy=10 --logx=2 -f $(@)_legend $? $(cufft8_K80_files) $(cufft8_GTX1080_files) > $(@)_legend.log 2>&1
+
+results_verify_cufft :
+	@echo "input: $(?)"
+	./compare -n 1 -a "library" --legend-only --notitle -f $(@)_legend $(cufft8_K80_verify_files)  > $(@)_legend.log 2>&1
+# small extent
+	./compare -n 1 --xlabel="iteration" --xmetric="id" --ylabel="t_[ms]" -a "library" --nolegend --notitle -f $(@)_a $(cufft8_K80_verify_small_files)  > $(@)_a.log 2>&1
+	./compare -n 1 --xlabel="iteration" --xmetric="id" --ylabel="t_[ms]" -a "library" --nolegend --notitle -f $(@)_b $(cufft8_K80_verify_files)  > $(@)_b.log 2>&1
+
 
 clean :
 	rm -vf  *tex
