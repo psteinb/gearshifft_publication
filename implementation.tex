@@ -38,7 +38,7 @@ Fftw offers five levels for this planning flag in total. As covering all of them
 %
 In \fftw{} terminology, wisdom is a persistent data structure that \texttt{fftw\_wisdom} binary in the \fftw{} install tree can generate. It is meant to allow users to generate the plan for specific input data shapes offline to their application. The stored 'wisdom' can then be read from disk through the \fftw{} wisdom API.
 The studied GPU based FFT implementations follow this design structure without the plan-rigor flags and wisdoms however, see \cref{lst:cufft_example}.
-\begin{lstlisting}[caption={Minimal usage example of the cuFFT single precision real-to-complex planner API. Memory management is omitted.},label={lst:cufft_example}]
+\begin{lstlisting}[caption={Minimal usage example of the \cufft{} single precision real-to-complex planner API. Memory management is omitted.},label={lst:cufft_example}]
 int N = 32;
 cufftHandle plan;
 cufftPlan3d(&plan, N, N, N, CUFFT_R2C);
@@ -69,7 +69,7 @@ struct Context {
 
 The frontend interface requires the user to implement the context class and a class with methods for the FFT client routines.
 The context class in \cref{lst:implcontext} is instantiated only once for the application lifetime.
-FFT libraries like clFFT have a global setup routine, which should not be invoked in each benchmark for the sake of performance and proper measurements. 
+FFT libraries like \clfft{} have a global setup routine, which should not be invoked in each benchmark for the sake of performance and proper measurements. 
 The context functions \mc{create} and \mc{destroy} are run only once and are measured separately.
 This speeds up the whole benchmark as device and library initialization might be quite time-consuming. 
 By \mc{Application<Context>::getContext()} the user has access to the global context instance.
@@ -291,8 +291,8 @@ destroy\\
  \label{fig:framework}
 \end{figure}
 
-Currently, \gearshifft{} comes with three different FFT libraries, namely cuFFT (CUDA) for nVidia GPUs \cite{nvidia2010cufft}, clFFT (OpenCL) from AMD \cite{clfft} and \fftw{} \cite{\fftw{}05}.
-% cuFFT is NVIDIA CUDA GPU-only using the Cooley-Tukey and Bluestein algorithms \cite{cooley65,bluestein}.
+Currently, \gearshifft{} comes with three different FFT libraries, namely \cufft{} (CUDA) for nVidia GPUs \cite{nvidia2010cufft}, \clfft{} (OpenCL) from AMD \cite{clfft} and \fftw{} \cite{\fftw{}05}.
+% \cufft{} is NVIDIA CUDA GPU-only using the Cooley-Tukey and Bluestein algorithms \cite{cooley65,bluestein}.
 % clFFT implements a variation of Cooley-Tukey and Stockham algorithm in OpenCL to run on heterogeneous platforms.
 % \fftw{} is CPU-only and primarily uses Cooley-Tukey supporting various SIMD (SSE, AVX, \ldots) optimizations.
 By this selection, an accelerator-, mixed and a CPU-optimized library is covered.
@@ -355,7 +355,7 @@ Flag & [Flag] Argument & Description \\
                                   device is not supported by FFT lib, then it
                                   is ignored and default is used. \\
 -n&[ -{}-ndevices ] arg (=0)       &Number of devices (0=all), if supported by 
-                                  FFT lib (e.g. clfft and fftw with n CPU 
+                                  FFT lib (e.g. \clfft{} and fftw with n CPU 
                                   threads). \\
 -l&[ -{}-list-devices ]            &List of available compute devices with IDs,
                                   if supported.  \\
@@ -368,6 +368,6 @@ Flag & [Flag] Argument & Description \\
 
 For the command-line arguments Boost is utilized, particularly for benchmark lists and selection. The \gearshifft{} program options are given in \cref{tab:cmdargs}.\linebreak
 \verb!gearshifft_clfft -e 16,16 8x8x8 -r */float/*/Inplace_Real -d cpu!\linebreak
-would run clfft benchmarks with real inplace real-to-complex / complex-to-real transform on an $8\times8\times8$ FFT and $16\times16$ FFT at single-precision. The default setting implies to use all CPU cores and to dump the results to result.csv (if already existent, it will be overwritten).
+would run \clfft{} benchmarks with real inplace real-to-complex / complex-to-real transform on an $8\times8\times8$ FFT and $16\times16$ FFT at single-precision. The default setting implies to use all CPU cores and to dump the results to result.csv (if already existent, it will be overwritten).
 The first wildcard \mc{*} relates to the title of the FFT client, where the second one refers to the extents.
 

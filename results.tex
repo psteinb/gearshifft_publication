@@ -2,7 +2,7 @@ Based on the experiences made for \cite{preibisch2014efficient, schmid2015real},
 
 Expeditions into other use cases will be made where appropriate. The curious reader may rest assured that a more comprehensive study is easily possible with \gearshifft{}, however the mere multiplicity of all possible combinations and use cases of FFT render it neither feasible nor practical to discuss 1D or 2D in a comprehensive fashion as well.
 
-For this study, we will concentrate on three modern and current FFT implementations available free of charge: \fftw{} ($3.3.5$, on x86 CPUs), cuFFT ($8.0.44$, on nVidia GPUs) and clFFT ($2.12.2$, on x86 CPUs or nVidia GPUs). We consider this the natural starting point of developers beyond possible domain specific implementations. It should be noted, that this will infer not only a study in terms of hardware performance, but also how well the APIs designed by the authors of \fftw{}, clFFT and cuFFT are documented, understood and used in practice. We consider both hardware and cognitive/developer performance a virtue of equal importance.
+For this study, we will concentrate on three modern and current FFT implementations available free of charge: \fftw{} ($3.3.5$, on x86 CPUs), cuFFT ($8.0.44$, on nVidia GPUs) and \clfft{} ($2.12.2$, on x86 CPUs or nVidia GPUs). We consider this the natural starting point of developers beyond possible domain specific implementations. It should be noted, that this will infer not only a study in terms of hardware performance, but also how well the APIs designed by the authors of \fftw{}, \clfft{} and cuFFT are documented, understood and used in practice. We consider both hardware and cognitive/developer performance a virtue of equal importance.
 
 \subsection{Experimental Environment}
 \label{ssec:env}
@@ -97,7 +97,7 @@ We begin the discussion with the classical use case for developers that might be
   \subfloat[3D transforms]{\includegraphics[width=0.45\textwidth]{figures/results_plan_time_a.pdf}\label{fig:plan_time_a}}
   \hfill
   \subfloat[1D transforms]{\includegraphics[width=0.45\textwidth]{figures/results_plan_time_b.pdf}\label{fig:plan_time_b}}
-  \caption{Time-to-plan for power-of-2 single-precision real-to-complex forward transforms using \fftw{}, cuFFT and clFFT. \cref{fig:plan_time_a} reports the complete time to plan for 3D transforms, whereas \cref{fig:plan_time_b} is limited to 1D transforms. Both figures use a log10-log2 scale.}
+  \caption{Time-to-plan for power-of-2 single-precision real-to-complex forward transforms using \fftw{}, cuFFT and \clfft{}. \cref{fig:plan_time_a} reports the complete time to plan for 3D transforms, whereas \cref{fig:plan_time_b} is limited to 1D transforms. Both figures use a log10-log2 scale.}
   \label{fig:plan_time}
 \end{figure}
 %
@@ -114,7 +114,7 @@ The last section finished by discussing a design artifact, that the \fftw{} auth
   \subfloat[3D transforms]{\includegraphics[width=0.45\textwidth]{figures/results_r2c_fwd_a.pdf}\label{fig:r2c_fwd_a}}
   \hfill
   \subfloat[1D transforms]{\includegraphics[width=0.45\textwidth]{figures/results_r2c_fwd_b.pdf}\label{fig:r2c_fwd_b}}
-  \caption{Time for computing power-of-2 single-precision real-to-complex forward transforms using the 3D API (\cref{fig:r2c_fwd_a}) and the 1D API clFFT (\cref{fig:r2c_fwd_b}). Both figures use a log10-versus-log2 scale.}
+  \caption{Time for computing power-of-2 single-precision real-to-complex forward transforms using the 3D API (\cref{fig:r2c_fwd_a}) and the 1D API \clfft{} (\cref{fig:r2c_fwd_b}). Both figures use a log10-versus-log2 scale.}
   \label{fig:r2c_fwd}
 \end{figure}
 
