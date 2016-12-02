@@ -60,6 +60,9 @@
 
 \newcommand{\todo}[1]{\textcolor{red}{(TODO #1)}}
 \newcommand{\gearshifft}{\texttt{gearshifft}}
+\newcommand{\fftw}{\texttt{fftw}}
+\newcommand{\cufft}{\texttt{cuFFT}}
+\newcommand{\clfft}{\texttt{clFFT}}
 \newcommand{\mc}[1]{\lstinline!#1!}
 
 \newcommand{\Title}{gearshifft -- The FFT Benchmark Suite for Heterogeneous Platforms}
@@ -119,7 +122,7 @@ sorting=nyt
 \maketitle              % typeset the title of the contribution
 
 \begin{abstract}
-  Fast Fourier Transforms (FFTs) are exploited in a wide variety of fields ranging from computer science to natural sciences and engineering. Most applications use frequency field information for filtering in a myriad of fashions. With the rising data production bandwidths of experimental hardware and modern simulations, judging best what algorithmic tool to apply, can be vital to any scientific endeavor. FFTs are no exception to this. Moreover, as tailored FFT implementations exist for an ever increasing variety of high performance computer hardware, choosing the best performing FFT implementation has strong implications for the hardware to purchase in the future, for resources FFTs consume and for possibly decisive financial and time savings ahead of the competition. We therefor present an open-source and vendor agnostic benchmark suite, called \gearshifft{}, to process a wide variety of problem sizes and types with state-of-the-art FFT implementations (FFTW, clFFT and cuFFT). \gearshifft{} allows for a reproducible, unbiased and fair comparison on a wide variety of hardware to explore which FFT variant is best for a given problem size.
+  Fast Fourier Transforms (FFTs) are exploited in a wide variety of fields ranging from computer science to natural sciences and engineering. Most applications use frequency field information for filtering in a myriad of fashions. With the rising data production bandwidths of experimental hardware and modern simulations, judging best what algorithmic tool to apply, can be vital to any scientific endeavor. FFTs are no exception to this. Moreover, as tailored FFT implementations exist for an ever increasing variety of high performance computer hardware, choosing the best performing FFT implementation has strong implications for the hardware to purchase in the future, for resources FFTs consume and for possibly decisive financial and time savings ahead of the competition. We therefor present an open-source and vendor agnostic benchmark suite, called \gearshifft{}, to process a wide variety of problem sizes and types with state-of-the-art FFT implementations (\fftw{}, \clfft{} and \cufft{}). \gearshifft{} allows for a reproducible, unbiased and fair comparison on a wide variety of hardware to explore which FFT variant is best for a given problem size.
 \keywords{signal processing, FFT, fftw. cufft, clfft, GPU, GPGPU, benchmark, HPC}
 \end{abstract}
 

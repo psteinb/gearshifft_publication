@@ -1,8 +1,8 @@
 Based on the experiences made for \cite{preibisch2014efficient, schmid2015real}, this section will discuss results obtained with \gearshifft{} on various hardware in order to showcase the capabilities of \gearshifft{}. We will assume the motivation of a developer seeking to optimize the use of FFTs in the context of the aforementioned publications, i.e. 3D real-to-complex transforms with contiguous single-precision input data. If not stated otherwise, this is the transform type assumed for all illustrations hereafter. 
 
-Expeditions into other use cases will be made where appropriate. The curious reader may rest assured that a more comprehensive study is easily possible with \gearshifft{}, however the mere multiplicity of all possible combinations and use cases of FFT render it neither feasible nor practical to discuss 1D or 2D in a comprehensive fashion as well.
+Expeditions into other use cases will be made where appropriate. The curious reader may rest assured that a more comprehensive study is possible with \gearshifft{}, however the mere multiplicity of all possible combinations and use cases of FFT render it neither feasible nor practical to discuss all of them here.
 
-For this study, we will concentrate on three modern and current FFT implementations available free of charge: FFTW ($3.3.5$, on x86 CPUs), cuFFT ($8.0.44$, on nVidia GPUs) and clFFT ($2.12.2$, on x86 CPUs or nVidia GPUs). We consider this the natural starting point of developers beyond possible domain specific implementations. It should be noted, that this will infer not only a study in terms of hardware performance, but also how well the APIs designed by the authors of FFTW, clFFT and cuFFT are documented, understood and used in practice. We consider both hardware and cognitive/developer performance a virtue of equal importance.
+For this study, we will concentrate on three modern and current FFT implementations available free of charge: \fftw{} ($3.3.5$, on x86 CPUs), \cufft{} ($8.0.44$, on nVidia GPUs) and \clfft{} ($2.12.2$, on x86 CPUs or nVidia GPUs). We consider this the natural starting point of developers beyond possible domain specific implementations. It should be noted, that this will infer not only a study in terms of hardware performance, but also how well the APIs designed by the authors of \fftw{}, \clfft{} and \cufft{} can be used in practice. 
 
 \subsection{Experimental Environment}
 \label{ssec:env}
@@ -15,45 +15,24 @@ The results presented in the following sections were collected on three systems:
   \label{tab:hardware}
   \begin{tabular}{lllll}
     \toprule
-               & \multicolumn{2}{c}{\textbf{Taurus}}           & \textbf{Hypnos}           & \textbf{Islay}                            \\
-               & \multicolumn{2}{c}{HPC Cluster \cite{taurus}} & HPC Cluster \cite{hypnos} & Workstation                               \\
-%               & K80 node                                      & K20Xm node                &                     &                     \\
+                        & \multicolumn{2}{c}{\textbf{Taurus}}           & \textbf{Hypnos}           & \textbf{Islay}                                  \\
+                        & \multicolumn{2}{c}{HPC Cluster \cite{taurus}} & HPC Cluster \cite{hypnos} & Workstation                                     \\
     \midrule
-%    CPU vendor & Intel                                         & Intel                     & Intel               & Intel               \\
-    \textbf{CPU family} & Haswell Xeon                                  & Sandybridge Xeon          & Haswell Xeon        & Haswell Xeon        \\
-    \textbf{CPU model } & $2{\times}$ E5-2680 v3                        & $2{\times}$ E5-2450       & $2{\times}$ E5-2603 v3 & $2{\times}$ E5-2640 v3          \\
-%    sockets    & $2$                                           & $2$                       & $2$                 & $2$                 \\
-    \textbf{RAM       } & \SI{64}{\gibi\byte}                           & \SI{48}{\gibi\byte}       & \SI{64}{\gibi\byte} & \SI{64}{\gibi\byte} \\
-%    \midrule
-%    GPU vendor & NVIDIA                                        & NVIDIA                    & NVIDIA              & NVIDIA              \\
-    \textbf{GPU family} & Tesla                                         & Tesla                     & Tesla               & GeForce             \\
-    \textbf{GPU       } & 4x K80                                        & 2x K20x                   & 1x P100             & 1x GTX 1080         \\
-    \textbf{GPU memory} & 4x \SI{12}{\gibi\byte}                        & \SI{6}{\gibi\byte}        & \SI{16}{\gibi\byte} & \SI{8}{\gibi\byte}  \\
-    \textbf{GPU driver} & $367.48$                                      & $367.48$                  & $367.48$            & $367.57$            \\
-%    \midrule
-    \textbf{OS}         & RHEL $7.2$                                    & RHEL $7.2$                & Ubuntu $14.04.3$    & CentOS $7.2$        \\
-%               & 64-bit                                        & 64-bit                    & 64-bit              & 64-bit              \\
+    \textbf{CPU family} & Haswell Xeon                                  & Sandybridge Xeon          & Haswell Xeon           & Haswell Xeon           \\
+    \textbf{CPU model } & $2{\times}$ E5-2680 v3                        & $2{\times}$ E5-2450       & $2{\times}$ E5-2603 v3 & $2{\times}$ E5-2640 v3 \\
+    \textbf{RAM       } & \SI{64}{\gibi\byte}                           & \SI{48}{\gibi\byte}       & \SI{64}{\gibi\byte}    & \SI{64}{\gibi\byte}    \\
+    \textbf{GPU family} & Tesla                                         & Tesla                     & Tesla                  & GeForce                \\
+    \textbf{GPU       } & 4x K80                                        & 2x K20x                   & 1x P100                & 1x GTX 1080            \\
+    \textbf{GPU memory} & 4x \SI{12}{\gibi\byte}                        & \SI{6}{\gibi\byte}        & \SI{16}{\gibi\byte}    & \SI{8}{\gibi\byte}     \\
+    \textbf{GPU driver} & $367.48$                                      & $367.48$                  & $367.48$               & $367.57$               \\
+    \textbf{OS}         & RHEL $7.2$                                    & RHEL $7.2$                & Ubuntu $14.04.3$       & CentOS $7.2$           \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-% \begin{itemize}
-% \item \emph{Taurus HPC cluster}\cite{taurus} running RHEL 7.2
-%   \begin{itemize}
-%   \item \emph{K80 node}: 2x Intel(R) Xeon(R) CPU E5-2680 v3 (12 cores) @ 2.50GHz, 64 GB RAM, 4x NVIDIA Tesla K80 (12 GB GDDR5 RAM) GPUs 
-%   \item \emph{K20X node}: 2x Intel(R) Xeon(R) CPU E5-2450 (8 cores) @ 2.10GHz, 48 GB RAM, 2x NVIDIA Tesla K20x (6 GB GDDR RAM) GPUs 
-%   \end{itemize}
-% \item \emph{Hypnos HPC cluster}\cite{hypnos} running Ubuntu 14.04.3:\newline
-%   2x Intel(R) Xeon(R) CPU E5-2603 v3 @ 1.60GHz, 64 GB RAM (2.67 GB per core), 1x NVIDIA Tesla P100 (16 GB HBM2 RAM) GPUs via PCIe 
-% \item  \emph{Dell workstation} running CentOS 7.2:\newline 
-%   2x Intel(R) Xeon(R) CPU E5-2640 v3 @ 2.60GHz, 64 GB RAM, 1x NVIDIA GeForce GTX 1080 (8 GB GDDR5X RAM)
-% \end{itemize}
-
 All systems presented in \cref{tab:hardware} will be used for the benchmarks in this section. Access was performed via a \texttt{ssh} session without running a graphical user interface running on the target system. All measurements used the GNU compiler collection (GCC) version 5.3.0 as the underlying compiler if not stated otherwise. All used GPU implementations on nVidia hardware interfaced with the proprietary driver listed in \cref{tab:hardware} and used the infrastructure provided by CUDA $8.0.44$ if not stated otherwise. 
 
-In order to generate one data set, a set arrays of arbitrary shapes is provided to a specific FFT API. The configuration files thereof can be accessed via \cite{gearshifft_github}. The shape configurations are separated in groups: \texttt{powerof2} (all dimensions are powers of $2$), \texttt{radix357} (all dimensions are either powers of $3$, $5$ or $7$) and \texttt{oddshape} (all dimensions are powers of $19$ in order to emulated very uncommon signal sizes). These configurations were generated in order to probe the FFT implementations for a wide spectrum of possible applications.  
-
-The FFT calls to benchmark are executed five times each. From this, the arithmetic mean and sample standard deviations are used for figures presented below. As the number of repetitions is a configurable parameter of \gearshifft{}, we leave it to the user to produce a more comprehensive data set than used for this publication. We consider five repetitions enough at this point to show and discuss several aspects of performance and usability of \gearshifft{} and the FFT libraries under study.  
+Each benchmark is executed five times. From this, the arithmetic mean and sample standard deviations are used for figures presented below. As the number of repetitions is a configurable parameter of \gearshifft{}, we leave it to the user to produce a more comprehensive data set than used for this publication. We consider five repetitions enough at this point to show and discuss several aspects of performance and usability of \gearshifft{} and the FFT libraries under study.  
 
 %TODO: why maximum size of transforms?
 
@@ -81,7 +60,7 @@ Even, after 100 benchmarks there is no runtime impact visible, which allows reli
 \subsection{Time To Solution}
 \label{ssec:tts}
 
-We begin the discussion with the classical use case for developers that might be accustomed to small size transforms. As such, an out-of-place transform with \texttt{powerof2} signal shapes will be assumed. The memory volume required for this operation amounts to the real input array plus an equally shaped complex output array.   
+We begin the discussion with the classical use case for developers that might be accustomed to small size transforms. As such, an out-of-place transform with \texttt{powerof2} signal shapes will be assumed. The memory volume required for this operation amounts to the real input array plus an equally shaped complex output array of the same precision.   
 
 \begin{figure}[!htbp]
   \centering
@@ -89,11 +68,11 @@ We begin the discussion with the classical use case for developers that might be
   \subfloat[linear scale]{\includegraphics[width=0.45\textwidth]{figures/results_tts_a.pdf}\label{fig:tts_a}}
   \hfill
   \subfloat[log10-log2 scale]{\includegraphics[width=0.45\textwidth]{figures/results_tts_b.pdf}\label{fig:tts_b}}
-  \caption{Time-to-solution for power-of-2 3D single-precision real-to-complex forward transforms using FFTW (\texttt{FFTW\_ESTIMATE}) and cuFFT. \cref{fig:tts_b} shows the same data as \cref{fig:tts_a} but in a log10-log2 scale.}
+  \caption{Time-to-solution for power-of-2 3D single-precision real-to-complex forward transforms using \fftw{} (\mc{FFTW_ESTIMATE}) and \cufft{}. \cref{fig:tts_b} shows the same data as \cref{fig:tts_a} but in a log10-log2 scale.}
   \label{fig:tts}
 \end{figure}
 
-\cref{fig:tts} reports a comparison of runtime results of power-of-2 single-precision real-to-complex forward transforms from FFTW and cuFFT. It is evident that given the largest device memory available of  \SI{16}{\gibi\byte}, the GPU data does not yield any points higher than \SI{8}{\gibi\byte}. Note that the total time reflects the time to set up a plan, allocate memory on device, perform the data transfer onto the device, execute the FFT, transfer the result back to the host and clean up the used plan and the allocated memory. \cref{fig:tts_a} shows that the oldest GPU generation used in this comparison yields the slowest results for input signals in the order of \SIrange{1}{2}{\gibi\byte}. All other and more recent GPU models supersede FFTW using all available cores in this node. Any judgment on the superiority of cuFFT over FFTW can be considered premature at this point, as FFTW was used with the \texttt{FFTW\_ESTIMATE} planner flag.
+\cref{fig:tts} reports a comparison of runtime results of power-of-2 single-precision real-to-complex forward transforms from \fftw{} and \cufft{}. It is evident that given the largest device memory available of  \SI{16}{\gibi\byte}, the GPU data does not yield any points higher than \SI{8}{\gibi\byte}. Note that the total time reflects the time described in \cref{fig:framework}, i.e. it is the sum of the time to set up a plan, allocate memory on device, perform the data transfer onto the device, execute the FFT, transfer the result back to the host and clean up the used plan and the allocated memory. \cref{fig:tts_a} shows that the oldest GPU generation used in this comparison yields the slowest results for input signals in the order of \SIrange{1}{2}{\gibi\byte}. All other and more recent GPU models supersede \fftw{} using all available cores a $2\times12\,\text{core}$ double socket Intel Haswell CPU. Any judgment on the superiority of \cufft{} over \fftw{} can be considered premature at this point, as \fftw{} was used with the \mc{FFTW_ESTIMATE} planner flag.
 
 \begin{figure}[!htbp]
   \centering
@@ -101,11 +80,13 @@ We begin the discussion with the classical use case for developers that might be
   \subfloat[time to solution]{\includegraphics[width=0.45\textwidth]{figures/results_plan_flags_a.pdf}\label{fig:plan_flags_a}}
   \hfill
   \subfloat[time for forward transform only]{\includegraphics[width=0.45\textwidth]{figures/results_plan_flags_b.pdf}\label{fig:plan_flags_b}}
-  \caption{Time-to-solution for power-of-2 3D single-precision real-to-complex forward transforms using FFTW (\texttt{FFTW\_ESTIMATE}) and cuFFT. \cref{fig:plan_flags_a} report the complete time to solution, whereas \cref{fig:plan_flags_b} is limited to the time spent for the execution of the forward transform only. Both figures use a in a log10-log2 scale.}
+  \caption{Time-to-solution for power-of-2 3D single-precision real-to-complex inplace forward transforms using \fftw{} (\mc{FFTW_ESTIMATE}) and \cufft{}. \cref{fig:plan_flags_a} report the complete time to solution, whereas \cref{fig:plan_flags_b} is limited to the time spent for the execution of the forward transform only. Both figures use a log10-log2 scale.}
   \label{fig:fftw_plan_flags}
 \end{figure}
 
-\cref{fig:fftw_plan_flags} compares the time-to-solution to the actual time spent for the FFT operation itself. This illustration makes the cost and the benefit of higher planning flags than \texttt{FFTW\_ESTIMATE} obvious. Where \texttt{FFTW\_MEASURE} imposes a runtime penalty of 1 to 2 orders of magnitude with respect to \texttt{FFTW\_ESTIMATE}, it offers superior performance. The careful observer has noticed that the planning times for \texttt{FFTW\_MEASURE} become prohibitively large for large input data sizes and reach minutes for data sets in the Gigabyte range. This is a well-known feature of FFTW as the authors note in \cite{FFTW05}:
+\cref{fig:fftw_plan_flags} compares the time-to-solution to the actual time spent for the FFT operation itself. This illustration makes the cost and the benefit of higher planning flags than \mc{FFTW_ESTIMATE} obvious. \mc{FFTW_MEASURE} imposes a total runtime penalty of 1 to 2 orders of magnitude with respect to \mc{FFTW_ESTIMATE}, but it offers superior performance if limited to pure FFT execution timings compared \mc{FFTW_ESTIMATE}. For illustration, we generated the wisdom for shapes up to $64\times64\times64$ elements. As during plan creation, the \emph{wisdom} has to be loaded from disk only, the planning times are drastically reduced and \cref{fig:plan_flags_b} shows that the user is rewarded by pure FFT runtimes of less than an order of magnitude for small signal sizes. However, the FFT runtimes become even larger than those of \mc{FFTW_ESTIMATE} for input signal sizes of more than \SI{32}{\kibi\byte}. So a consequent use of \fftw{} \emph{wisdom} cannot be recommended to developers. 
+
+It must emphasized that the planning times for \mc{FFTW_MEASURE} become prohibitively large for large input data sizes and reach minutes for data sets in the Gigabyte range. This is a well-known feature of \fftw{} as the authors note in \cite{FFTW05}:
 %
 \begin{quote}
   ``In performance critical applications, many transforms of the same
@@ -117,19 +98,20 @@ We begin the discussion with the classical use case for developers that might be
 %
 \begin{figure}[!tbp]
   \centering
+  \includegraphics[width=\textwidth]{figures/results_plan_time_legend.pdf}\vspace{-1em}
   \subfloat[3D transforms]{\includegraphics[width=0.45\textwidth]{figures/results_plan_time_a.pdf}\label{fig:plan_time_a}}
   \hfill
   \subfloat[1D transforms]{\includegraphics[width=0.45\textwidth]{figures/results_plan_time_b.pdf}\label{fig:plan_time_b}}
-  \caption{Time-to-plan for power-of-2 single-precision real-to-complex forward transforms using FFTW, cuFFT and clFFT. \cref{fig:plan_time_a} reports the complete time to plan for 3D transforms, whereas \cref{fig:plan_time_b} is limited to 1D transforms. Both figures use a log10-log2 scale.}
+  \caption{Time-to-plan for power-of-2 single-precision inplace real-to-complex forward transforms using \fftw{}, \cufft{} and \clfft{}. \cref{fig:plan_time_a} reports the complete time to plan for 3D transforms, whereas \cref{fig:plan_time_b} is limited to 1D transforms. ``None'' refers to the planning with cufft as it does not support the plan rigor concept. Both figures use a log10-log2 scale.}
   \label{fig:plan_time}
 \end{figure}
 %
-\cref{fig:plan_time} illustrates the problem to it's full extent. \texttt{FFTW\_MEASURE} consumes up to 3-4 orders of magnitude more time to produce a plan than a standard (GPU based libraries) or \texttt{FFTW\_ESTIMATE} based planner call especially for large input shapes, see \cref{fig:plan_time_a}. We observed that FFTW wisdom cannot be generated for 2D or 3D out-of-place transforms. Therefor, we compare the 3D planning with it's counterpart in 1D in \cref{fig:plan_time_b}. At input sizes of \SI{128}{\mebi\byte} in 1D, the planning phase exceeds the duration of \SI{100}{\second}. In practice, this imposes a challenge on the client to the FFTW API. Not only is the time to solution affected by this behavior which is a crucial quantity if FFT-heavy applications are run in an HPC environment. Here the runtime of applications needs to be know to some extent in order to allow efficient and rapid job placement in a cluster. Further, the developer interfacing with FFTW has to create infrastructure (thread-safe static singleton objects or similar come to mind) in order to perform the planning of FFTW only once and reuse the resulting plan as much as possible.
+\cref{fig:plan_time} illustrates the problem to it's full extent. \mc{FFTW_MEASURE} consumes up to 3-4 orders of magnitude more time to produce a plan than a standard (GPU based libraries) or \mc{FFTW_ESTIMATE} based planner call especially for large input shapes, see \cref{fig:plan_time_a}. We compare the 3D planning with it's counterpart in 1D (see \cref{fig:plan_time_b}). It is important to note that \fftw{} planning in 1D appears to be very expensive in terms of plan time as the \mc{FFTW_MEASURE} curve is very steep compared to \cref{fig:plan_time_a}. At input sizes of \SI{128}{\mebi\byte} in 1D, the planning phase exceeds the duration of \SI{100}{\second}. In practice, this imposes a challenge on the client to the \fftw{} API. Not only is the time to solution affected by this behavior which is a crucial quantity if FFT-heavy applications are run. Moreover, in an HPC environment the runtime of applications needs to be known before executing them in order to allow efficient and rapid job placement on compute resources. From a nother perspective, this asserts a development pressure on the developer interfacing with \fftw{} as she has to create infrastructure (thread-safe static objects or similar come to mind) in order to perform the planning of \fftw{} only once and reuse the resulting plan as much as possible.
 
 \subsection{Comparing CPU versus GPU runtimes}
 \label{ssec:cpu_vs_gpu}
 
-The last section finished by discussing a design artifact, that the FFTW authors introduced in their API and which the other FFT libraries discussed here adopted. Another important question typically asked is if GPU accelerated FFT implementations are really faster than their CPU equivalents. Although this question cannot be answered comprehensively in our study, we would like to point out several aspects of it. First of all, modern GPU are connected via the PCIe bus to the host system in order to transfer data, receive instructions and to be supplied with power. This imposes a severe bottleneck to data transfer and is sometimes neglected during library design. Therefor, the time for data transfer needs to be accounted for be removed it from the measurement. \gearshifft{}s results data model offers access to each individual step of a transformation. With it, it is possible to isolate the time for the FFT transform only.
+The last section finished by discussing a design artifact, that the \fftw{} authors introduced in their API and which other FFT libraries adopted. Another important question typically asked is if GPU accelerated FFT implementations are really faster than their CPU equivalents. Although this question cannot be answered comprehensively in our study, we would like to point out several aspects of it. First of all, modern GPU are connected via the PCIe bus to the host system in order to transfer data, receive instructions and to be supplied with power. This imposes a severe bottleneck to data transfer and is sometimes neglected during library design. Therefor, the time for data transfer needs to be accounted for or removed from the measurement. \gearshifft{}s results data model offers access to each individual step of a transformation, see \cref{fig:framework}. With it, it is possible to isolate the time for the FFT transform only.
 
 \begin{figure}[!tbp]
   \centering
@@ -137,18 +119,20 @@ The last section finished by discussing a design artifact, that the FFTW authors
   \subfloat[3D transforms]{\includegraphics[width=0.45\textwidth]{figures/results_r2c_fwd_a.pdf}\label{fig:r2c_fwd_a}}
   \hfill
   \subfloat[1D transforms]{\includegraphics[width=0.45\textwidth]{figures/results_r2c_fwd_b.pdf}\label{fig:r2c_fwd_b}}
-  \caption{Time for computing power-of-2 single-precision real-to-complex forward transforms using the 3D API (\cref{fig:r2c_fwd_a}) and the 1D API clFFT (\cref{fig:r2c_fwd_b}). Both figures use a log10-versus-log2 scale.}
+  \caption{Time for computing power-of-2 single-precision real-to-complex forward transforms using the 3D API (\cref{fig:r2c_fwd_a}) and the 1D API \clfft{} (\cref{fig:r2c_fwd_b}). Both figures use a log10-versus-log2 scale.}
   \label{fig:r2c_fwd}
 \end{figure}
 
-\cref{fig:r2c_fwd} shows the runtime spent for computing the forward FFT for real single precision input data. This illustration is a direct measure for the quality of the implmentation and the hardware underneath. For the 3D case in \cref{fig:r2c_fwd_a}, we see that at the time of writing, FFTW on a double socket Haswell Intel Xeon E5 CPU provides very compelling performance if the input data is not larger than \SI{1}{\mebi\byte}. Above this limit, the GPU implementations offer a clear advantage by up to one order of magnitude. The current Pascal generation GPUs used with cuFFT provide the best performance, which does not come by surprise as both cards are equipped with GDDR5X or HBM2 memory which are clearly beneficial for an operation that yields low computational complexity such as the FFT. In the 1D case of \cref{fig:r2c_fwd_b}, the same observations must be made with even more certainty. The cross-over of FFTW and the GPU libraries occurs at an earlier point of \SI{64}{\kibi\byte}.  
+\cref{fig:r2c_fwd} shows the runtime spent for computing the forward FFT for real single precision input data. This illustration is a direct measure for the quality of the implmentation and the hardware underneath. For the 3D case in \cref{fig:r2c_fwd_a}, we see that at the time of writing, \fftw{} on a double socket Haswell Intel Xeon E5 CPU provides very compelling performance if the input data is not larger than \SI{1}{\mebi\byte}. Above this limit, the GPU implementations offer a clear advantage by up to one order of magnitude. The current Pascal generation GPUs used with \cufft{} provide the best performance, which does not come by surprise as both cards are equipped with GDDR5X or HBM2 memory which are clearly beneficial for an operation that yields low computational complexity such as the FFT, see \cref{sec:motivation}. In the 1D case of \cref{fig:r2c_fwd_b}, the same observations must be made with even more certainty. The cross-over of \fftw{} and the GPU libraries occurs at an earlier point of \SI{64}{\kibi\byte}.  
 
-Another observation in \cref{fig:r2c_fwd_a} is that the general structure of the runtime curves of GPU FFT implemetations follows an inverse roofline curve \cite{williams2009roofline}, that is for input signals smaller than the roofline turning point at \SI{1}{\mebi\byte} the FFT implementation appears to be of constant cost, i.e. to be compute bound. Above the aforementioned threshold, the implementation appears to be memory bound and hence exposes a linear growth with growing input signals. It is interesting to see that cufft performance curves apparently follow a roofline like shape the best, whereas FFTW does not - most of all in \cref{fig:r2c_fwd_b}.  We note that \gearshifft{} benchmark data could be well suited for creating roofline plots. However, the output data is currently not as detailed to produce comprehensive roofline graphs as discussed in \cite{ofenbeck2014applying} as hardware details (e.g. number of flops per cycle, number of flops per byte etc) are not contained. We would like to potentially address this issue in a future development of \gearshifft{} as this offers a unique chance to learn more about the capabilities and efficiency of the used implementation on the given hardware. 
+Another observation in \cref{fig:r2c_fwd_a} is that the general structure of the runtime curves of GPU FFT implemetations follows an inverse roofline curve \cite{williams2009roofline}. That is for input signals smaller than the roofline turning point at \SI{1}{\mebi\byte} the FFT implementation appears to be of constant cost, i.e. to be compute bound. Above the aforementioned threshold, the implementation appears to be memory bound and hence exposes a linear growth with growing input signals which corresponds to the $\mathcal{O}(n \log n)$ complexity observed in \cref{sec:motivation}. It is interesting to see that cufft performance curves apparently follow a roofline like shape the best, whereas \fftw{} does not - most of all in \cref{fig:r2c_fwd_b}.  We note that \gearshifft{} benchmark data could be well suited for creating roofline plots. However, the output data is currently not as detailed to produce comprehensive roofline graphs as discussed in \cite{ofenbeck2014applying} as hardware details (e.g. number of flops per cycle, number of flops per byte etc) are not contained. We would like to potentially address this issue in a future development of \gearshifft{} as this offers a unique chance to learn more about the capabilities and efficiency of the used implementation on the given hardware. 
+ 
+Finally, it is not to our surprise that the CLFFT results reported in \cref{fig:r2c_fwd} cannot be considered optimal. As we executed CLFFT on nVidia hardware interfacing with the OpenCL runtime coming with CUDA and interfaced to the nVidia proprietary driver, OpenCL performance can not be considered a first-class citizen in this environment. Only in \cref{fig:r2c_fwd_b}, the CLFFT runtimes are below those of \fftw{}.
  
 \subsection{Non-power-of-2 transforms}
 \label{ssec:nonpowerof2}
 
-Due to the three major mathematical approaches to performing FFTs (see \cref{sec:motivation}), we classify the FFT extent shapes of our benchmark data into \texttt{powerof2} (radix-2, Cooley-Turkey), \texttt{radix357} (mixed-radix of primes 3, 5 and 7, Stockham) and into \texttt{oddshape} (arbitrary radices excluding the previous cases, Bluestein's algorithm). In a lot of conversations, the hypothesis is still often communicated, that input signals should be padded to power-of-2 shapes in order to achieve the highest possible performance. With \gearshifft{}, we can now probe the availability and quality of the common mathematical approaches across many FFT libraries. 
+In a lot of conversations, the hypothesis is still often communicated, that input signals should be padded to power-of-2 shapes in order to achieve the highest possible performance. With \gearshifft{}, we can now probe the availability and quality of the common mathematical approaches across many FFT libraries. 
 
 \begin{figure}[!tbp]
   \centering
@@ -160,7 +144,9 @@ Due to the three major mathematical approaches to performing FFTs (see \cref{sec
   \label{fig:non_power_of_2}
 \end{figure}
 
-Even though our findings in \cref{fig:non_power_of_2} are restricted to FFTW and cuFFT for the sake of simplicity, the figure shows that this urban myth of padding for a power-of-2 to achieve better performance can be falsified to some extent. Clearly, power-of-2 transforms are the fastest among the three categories we chose. \cref{fig:non_power_of_2_a} illustrates that FFTW is able to offer almost identical performance for different input signal shape types across a very wide range of input signal volumes. This however comes at the expense of long planning times, see \cref{fig:non_power_of_2_b}. The situation is not so clear for cuFFT. For large input signals, a runtime difference of up to one order of magnitude on the K80 and the P100 can be observed seen. For small input signal sizes, the performance of the K80 is even superior to the P100. Further, we can observe that the cuFFT runtimes varies for different input signal shapes especially for the case of large input signal arrays. We can only hypothesize about the root cause of this behavior whether it is due to lack of implemented mathematical approaches or exploitation of hardware features. Thus, a padding to power-of-2 when using cuFFT might be justified if enough memory is available on the device.     
+Even though our findings in \cref{fig:non_power_of_2} are restricted to \fftw{} and \cufft{} for the sake of simplicity, the figure shows that this urban myth of padding for a power-of-2 to achieve better performance can be falsified to some extent. Clearly, power-of-2 transforms are the fastest among the three categories we chose. \cref{fig:non_power_of_2_a} illustrates that \fftw{} is able to offer almost identical performance for different input signal shape types across a very wide range of input signal volumes. This however comes at the expense of long planning times, see \cref{fig:non_power_of_2_b}. The situation is not so clear for \cufft{}. For large input signals, a runtime difference of up to one order of magnitude on the K80 and the P100 can be observed seen. For small input signal sizes, the performance of the K80 is even superior to the P100. Further, we can observe that the \cufft{} runtimes varies for different input signal shapes especially for the case of large input signal arrays. We can only hypothesize about the root cause of this behavior whether it is due to lack of implemented mathematical approaches or exploitation of hardware features. 
+
+Thus, a padding to power-of-2 when using \cufft{} might be justified if enough memory is available on the device. For \fftw{}, this recommendation cannot be made.    
 
 \subsection{Data Types}
 \label{ssec:data_types}
@@ -173,25 +159,25 @@ It is a common practice that complex-to-complex transforms are considered more p
   \subfloat[single precision]{\includegraphics[width=0.45\textwidth]{figures/results_r2c_vs_c2c_a.pdf}\label{fig:r2c_vs_c2c_a}}
   \hfill
   \subfloat[real-to-complex]{\includegraphics[width=0.45\textwidth]{figures/results_r2c_vs_c2c_b.pdf}\label{fig:r2c_vs_c2c_b}}
-  \caption{Time for computing a forward FFT transform using 3D power-of-2 input signals using FFTW and cuFFT on respective hardware. \cref{fig:r2c_vs_c2c_a} computes a real-to-complex transform and compares it to a complex-to-complex transform for single precision input data, whereas \cref{fig:r2c_vs_c2c_b} shows a real-to-complex transform for either single or double precision. Both figures use a log2-versus-log2 scale.}
+  \caption{Time for computing a forward FFT transform using 3D power-of-2 input signals using \fftw{} and \cufft{} on respective hardware. \cref{fig:r2c_vs_c2c_a} computes a real-to-complex transform and compares it to a complex-to-complex transform for single precision input data, whereas \cref{fig:r2c_vs_c2c_b} shows a real-to-complex transform for either single or double precision. Both figures use a log2-versus-log2 scale.}
   \label{fig:r2c_vs_c2c}
 \end{figure}
 
-\cref{fig:r2c_vs_c2c} restricts itself to larger signal sizes in order to aid the visualisation. Note that in \cref{fig:r2c_vs_c2c_a}, a data point at the same signal size does have equal shape compared to real and complex data due to complex data having double the items than real inputs. If one compares for example the entry at \SI[exponent-base=2]{e8}{\mebi\byte} for real input to the entry for \SI[exponent-base=2]{e9}{\mebi\byte} of complex type, it is clearly visible that the runtime difference amounts to \numrange{4}{8} fold regressions (note that \cref{fig:r2c_vs_c2c_a} uses a log2-log2 scale). This is equally true for FFTW on the CPU as well as for cuFFT on the P100. Thus, using a complex-to-complex transform to perform an FFT on real input proves to be slower than the real-to-complex operation.
+\cref{fig:r2c_vs_c2c} restricts itself to larger signal sizes in order to aid the visualisation. Note that in \cref{fig:r2c_vs_c2c_a}, a data point at the same signal size does have equal shape compared to real and complex data due to complex data having double the items than real inputs. If one compares for example the entry at \SI[exponent-base=2]{e8}{\mebi\byte} for real input to the entry for \SI[exponent-base=2]{e9}{\mebi\byte} of complex type, it is clearly visible that the runtime difference amounts to \numrange{4}{8} fold regressions (note that \cref{fig:r2c_vs_c2c_a} uses a log2-log2 scale). This is equally true for \fftw{} on the CPU as well as for \cufft{} on the P100. Thus, using a complex-to-complex transform to perform an FFT on real input proves to be slower than the real-to-complex operation.
 
-\cref{fig:r2c_vs_c2c_b} tries to answer the question, what gain can be expected if double precision is not needed for computing an FFT. On the high grade server GPU, the Nvidia Tesla P100, the performance difference remains below $2{\times}$. The results for FFTW vary more around \numrange{1.5}{2.5} fold regressions. 
+\cref{fig:r2c_vs_c2c_b} tries to answer the question, what gain can be expected if double precision is not needed for computing an FFT. On the high grade server GPU, the Nvidia Tesla P100, the performance difference remains below $2{\times}$. The results for \fftw{} vary more around \numrange{1.5}{2.5} fold regressions. 
 
 %% \subsection{Memory Modes}
 %% \label{ssec:mem_mode}
 
-The last analysis of this study is dedicated to the performance difference of inplace transforms versus out-of-place transforms. While the superficial argument is commonly mentioned that less memory is always better, it is worth having a look at the situation from data.
+% The last analysis of this study is dedicated to the performance difference of inplace transforms versus out-of-place transforms. While the superficial argument is commonly mentioned that less memory is always better, it is worth having a look at the situation from data.
 
-\begin{figure}[!tbp]
-  \centering
-  \includegraphics[width=\textwidth]{figures/results_placiness_legend.pdf}
-  \includegraphics[width=0.45\textwidth]{figures/results_placiness_b.pdf}
-  \caption{Time for computing single-precision real-to-complex forward transforms using the 3D power-of-2 input data. The figure uses a log10-versus-log2 scale.}
-  \label{fig:placiness}
-\end{figure}
+% \begin{figure}[!tbp]
+%   \centering
+%   \includegraphics[width=\textwidth]{figures/results_placiness_legend.pdf}
+%   \includegraphics[width=0.45\textwidth]{figures/results_placiness_b.pdf}
+%   \caption{Time for computing single-precision real-to-complex forward transforms using the 3D power-of-2 input data. The figure uses a log10-versus-log2 scale.}
+%   \label{fig:placiness}
+% \end{figure}
 
-\cref{fig:placiness} shows that in terms of performance and for large input signals, it does not matter whether the transform is performed inplace or out-of-place. There are only observable performance penalties for small input signals on the GPU.  
+% \cref{fig:placiness} shows that in terms of performance and for large input signals, it does not matter whether the transform is performed inplace or out-of-place. There are only observable performance penalties for small input signals on the GPU.  
