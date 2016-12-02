@@ -76,7 +76,7 @@ void check_cuda(cufftResult code, const char* msg,  const char *func, const char
 }
 
 // _______________________________________________________
-// Outplace Complex
+// Inplace Real
 template<typename TReal, typename TComplex>
 void run(int extent, int ID) {
   const auto runs = 5;
@@ -107,7 +107,7 @@ void run(int extent, int ID) {
         CHECK_CUDA( cudaDeviceSynchronize() );
         start = clock::now();
         CHECK_CUDA( cudaMalloc(&data, data_size));
-//        CHECK_CUDA( cudaMalloc(&data_transform, data_transform_size));
+//        CHECK_CUDA( cudaMalloc(&data_transform, data_transform_size)); // for outplace
 
         CHECK_CUDA( cufftPlan1d(&plan, extents[0], CUFFT_R2C, 1));
 
@@ -140,7 +140,7 @@ void run(int extent, int ID) {
 
         auto diff = clock::now() - start;
         auto duration = std::chrono::duration<double, std::milli> (diff).count();
-        std::cout << "\"cuFFT Standalone\",\"Inplace\",\"Complex\",\"float\",1,\"powerof2\","<<extents[0]<<",0,0,"<<i-1<<",\"Success\",0,0,0,0,0,0,0,0,0,"<<duration<<",0,0,0,"<<ID<<std::endl;
+        std::cout << "\"cuFFT Standalone\",\"Inplace\",\"Real\",\"float\",1,\"powerof2\","<<extents[0]<<",0,0,"<<i-1<<",\"Success\",0,0,0,0,0,0,0,0,0,"<<duration<<",0,0,0,"<<ID<<std::endl;
       }
 
       delete[] hdata;
