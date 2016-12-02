@@ -126,7 +126,6 @@ We begin the discussion with the classical use case for developers that might be
 %
 \cref{fig:plan_time} illustrates the problem to it's full extent. \texttt{FFTW\_MEASURE} consumes up to 3-4 orders of magnitude more time to produce a plan than a standard (GPU based libraries) or \texttt{FFTW\_ESTIMATE} based planner call especially for large input shapes, see \cref{fig:plan_time_a}. We observed that FFTW wisdom cannot be generated for 2D or 3D out-of-place transforms. Therefor, we compare the 3D planning with it's counterpart in 1D in \cref{fig:plan_time_b}. At input sizes of \SI{128}{\mebi\byte} in 1D, the planning phase exceeds the duration of \SI{100}{\second}. In practice, this imposes a challenge on the client to the FFTW API. Not only is the time to solution affected by this behavior which is a crucial quantity if FFT-heavy applications are run in an HPC environment. Here the runtime of applications needs to be know to some extent in order to allow efficient and rapid job placement in a cluster. Further, the developer interfacing with FFTW has to create infrastructure (thread-safe static singleton objects or similar come to mind) in order to perform the planning of FFTW only once and reuse the resulting plan as much as possible.
 
-\newpage
 \subsection{Comparing CPU versus GPU runtimes}
 \label{ssec:cpu_vs_gpu}
 
@@ -149,7 +148,7 @@ Another observation in \cref{fig:r2c_fwd_a} is that the general structure of the
 \subsection{Non-power-of-2 transforms}
 \label{ssec:nonpowerof2}
 
-As power-of-2 shaped input signals do naturally fit the memory hierarchy found on modern CPUs and GPUs, the transformation of non-power-of-2 input signals could be considered a computational challenge. In a lot of conversations, the hypothesis is still communicated very often, that input signals should be padded to power-of-2 shapes in order to achieve the highest possible performance. As discussed in \cref{sec:motivation}, we evaluated the runtimes of input signals that have dimensions which are powers of $3,5,7$ (referred to as \texttt{radix357}) and to signals with a dimension being a power of 19 (referred to as \texttt{oddshape}) and which are powers of $2$ (referred to as \texttt{powerof2}) to probe the availability and quality of the mathematical typically used to perform FFTs on these. 
+Due to the three major mathematical approaches to performing FFTs (see \cref{sec:motivation}), we classify the FFT extent shapes of our benchmark data into \texttt{powerof2} (radix-2, Cooley-Turkey), \texttt{radix357} (mixed-radix of primes 3, 5 and 7, Stockham) and into \texttt{oddshape} (arbitrary radices excluding the previous cases, Bluestein's algorithm). In a lot of conversations, the hypothesis is still often communicated, that input signals should be padded to power-of-2 shapes in order to achieve the highest possible performance. With \gearshifft{}, we can now probe the availability and quality of the common mathematical approaches across many FFT libraries. 
 
 \begin{figure}[!tbp]
   \centering
