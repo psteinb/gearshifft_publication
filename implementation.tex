@@ -23,7 +23,7 @@ fftw_plan r2c_plan = fftw_plan_dft_r2c(
   shape,                   //shape of the input
   (float *) input_buffer,  //input data array
   (fftwf_complex *) output,//output data array
-  \fftw{}_ESTIMATE );         //plan-rigor flag
+  FFTW_ESTIMATE );         //plan-rigor flag
 fftwf_execute(r2c_plan);
 \end{lstlisting}
 
@@ -56,6 +56,7 @@ cufftExecC2C(plan, input_buffer, output, CUFFT_FORWARD);
 The frontend API is a wrapper for the FFT client operations like plan initialization, forward or backward transformation which are motivated in \cref{sec:motivation}.
 The interface for the FFT client is designed to integrate any given FFT library, that provides forward and backward Fourier transforms.
 The wrapper code leverages C++ templates and the meta-programming language for compile-time constant expressions.
+
 This yields minimal overhead at runtime and provides a type-agnostic interface, i.\,e. \gearshifft{} is not fixed to single or double precision.
 However, the benchmark runtime environment allocates memory for samples and performance data.
 
@@ -81,28 +82,13 @@ By \mc{Application<Context>::getContext()} the user has access to the global con
 
 \begin{lstlisting}[caption={Required template arguments for FFT client implementation},label={lst:implfft_templ}]
 template<
- typename TFFT, // e.g. gearshifft::FFT_Inplace_Real, ...
+ typename TFFT,       // e.g. gearshifft::FFT_Inplace_Real, ...
  typename TPrecision, // e.g. double, float, ...
  size_t   NDim        // 1,..,3
  /* .. further template types if needed .. */
 >
-struct MyFFTClient { // ...
+struct MyFFTClient;
 \end{lstlisting}
-%   FFT_Client_Impl();
-%   ~FFT_Client_Impl();
-%   void allocate();
-%   size_t getAllocSize();
-%   size_t getTransferSize();
-%   size_t getPlanSize();
-%   void init_forward();
-%   void init_inverse();
-%   void execute_forward();
-%   void execute_inverse();
-%   template<typename THostData>
-%   void upload(THostData* input);
-%   template<typename THostData>
-%   void download(THostData* output);
-%   void destroy();
 
 \begin{table}[ht]
 \centering
@@ -118,15 +104,14 @@ struct MyFFTClient { // ...
  \end{tabular}
 \end{table}
 
-The FFT client implementation class in \cref{lst:implfft_templ} is instantiated once per benchmark run and follows the ``resource allocation is initialization (RAII) pattern.
-All the data allocated in instantiation must be freed on destruction, otherwise memory leaks can have significant impact on benchmark results.
-The methods listed in \cref{tab:implfft} are invoked by \gearshifft{} and must be implemented by the user.
-The FFT client implementation can assign user-defined template types to create different FFT client classes to mimic different use cases. An example is given by the \fftw{} implementation, which involves a compile-time constant configuration structure to map plan-rigors like \mc{\fftw{}_MEASURE} or \mc{\fftw{}_ESTIMATE}.
+The FFT client implementation class in \cref{lst:implfft_templ} is instantiated once per benchmark run and follows the ``resource allocation is initialization'' (RAII) idiom \cite{stroustrup1994design}. \gearshifft{} will invoke FFT client methods as listed \cref{tab:implfft} to perform the benchmarks and populate the benchmark data.
+
+The FFT client can assign user-defined template types to create different FFT client classes to mimic various use cases. An example is given by the \fftw{} implementation, which involves a compile-time constant configuration structure to map plan rigors like \mc{FFTW_MEASURE} or \mc{FFTW_ESTIMATE} into the aforementioned FFT client classes.
 
 \begin{lstlisting}[caption={FFT wrapper class},label={lst:fftabstract}]
 template<
- typename T_FFT, // e.g. FFT_Inplace_Real ..
- typename T_ReusePlan, // can plan be reused ?
+ typename T_FFT, 
+ typename T_ReusePlan, 
  template <typename,typename,size_t,typename... > typename T_Client,
  typename T_DeviceTimer,
  typename... T_ClientArgs >
@@ -136,37 +121,29 @@ struct FFT : public T_FFT {
 };
 \end{lstlisting}
 
-The wrapper for the FFT client and the layout of measurement is implemented in the \mc{gearshifft::FFT} functor.
-Its template parameters are shown in \cref{lst:fftabstract}. 
-The template parameter \mc{T_FFT} is assigned with one of the predefined types \mc{FFT_Inplace_Real}, \mc{FFT_Outplace_Real}, \mc{FFT_Inplace_Complex} and \mc{FFT_Outplace_Complex}.
+The wrapper for the FFT client and the layout of measurement is implemented in the \mc{gearshifft::FFT} functor. Its template parameters are shown in \cref{lst:fftabstract}. The template parameter \mc{T_FFT} is assigned with one of the predefined tag types \mc{FFT_Inplace_Real}, \mc{FFT_Outplace_Real}, \mc{FFT_Inplace_Complex} and \mc{FFT_Outplace_Complex}.
 
-Most libraries allow plan reuse.
-Reusing a plan means to use only one plan handle. After forward transform has been finished the same plan handle is used for backward transform.
-This might save memory as there are no two plans allocated at the same time. \fftw{} already overwrites input and output buffer in the planning phase, when \mc{\fftw{}_MEASURE} is used. Afterwards, the buffers can be filled with data, but it means, that the plan cannot be reused at a later time, since the result buffer of the previous plan would be overwritten at the second planning stage.
-Thus, when it is not possible to reuse the plan handle, then plan handles for forward and inverse transform are allocated in the initialization phase.
+Most libraries allow plan reuse. Thus, after a forward transform has been finished the same plan handle is used for backward transform. This saves memory as there is only one plan allocated at any point in time and for example the GPU FFT libraries allocate memory for the plan on the device. \fftw{} can overwrite input and output buffers during the planning phase, when e.g. \mc{FFTW_MEASURE} is used. Afterwards, the buffers can be filled with data. In turn, this plan cannot be reused at a later time, as the result buffer of the previous plan would be overwritten during the second planning stage. When it is not possible to reuse the plan handle, then plan handles for forward and inverse transform are allocated in the initialization phase separately in \gearshifft{}.
 %
-\mc{T_Client} defines the FFT client class like \mc{CuFFTImpl} or \mc{FftwImpl}.
-The template parameters are at least the \mc{T_FFT} type (\mc{FFT_Inplace_Real}, \ldots), the precision type (float, \ldots) and the FFT dimension (1, 2 or 3). 
+\mc{T_Client} defines the FFT client class like \mc{CuFFTImpl} or \mc{FftwImpl} as in \cref{lst:implfft_templ}. The template parameters are at least the \mc{T_FFT} type (\mc{FFT_Inplace_Real}, \ldots), the precision type (float, \ldots) and the FFT dimension (1, 2 or 3). 
 If the client needs more template arguments the variadic template \mc{T_ClientArgs} is given to the \mc{T_Client} instantiation as fourth parameter (expansion of a parameter pack).
-The \mc{T_DeviceTimer} allows device-specific time measurements and is only implemented for CUDA/cuFFT library at the moment.
+The \mc{T_DeviceTimer} allows device-specific time measurements and is only implemented for the \cufft{} library at the moment. For \fftw{} and \clfft{}, we use the CPU timers exposed by the C++14 \mc{chrono} header of the host compiler used.
 
 \begin{lstlisting}[caption={Define FFT client types for corresponding FFTs},label={lst:implfftusing}]
 namespace MyFFT { 
-// ...
   using Inplace_Real = gearshifft::FFT<
    gearshifft::FFT_Inplace_Real, MyFFTClient, TimerCPU >;
+// ...
 }
 \end{lstlisting}
 
-Finally, the FFT client and the FFT wrapping functor are combined in \cref{lst:implfftusing} to obtain the type at compile-time, which is invoked in benchmark.cpp as \cref{lst:implfftusingp2} illustrates. The \mc{gearshifft::List} is a compile-time constant list, which holds the different template instantiations of the FFT client. 
+Finally, the FFT client and the FFT wrapping functor are combined in \cref{lst:implfftusing} to obtain the type at compile-time, which is invoked in \mc{benchmark.cpp} (\cref{lst:implfftusingp2}). The \mc{gearshifft::List} is a compile-time constant list, which holds the different template instantiations of the FFT client. \mc{FFT_Is_Normalized} denotes a compile time flag if the FFT client used needs to normalize the backward transformed data in order to achieve identity with the input.
 
 \begin{lstlisting}[caption={Using FFT client types to run the benchmarks},label={lst:implfftusingp2}]
 using namespace gearshifft;
 using Context           = MyFFT::Context;         
-/// meta list can be extended with further types
 using FFTs              = List<MyFFT::Inplace_Real>;
 using Precisions        = List<float, double>;   
-/// do not divide iFFT(FFT(x)) by number of elements
 using FFT_Is_Normalized = std::false_type;
 int main( int argc, char* argv[] ) {                                                        
   try {                                                  
@@ -181,12 +158,9 @@ int main( int argc, char* argv[] ) {
 }                                                        
 \end{lstlisting}
 
-The number of benchmark repetitions is currently defined as compile-time constant in \mc{Application::NR_RUNS=5}, which will be changed to a runtime flag in a future release.
-The same holds for the error bound \mc{Application::ERROR_BOUND=0.00001}. After a benchmark has been completed, the roundtrip transformed data is validated against the original input data. If a mismatch is present, the benchmark is marked as failed and \gearshifft{} continues with the next configuration in the benchmark tree.
+For each benchmark configuration, a number of benchmark repetitions are performed to allow statistical analysis on the stochastic fluctuations expected. This is currently defined as compile-time constant in \mc{Application::NR_RUNS=5}. After a benchmark has been completed, the roundtrip transformed data is validated against the original input data. If a mismatch is present, the benchmark is marked as failed and \gearshifft{} continues with the next configuration in the benchmark tree. The error bound used for this error check is defined by \mc{Application::ERROR_BOUND=0.00001}. 
 
-Now after the frontend API has been introduced, the backend of \gearshifft{} is discussed.
-% definition might be moved into former section
-A benchmark is defined to collect performance indicators of a set of operations, and repeats the execution several times to obtain reliable statistics. Different parameters like precision, FFT extents, transform variant, device type or FFT library relate to different benchmarks.
+A \gearshifft{} benchmark is defined in the backend. It is meant to collect performance indicators of a set of operations, and repeats the execution several times. Different parameters like precision, FFT extents, transform variant, device type or FFT library relate to different benchmarks.
 \gearshifft{} controls many of them by command line arguments (\cref{tab:cmdargs}). The FFT libraries are related to different \gearshifft{} binaries (\mc{gearshifft_cufft}, \ldots).
 The backend of \gearshifft{} uses Boost Unit Test Framework to generate the benchmark instances. % @todo ref
 %
@@ -194,10 +168,10 @@ The measurement layout and benchmark framework is illustrated in \cref{fig:frame
 One single run comprises time measurement of each operation (allocate, \ldots). 
 %allocate, init forward, upload, execute forward, init inverse, execute inverse, download and destroy
 The total time measures from \mc{allocate} over forward and inverse transforms to \mc{destroy}.
-Furthermore, the memory footprint of the FFT client is recorded to answer the question, which FFT library consumes minimal memory.
+Furthermore, the memory footprint of the FFT client is recorded.
 %i.\,e. the FFT client \mc{T_Client} is intantiated to run its operations for plan generation, FFTs and data management.
 
-The functor \mc{FFT} contains the FFT client operations wrapped with time measurements. The input data buffer is hold by \mc{BenchmarkExecutor} and a copy is given to the \mc{FFT} functor each run.
+The functor \mc{FFT} contains the FFT client operations wrapped with time measurements. The input data buffer is held by \mc{BenchmarkExecutor} and a copy is given to the \mc{FFT} functor each run.
 
 % implies plan reuse
 \begin{figure}[t]
@@ -296,15 +270,14 @@ destroy\\
  \label{fig:framework}
 \end{figure}
 
-Currently, \gearshifft{} comes with three different FFT libraries, namely \cufft{} (CUDA) for nVidia GPUs \cite{nvidia2010cufft}, \clfft{} (OpenCL) from AMD \cite{clfft} and \fftw{} \cite{\fftw{}05}.
+Currently, \gearshifft{} supports three different FFT libraries, \cufft{} (CUDA runtime, \cite{nvidia2010cufft}) for nVidia GPUs , \clfft{} (OpenCL runtime, \cite{clfft}) for CPU and GPUs and \fftw{} for CPU (C/C++ runtime, \cite{\fftw{}05}).
 % \cufft{} is NVIDIA CUDA GPU-only using the Cooley-Tukey and Bluestein algorithms \cite{cooley65,bluestein}.
 % clFFT implements a variation of Cooley-Tukey and Stockham algorithm in OpenCL to run on heterogeneous platforms.
 % \fftw{} is CPU-only and primarily uses Cooley-Tukey supporting various SIMD (SSE, AVX, \ldots) optimizations.
-By this selection, an accelerator-, mixed and a CPU-optimized library is covered.
+By this selection, an accelerator-only, a mixed CPU-GPU based and a CPU-optimized library is covered.
 %
-As build system we use \texttt{cmake} to configure the includes and the executables according to the FFT libraries found by \texttt{cmake} in the user environment. There are options\footnote{Use \mc{ccmake .} in the build directory for customizing the settings.} for disabling FFT libraries or \fftw{} planning time limit.
+We use \texttt{cmake} as build system to setup build paths to construct one executable for each supported FFT libraries found by \texttt{cmake} as well as for collecting the include paths during the build process and library locations for linking later on. There are options for disabling FFT libraries or pointing to non-standard installation paths and to configure compile-time constants such as the \fftw{} planning time limit. For more details about the build process, see \cite{gearshifft_github}.
 %The project structure is depicted in \cref{fig:projstruct}.
-The common build procedure is to use a build directory (release, debug) for makefile generation with \mc{cmake ..}.
 %
 %% \begin{figure}[!htp]
 %%   \centering
@@ -371,8 +344,11 @@ Flag & [Flag] Argument & Description \\
   \end{tabular}
 \end{table}
 
-For the command-line arguments Boost is utilized, particularly for benchmark lists and selection. The \gearshifft{} program options are given in \cref{tab:cmdargs}.\linebreak
-\verb!gearshifft_clfft -e 16,16 8x8x8 -r */float/*/Inplace_Real -d cpu!\linebreak
-would run \clfft{} benchmarks with real inplace real-to-complex / complex-to-real transform on an $8\times8\times8$ FFT and $16\times16$ FFT at single-precision. The default setting implies to use all CPU cores and to dump the results to result.csv (if already existent, it will be overwritten).
-The first wildcard \mc{*} relates to the title of the FFT client, where the second one refers to the extents.
+For illustration, an example call to \gearshifft{} would look like:
+\newline
+\begin{center}
+  \verb!$ gearshifft_clfft -e 16,16 8x8x8 -r */float/*/Inplace_Real -d cpu!
+\end{center}
+\newline
+Here, the \clfft{} benchmarks would be invoked on an $8\times8\times8$ input array as well as a $16\times16$ input array of single-precision each, performing with real-to-complex / complex-to-real transforms. The default setting implies to use all CPU cores and to store the results into result.csv. The \gearshifft{} benchmark selection syntax supports wildcards. The first wildcard \mc{*} relates to the title of the FFT client (\mc{Clfft} in this example). The second one refers to the extents.
 
