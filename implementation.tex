@@ -5,10 +5,10 @@
 % - issues?
 % - #runs, cmake, project structure
 % - libraries : mem checks
-\gearshifft{} is developed as an open-source framework using C++ (following the 2014 ISO standard \cite{cpp14std}) and Boost Unit Test Framework (UTF, \cite{boost}) for managing the tree of all the different benchmark cases.
 
 \subsection{Using a Modern FFT Library}
 \label{ssec:modern_ffts}
+\gearshifft{} is developed as an open-source framework using C++ (following the 2014 ISO standard \cite{cpp14std}) and Boost Unit Test Framework (UTF, \cite{boost}) for managing the tree of all the different benchmark cases.
 
 Before discussing the design of \gearshifft{}, a brief introduction into the use and application programming interfaces (APIs) of modern FFT libraries is required to illustrate the design choices made.
 
@@ -93,7 +93,8 @@ struct MyFFTClient;
 \begin{table}[ht]
 \centering
 \caption{FFT client implementation required by gearshifft frontend API}\label{tab:implfft}
-\begin{tabular}{*{3}{p{0.3\textwidth}}}
+\setlength{\tabcolsep}{12pt}
+\begin{tabular}{*{3}{c}}
   \toprule
   \mc{constructor} & \mc{get_alloc_size}    & \mc{execute_forward} \\
   \mc{destructor}  & \mc{get_transfer_size} & \mc{execute_inverse} \\
