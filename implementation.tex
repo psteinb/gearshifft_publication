@@ -12,8 +12,10 @@
 
 Before discussing the design of \gearshifft{}, a brief introduction into the use and application programming interfaces (APIs) of modern FFT libraries is required to illustrate the design choices made.
 
-Many FFT libraries today and moreover those used in this study base their architecture and API on \fftw{} $3.0$. There are typical interactions that any client to \fftw{} has to perform in order to execute an FFT on signal data. First a plan data structure has to be created and filled using a planner. For this, the FFT problem is defined in terms of rank (1D, 2D or 3D), shape of the input signal, type of the input signal (single or double precision of real or complex inputs), type of the transformation (real-to-complex, complex-to-complex, real-to-real) and memory mode of the transformation (inplace versus out-of-place). The FFT problem description is then used as input parameters to the planner. The planner is a piece of code inside \fftw{} that henceforth tries to find the best suited radix factorization based on the shape of the input signal. It then performs several FFTs on the input data to sample the runtime of different FFT implementations available inside \fftw{}. The sample of runtimes is then used to find the optimal implementation of the FFT. After the plan has been created, it is used to execute the FFT itself.
-Depending on the number of plan executions one should spend certain amount of time in the planning phase to minimize planning and execution times altogether.
+Many FFT libraries today and moreover those used in this study base their API on \fftw{} $3.0$. In order to execute a FFT, there are required interactions with \fftw{} that have to be perform. First, a plan data structure has to be created and filled using a planner. For this, the FFT problem is defined in terms of rank (1D, 2D or 3D), shape of the input signal (the dimensional extent), type of the input signal (single or double precision of real or complex inputs), type of the transformation (real-to-complex, complex-to-complex, real-to-real) and memory mode of the transformation (inplace versus out-of-place). 
+
+The parameters describing the FFT problem are then used as input to the planner. The planner is a piece of code inside \fftw{} that tries to find the best suited radix factorization based on the shape of the input signal. By default, it then performs several FFTs derived from the mathematical descriptions discussed in \cref{sec:motivation} on the input data to sample the runtime of different FFT implementations available inside \fftw{}. This ensemble of runtimes is then used to find the optimal FFT implementation to use. After the plan has been created, it is has to be used to execute the FFT itself.
+
 \begin{lstlisting}[caption={Minimal usage example of the \fftw{} single precision real-to-complex planner API. Memory management is omitted.},label={lst:fftw_example}]
 int shape[] = {32,32,32};
 fftw_plan r2c_plan = fftw_plan_dft_r2c(
@@ -24,20 +26,23 @@ fftw_plan r2c_plan = fftw_plan_dft_r2c(
   \fftw{}_ESTIMATE );         //plan-rigor flag
 fftwf_execute(r2c_plan);
 \end{lstlisting}
-\cref{lst:fftw_example} illustrates the \fftw{} API for a single precision real-to-complex out-of-place transform. It is important to note that \fftw{} offers the user the freedom to choose the degree of optimization for finding the most optimal FFT implementation for the signal at hand. \cref{lst:fftw_example} uses the \texttt{\fftw{}\_ESTIMATE} flag, which is described by the \fftw{} manual \cite{fftw_manual} as:
+
+\cref{lst:fftw_example} illustrates the \fftw{} API for a single precision real-to-complex out-of-place transform. It is important to note that \fftw{} offers the freedom to choose the degree of optimization for finding the most optimal FFT implementation for the signal at hand by means of planner flag, also referred to as plan rigors. \cref{lst:fftw_example} uses the \texttt{\fftw{}\_ESTIMATE} flag as example, which is described by the \fftw{} manual \cite{fftw_manual} as:
 %
 \begin{quote}
 ``\texttt{\fftw{}\_ESTIMATE} specifies that, instead of actual measurements of different algorithms, a simple heuristic is used to pick a (probably sub-optimal) plan quickly. With this flag, the input/output arrays are not overwritten during planning.''
 \end{quote}
 %
-Fftw offers five levels for this planning flag in total. As covering all of them in this study is impractical, we selected two more:
+\fftw{} offers five levels for this planning flag. As covering all of them in this study is impractical, we selected two more:
 \begin{quote}
 ``\texttt{\fftw{}\_MEASURE} tells \fftw{} to find an optimized plan by actually computing several FFTs and measuring their execution time. Depending on your machine, this can take some time (often a few seconds).\newline
 \texttt{\fftw{}\_WISDOM\_ONLY} is a special planning mode in which the plan is only created if wisdom is available for the given problem, and otherwise a NULL plan is returned.''
 \end{quote}
 %
-In \fftw{} terminology, wisdom is a persistent data structure that \texttt{fftw\_wisdom} binary in the \fftw{} install tree can generate. It is meant to allow users to generate the plan for specific input data shapes offline to their application. The stored 'wisdom' can then be read from disk through the \fftw{} wisdom API.
-The studied GPU based FFT implementations follow this design structure without the plan-rigor flags and wisdoms however, see \cref{lst:cufft_example}.
+In \fftw{} terminology, \emph{wisdom} is a persistent data structure that the \texttt{fftw\_wisdom} binary in the persistent \fftw{} install tree can generate. It is meant to allow users to generate the plan for specific input data shapes offline to their application execution. The stored \emph{wisdom} file can then be read from disk through the \fftw{} wisdom API as mentioned above.
+
+The \cufft{} and \clfft{} follow this API mostly, only discarding the plan rigors and \emph{wisdom} infrastructure, see \cref{lst:cufft_example}.
+
 \begin{lstlisting}[caption={Minimal usage example of the \cufft{} single precision real-to-complex planner API. Memory management is omitted.},label={lst:cufft_example}]
 int N = 32;
 cufftHandle plan;
@@ -48,7 +53,7 @@ cufftExecC2C(plan, input_buffer, output, CUFFT_FORWARD);
 \subsection{The Architecture of \gearshifft{}}
 \label{ssec:gearshifft_arch}
 
-The frontend API is basically a wrapper for the FFT client operations like plan initialization, forward or backward transformation which are motivated in \cref{sec:motivation}.
+The frontend API is a wrapper for the FFT client operations like plan initialization, forward or backward transformation which are motivated in \cref{sec:motivation}.
 The interface for the FFT client is designed to integrate any given FFT library, that provides forward and backward Fourier transforms.
 The wrapper code leverages C++ templates and the meta-programming language for compile-time constant expressions.
 This yields minimal overhead at runtime and provides a type-agnostic interface, i.\,e. \gearshifft{} is not fixed to single or double precision.
