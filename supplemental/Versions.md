@@ -30,6 +30,13 @@ $ make
 $ make install
 ```
 
+## FFTW Wisdoms
+
+The wisdom files are precomputed plans using the `FFTW_PATIENT` mode and were generated with:
+```bash
+../fftw-3.3.5TF/fftw-3.3.5/tools/fftwf-wisdom -v -c -n -T 24 -o wisdomf  # single precision
+../fftw-3.3.5T/fftw-3.3.5/tools/fftw-wisdom -v -c -n -T 24 -o wisdom     # double precision
+```
 
 ## clFFT
 
