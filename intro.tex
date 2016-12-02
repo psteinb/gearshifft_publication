@@ -4,8 +4,8 @@ As input data grows in size with increasing experimental data production \citep{
 
 Also, the top ten sites listed of the fastest worldwide computer installations (Top500 \citep{meuer2011top500}) shows that the used hardware is by far not homogeneous in terms of vendor and composition. As this trend can be observed in practice even more, library architects and domain specialists are confronted with an essential question: Which FFT implementation works best on what hardware in terms of runtime or large signal sizes?  
 
-To answer this question we propose an open-source benchmark package called \gearshifft{} \citep{gearshifft_github} that allows to benchmark available state-of-the-art FFT libraries in a reproducible, automated, comprehensive, open and vendor-independent fashion on CPUs and GPUs.
-
+To answer this question we propose an open-source benchmark package called \gearshifft{} \citep{gearshifft_github} that allows to benchmark available state-of-the-art FFT libraries in a reproducible, automated, comprehensive and vendor-independent fashion on CPUs and GPUs.
+%
 To our surprise, comprehensive and peer-reviewed benchmarks of FFT implementations across different hardware platforms have not been published extensively. Either only specific hardware is chosen for the benchmark \citep{park2015fast,eleftheriou2005performance,Akin:15} or only specific FFT implementation variants are tested \citep{shoc2010,dongarra2013hpc}. Aside of that, many performance benchmarks are tied to domain-specific implementations \citep{fialka2006fft} that either lack comprehensiveness or the ability to map the obtained results to other implementation requirements.
 
 We thus conclude that a generic, comprehensive and open benchmark suite can help not only library authors and domain-specific developers to choose the best FFT library available. It will also support decision makers to choose the right technology if a FFT heavy workload is planned for a hardware installation. The discussion above motivates the following design goals of \gearshifft{}:

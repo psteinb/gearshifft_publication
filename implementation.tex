@@ -39,7 +39,7 @@ fftwf_execute(r2c_plan);
 \texttt{FFTW\_WISDOM\_ONLY} is a special planning mode in which the plan is only created if wisdom is available for the given problem, and otherwise a NULL plan is returned.''
 \end{quote}
 %
-In \fftw{} terminology, \emph{wisdom} is a data structure representing a more or less optimal plan for a given transform. The \texttt{fftw\_wisdom} binary which comes with the \fftw{} bundle generates hardware adapted wisdom files, which can be loaded by the wisdom API into any \fftw{} application.
+In \fftw{} terminology, \emph{wisdom} is a data structure representing a more or less optimized plan for a given transform. The \texttt{fftw\_wisdom} binary which comes with the \fftw{} bundle generates hardware adapted wisdom files, which can be loaded by the wisdom API into any \fftw{} application.
 
 The \cufft{} and \clfft{} follow this API mostly, only discarding the plan rigors and \emph{wisdom} infrastructure, see \cref{lst:cufft_example}.
 
@@ -92,7 +92,7 @@ struct MyFFTClient;
 
 \begin{table}[ht]
 \centering
-\caption{FFT client implementation required by gearshifft frontend API}\label{tab:implfft}
+\caption{Methods FFT client has to implement}\label{tab:implfft}
 \setlength{\tabcolsep}{12pt}
 \begin{tabular}{*{3}{c}}
   \toprule
