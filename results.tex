@@ -32,30 +32,27 @@ The results presented in the following sections were collected on three systems:
 
 All systems presented in \cref{tab:hardware} will be used for the benchmarks in this section. Access was performed via a \texttt{ssh} session without running a graphical user interface running on the target system. All measurements used the GNU compiler collection (GCC) version 5.3.0 as the underlying compiler if not stated otherwise. All used GPU implementations on nVidia hardware interfaced with the proprietary driver listed in \cref{tab:hardware} and used the infrastructure provided by CUDA $8.0.44$ if not stated otherwise. 
 
-Each benchmark is executed five times. From this, the arithmetic mean and sample standard deviations are used for figures presented below. As the number of repetitions is a configurable parameter of \gearshifft{}, we leave it to the user to produce a more comprehensive data set than used for this publication. We consider five repetitions enough at this point to show and discuss several aspects of performance and usability of \gearshifft{} and the FFT libraries under study.  
+After a warmup step a benchmark is executed five times. From this, the arithmetic mean and sample standard deviations are used for figures presented below. As the number of repetitions is a configurable parameter of \gearshifft{}, we leave it to the user to produce a more comprehensive data set than used for this publication. %We consider five repetitions enough at this point to show and discuss several aspects of performance and usability of \gearshifft{} and the FFT libraries under study. 
 
 %TODO: why maximum size of transforms?
 
 \subsection{gearshifft}
-The \gearshifft{} framework is designed as a thin wrapper, but there are still runtime information collected for each benchmark. 
-\gearshifft{} repeats after a warmup step the benchmark five times and averages the runtime. To verify the impact of \gearshifft{} a configuration file with 1 and with 100 extents is used.
-The cuFFT standalone code measures after a warmup step the time to solution for the same roundtrip FFT pattern as done in \gearshifft{}.
-Both uses 5 repetitions of the benchmark for the statistics.
+\gearshifft{} is designed to be a lightweight framework with a thin wrapper for the FFT clients. Performance indicators of each benchmark are collected and buffered to be sorted and dumped to a csv file after the last benchmark finished. To verify the impact of \gearshifft{} a configuration file with 1 and with 100 equal extents is used. The \cufft{} standalone code only measures the time to solution for the same roundtrip FFT.
+Both invoke a warmup step and 5 repetitions of the benchmark.
+The verification code and run scripts can be found online \cite{gearshifft_github}.
 \cref{fig:verify_cufft} indicates a constant, almost zero overhead effect of \gearshifft{}.
-Even, after 100 benchmarks there is no runtime impact visible, which allows reliable measurements with large config files for the FFT extents.
+Even, after 100 benchmarks there is no significant runtime impact visible, which allows reliable measurements with large config files for the FFT extents.
 
 \begin{figure}[!htbp]
+\vspace{-1em}
   \centering
   \includegraphics[width=\textwidth]{figures/results_verify_cufft_legend.pdf}\vspace{-1em}
   \subfloat[1024-point FFT]{\includegraphics[width=0.45\textwidth]{figures/results_verify_cufft_a.pdf}\label{fig:tts_verify_a}}
   \hfill
   \subfloat[16777216-point FFT]{\includegraphics[width=0.45\textwidth]{figures/results_verify_cufft_b.pdf}\label{fig:tts_verify_b}}
-  \caption{Comparison of runtimes of \gearshifft{} vs. standalone cuFFT---while the latter one was executed 250 times, \gearshifft{} processed a file with 250 rows containing the same number for the FFT extent; real-to-complex, inplace, roundtrip FFT, on Taurus K80 \cite{taurus}}
+  \caption{Comparison of runtimes of \gearshifft{} vs. standalone \cufft{}---while the standalone \cufft{} was executed 250 times, \gearshifft{} processed a file with 250 rows containing the same number for the FFT extent; real-to-complex, inplace, roundtrip FFT, on Taurus K80 \cite{taurus}.}
   \label{fig:verify_cufft}
 \end{figure}
-
-
-%\newpage
 
 \subsection{Time To Solution}
 \label{ssec:tts}
@@ -127,7 +124,7 @@ The last section finished by discussing a design artifact, that the \fftw{} auth
 
 Another observation in \cref{fig:r2c_fwd_a} is that the general structure of the runtime curves of GPU FFT implemetations follows an inverse roofline curve \cite{williams2009roofline}. That is for input signals smaller than the roofline turning point at \SI{1}{\mebi\byte} the FFT implementation appears to be of constant cost, i.e. to be compute bound. Above the aforementioned threshold, the implementation appears to be memory bound and hence exposes a linear growth with growing input signals which corresponds to the $\mathcal{O}(n \log n)$ complexity observed in \cref{sec:motivation}. It is interesting to see that cufft performance curves apparently follow a roofline like shape the best, whereas \fftw{} does not - most of all in \cref{fig:r2c_fwd_b}.  We note that \gearshifft{} benchmark data could be well suited for creating roofline plots. However, the output data is currently not as detailed to produce comprehensive roofline graphs as discussed in \cite{ofenbeck2014applying} as hardware details (e.g. number of flops per cycle, number of flops per byte etc) are not contained. We would like to potentially address this issue in a future development of \gearshifft{} as this offers a unique chance to learn more about the capabilities and efficiency of the used implementation on the given hardware. 
  
-Finally, it is not to our surprise that the CLFFT results reported in \cref{fig:r2c_fwd} cannot be considered optimal. As we executed CLFFT on nVidia hardware interfacing with the OpenCL runtime coming with CUDA and interfaced to the nVidia proprietary driver, OpenCL performance can not be considered a first-class citizen in this environment. Only in \cref{fig:r2c_fwd_b}, the CLFFT runtimes are below those of \fftw{}.
+Finally, it is not to our surprise that the \clfft{} results reported in \cref{fig:r2c_fwd} cannot be considered optimal. As we executed \clfft{} on nVidia hardware interfacing with the OpenCL runtime coming with CUDA and interfaced to the nVidia proprietary driver, OpenCL performance can not be considered a first-class citizen in this environment. Only in \cref{fig:r2c_fwd_b}, the \clfft{} runtimes are below those of \fftw{}.
  
 \subsection{Non-power-of-2 transforms}
 \label{ssec:nonpowerof2}
