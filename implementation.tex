@@ -5,38 +5,38 @@
 % - issues?
 % - #runs, cmake, project structure
 % - libraries : mem checks
+\gearshifft{} is developed as an open-source framework using C++ (following the 2014 ISO standard \cite{cpp14std}) and Boost Unit Test Framework (UTF, \cite{boost}) for managing the tree of all the different benchmark cases.
 
 \subsection{Using a Modern FFT Library}
-
-\gearshifft{} is developed as an open-source framework using C++14 standard and Boost Unit Test Framework (UTF) for managing the tree of all the different benchmark cases.
-Before discussing the design of \gearshifft{} in detail, it is instructive to provide a brief introduction to state of the FFT libraries that will be subject to the study in \cref{sec:results}.
-
 \label{ssec:modern_ffts}
-The design of many FFT libraries is based on the architecture and API of FFTW $3.0$. There are typical interactions that any client to FFTW has to perform in order to execute an FFT on signal data. First a plan data structure has to be created and filled using a planner. For this, the FFT problem is defined in terms of rank (1D, 2D or 3D), shape of the input signal, type of the input signal (single or double precision of real or complex inputs), type of the transformation (real-to-complex, complex-to-complex, real-to-real) and memory mode of the transformation (inplace versus out-of-place). The FFT problem description is then used as input parameters to the planner. The planner is a piece of code inside FFTW that henceforth tries to find the best suited radix factorization based on the shape of the input signal. It then performs several FFTs on the input data to sample the runtime of different FFT implementations available inside FFTW. The sample of runtimes is then used to find the optimal implementation of the FFT. After the plan has been created, it is used to execute the FFT itself.
+
+Before discussing the design of \gearshifft{}, a brief introduction into the use and application programming interfaces (APIs) of modern FFT libraries is required to illustrate the design choices made.
+
+Many FFT libraries today and moreover those used in this study base their architecture and API on \fftw{} $3.0$. There are typical interactions that any client to \fftw{} has to perform in order to execute an FFT on signal data. First a plan data structure has to be created and filled using a planner. For this, the FFT problem is defined in terms of rank (1D, 2D or 3D), shape of the input signal, type of the input signal (single or double precision of real or complex inputs), type of the transformation (real-to-complex, complex-to-complex, real-to-real) and memory mode of the transformation (inplace versus out-of-place). The FFT problem description is then used as input parameters to the planner. The planner is a piece of code inside \fftw{} that henceforth tries to find the best suited radix factorization based on the shape of the input signal. It then performs several FFTs on the input data to sample the runtime of different FFT implementations available inside \fftw{}. The sample of runtimes is then used to find the optimal implementation of the FFT. After the plan has been created, it is used to execute the FFT itself.
 Depending on the number of plan executions one should spend certain amount of time in the planning phase to minimize planning and execution times altogether.
-\begin{lstlisting}[caption={Minimal usage example of the FFTW single precision real-to-complex planner API. Memory management is omitted.},label={lst:fftw_example}]
+\begin{lstlisting}[caption={Minimal usage example of the \fftw{} single precision real-to-complex planner API. Memory management is omitted.},label={lst:fftw_example}]
 int shape[] = {32,32,32};
 fftw_plan r2c_plan = fftw_plan_dft_r2c(
   3,                       //rank, here 3D
   shape,                   //shape of the input
   (float *) input_buffer,  //input data array
   (fftwf_complex *) output,//output data array
-  FFTW_ESTIMATE );         //plan-rigor flag
+  \fftw{}_ESTIMATE );         //plan-rigor flag
 fftwf_execute(r2c_plan);
 \end{lstlisting}
-\cref{lst:fftw_example} illustrates the FFTW API for a single precision real-to-complex out-of-place transform. It is important to note that FFTW offers the user the freedom to choose the degree of optimization for finding the most optimal FFT implementation for the signal at hand. \cref{lst:fftw_example} uses the \texttt{FFTW\_ESTIMATE} flag, which is described by the FFTW manual \cite{fftw_manual} as:
+\cref{lst:fftw_example} illustrates the \fftw{} API for a single precision real-to-complex out-of-place transform. It is important to note that \fftw{} offers the user the freedom to choose the degree of optimization for finding the most optimal FFT implementation for the signal at hand. \cref{lst:fftw_example} uses the \texttt{\fftw{}\_ESTIMATE} flag, which is described by the \fftw{} manual \cite{fftw_manual} as:
 %
 \begin{quote}
-``\texttt{FFTW\_ESTIMATE} specifies that, instead of actual measurements of different algorithms, a simple heuristic is used to pick a (probably sub-optimal) plan quickly. With this flag, the input/output arrays are not overwritten during planning.''
+``\texttt{\fftw{}\_ESTIMATE} specifies that, instead of actual measurements of different algorithms, a simple heuristic is used to pick a (probably sub-optimal) plan quickly. With this flag, the input/output arrays are not overwritten during planning.''
 \end{quote}
 %
 Fftw offers five levels for this planning flag in total. As covering all of them in this study is impractical, we selected two more:
 \begin{quote}
-``\texttt{FFTW\_MEASURE} tells FFTW to find an optimized plan by actually computing several FFTs and measuring their execution time. Depending on your machine, this can take some time (often a few seconds).\newline
-\texttt{FFTW\_WISDOM\_ONLY} is a special planning mode in which the plan is only created if wisdom is available for the given problem, and otherwise a NULL plan is returned.''
+``\texttt{\fftw{}\_MEASURE} tells \fftw{} to find an optimized plan by actually computing several FFTs and measuring their execution time. Depending on your machine, this can take some time (often a few seconds).\newline
+\texttt{\fftw{}\_WISDOM\_ONLY} is a special planning mode in which the plan is only created if wisdom is available for the given problem, and otherwise a NULL plan is returned.''
 \end{quote}
 %
-In FFTW terminology, wisdom is a persistent data structure that \texttt{fftw\_wisdom} binary in the FFTW install tree can generate. It is meant to allow users to generate the plan for specific input data shapes offline to their application. The stored 'wisdom' can then be read from disk through the FFTW wisdom API.
+In \fftw{} terminology, wisdom is a persistent data structure that \texttt{fftw\_wisdom} binary in the \fftw{} install tree can generate. It is meant to allow users to generate the plan for specific input data shapes offline to their application. The stored 'wisdom' can then be read from disk through the \fftw{} wisdom API.
 The studied GPU based FFT implementations follow this design structure without the plan-rigor flags and wisdoms however, see \cref{lst:cufft_example}.
 \begin{lstlisting}[caption={Minimal usage example of the cuFFT single precision real-to-complex planner API. Memory management is omitted.},label={lst:cufft_example}]
 int N = 32;
@@ -116,7 +116,7 @@ struct MyFFTClient { // ...
 The FFT client implementation class in \cref{lst:implfft_templ} is instantiated once per benchmark run and follows the ``resource allocation is initialization (RAII) pattern.
 All the data allocated in instantiation must be freed on destruction, otherwise memory leaks can have significant impact on benchmark results.
 The methods listed in \cref{tab:implfft} are invoked by \gearshifft{} and must be implemented by the user.
-The FFT client implementation can assign user-defined template types to create different FFT client classes to mimic different use cases. An example is given by the FFTW implementation, which involves a compile-time constant configuration structure to map plan-rigors like \mc{FFTW_MEASURE} or \mc{FFTW_ESTIMATE}.
+The FFT client implementation can assign user-defined template types to create different FFT client classes to mimic different use cases. An example is given by the \fftw{} implementation, which involves a compile-time constant configuration structure to map plan-rigors like \mc{\fftw{}_MEASURE} or \mc{\fftw{}_ESTIMATE}.
 
 \begin{lstlisting}[caption={FFT wrapper class},label={lst:fftabstract}]
 template<
@@ -137,7 +137,7 @@ The template parameter \mc{T_FFT} is assigned with one of the predefined types \
 
 Most libraries allow plan reuse.
 Reusing a plan means to use only one plan handle. After forward transform has been finished the same plan handle is used for backward transform.
-This might save memory as there are no two plans allocated at the same time. FFTW already overwrites input and output buffer in the planning phase, when \mc{FFTW_MEASURE} is used. Afterwards, the buffers can be filled with data, but it means, that the plan cannot be reused at a later time, since the result buffer of the previous plan would be overwritten at the second planning stage.
+This might save memory as there are no two plans allocated at the same time. \fftw{} already overwrites input and output buffer in the planning phase, when \mc{\fftw{}_MEASURE} is used. Afterwards, the buffers can be filled with data, but it means, that the plan cannot be reused at a later time, since the result buffer of the previous plan would be overwritten at the second planning stage.
 Thus, when it is not possible to reuse the plan handle, then plan handles for forward and inverse transform are allocated in the initialization phase.
 %
 \mc{T_Client} defines the FFT client class like \mc{CuFFTImpl} or \mc{FftwImpl}.
@@ -291,13 +291,13 @@ destroy\\
  \label{fig:framework}
 \end{figure}
 
-Currently, \gearshifft{} comes with three different FFT libraries, namely cuFFT (CUDA) for nVidia GPUs \cite{nvidia2010cufft}, clFFT (OpenCL) from AMD \cite{clfft} and FFTW \cite{FFTW05}.
+Currently, \gearshifft{} comes with three different FFT libraries, namely cuFFT (CUDA) for nVidia GPUs \cite{nvidia2010cufft}, clFFT (OpenCL) from AMD \cite{clfft} and \fftw{} \cite{\fftw{}05}.
 % cuFFT is NVIDIA CUDA GPU-only using the Cooley-Tukey and Bluestein algorithms \cite{cooley65,bluestein}.
 % clFFT implements a variation of Cooley-Tukey and Stockham algorithm in OpenCL to run on heterogeneous platforms.
-% FFTW is CPU-only and primarily uses Cooley-Tukey supporting various SIMD (SSE, AVX, \ldots) optimizations.
+% \fftw{} is CPU-only and primarily uses Cooley-Tukey supporting various SIMD (SSE, AVX, \ldots) optimizations.
 By this selection, an accelerator-, mixed and a CPU-optimized library is covered.
 %
-As build system we use \texttt{cmake} to configure the includes and the executables according to the FFT libraries found by \texttt{cmake} in the user environment. There are options\footnote{Use \mc{ccmake .} in the build directory for customizing the settings.} for disabling FFT libraries or FFTW planning time limit.
+As build system we use \texttt{cmake} to configure the includes and the executables according to the FFT libraries found by \texttt{cmake} in the user environment. There are options\footnote{Use \mc{ccmake .} in the build directory for customizing the settings.} for disabling FFT libraries or \fftw{} planning time limit.
 %The project structure is depicted in \cref{fig:projstruct}.
 The common build procedure is to use a build directory (release, debug) for makefile generation with \mc{cmake ..}.
 %
