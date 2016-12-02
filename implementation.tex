@@ -27,16 +27,16 @@ fftw_plan r2c_plan = fftw_plan_dft_r2c(
 fftwf_execute(r2c_plan);
 \end{lstlisting}
 
-\cref{lst:fftw_example} illustrates the \fftw{} API for a single precision real-to-complex out-of-place transform. It is important to note that \fftw{} offers the freedom to choose the degree of optimization for finding the most optimal FFT implementation for the signal at hand by means of planner flag, also referred to as plan rigors. \cref{lst:fftw_example} uses the \texttt{\fftw{}\_ESTIMATE} flag as example, which is described by the \fftw{} manual \cite{fftw_manual} as:
+\cref{lst:fftw_example} illustrates the \fftw{} API for a single precision real-to-complex out-of-place transform. It is important to note that \fftw{} offers the freedom to choose the degree of optimization for finding the most optimal FFT implementation for the signal at hand by means of planner flag, also referred to as plan rigors. \cref{lst:fftw_example} uses the \texttt{FFTW\_ESTIMATE} flag as example, which is described by the \fftw{} manual \cite{fftw_manual} as:
 %
 \begin{quote}
-``\texttt{\fftw{}\_ESTIMATE} specifies that, instead of actual measurements of different algorithms, a simple heuristic is used to pick a (probably sub-optimal) plan quickly. With this flag, the input/output arrays are not overwritten during planning.''
+``\texttt{FFTW\_ESTIMATE} specifies that, instead of actual measurements of different algorithms, a simple heuristic is used to pick a (probably sub-optimal) plan quickly. With this flag, the input/output arrays are not overwritten during planning.''
 \end{quote}
 %
 \fftw{} offers five levels for this planning flag. As covering all of them in this study is impractical, we selected two more:
 \begin{quote}
-``\texttt{\fftw{}\_MEASURE} tells \fftw{} to find an optimized plan by actually computing several FFTs and measuring their execution time. Depending on your machine, this can take some time (often a few seconds).\newline
-\texttt{\fftw{}\_WISDOM\_ONLY} is a special planning mode in which the plan is only created if wisdom is available for the given problem, and otherwise a NULL plan is returned.''
+``\texttt{FFTW\_MEASURE} tells \fftw{} to find an optimized plan by actually computing several FFTs and measuring their execution time. Depending on your machine, this can take some time (often a few seconds).\newline
+\texttt{FFTW\_WISDOM\_ONLY} is a special planning mode in which the plan is only created if wisdom is available for the given problem, and otherwise a NULL plan is returned.''
 \end{quote}
 %
 In \fftw{} terminology, \emph{wisdom} is a persistent data structure that the \texttt{fftw\_wisdom} binary in the persistent \fftw{} install tree can generate. It is meant to allow users to generate the plan for specific input data shapes offline to their application execution. The stored \emph{wisdom} file can then be read from disk through the \fftw{} wisdom API as mentioned above.
@@ -270,7 +270,7 @@ destroy\\
  \label{fig:framework}
 \end{figure}
 
-Currently, \gearshifft{} supports three different FFT libraries, \cufft{} (CUDA runtime, \cite{nvidia2010cufft}) for nVidia GPUs , \clfft{} (OpenCL runtime, \cite{clfft}) for CPU and GPUs and \fftw{} for CPU (C/C++ runtime, \cite{\fftw{}05}).
+Currently, \gearshifft{} supports three different FFT libraries, \cufft{} (CUDA runtime, \cite{nvidia2010cufft}) for nVidia GPUs , \clfft{} (OpenCL runtime, \cite{clfft}) for CPU and GPUs and \fftw{} for CPU (C/C++ runtime, \cite{FFTW05}).
 % \cufft{} is NVIDIA CUDA GPU-only using the Cooley-Tukey and Bluestein algorithms \cite{cooley65,bluestein}.
 % clFFT implements a variation of Cooley-Tukey and Stockham algorithm in OpenCL to run on heterogeneous platforms.
 % \fftw{} is CPU-only and primarily uses Cooley-Tukey supporting various SIMD (SSE, AVX, \ldots) optimizations.
@@ -345,10 +345,10 @@ Flag & [Flag] Argument & Description \\
 \end{table}
 
 For illustration, an example call to \gearshifft{} would look like:
-\newline
+%\newline
 \begin{center}
   \verb!$ gearshifft_clfft -e 16,16 8x8x8 -r */float/*/Inplace_Real -d cpu!
 \end{center}
-\newline
-Here, the \clfft{} benchmarks would be invoked on an $8\times8\times8$ input array as well as a $16\times16$ input array of single-precision each, performing with real-to-complex / complex-to-real transforms. The default setting implies to use all CPU cores and to store the results into result.csv. The \gearshifft{} benchmark selection syntax supports wildcards. The first wildcard \mc{*} relates to the title of the FFT client (\mc{Clfft} in this example). The second one refers to the extents.
+%\newline
+Here, the \clfft{} benchmarks would be invoked on an $8\times8\times8$ input array as well as a $16\times16$ input array of single-precision each, performing with real-to-complex / complex-to-real transforms. The default setting implies to use all CPU cores and to store the results into result.csv. The \gearshifft{} benchmark selection syntax supports wildcards. The first wildcard \mc{*} relates to the title of the FFT client (\mc{ClFFT} in this example). The second one refers to the extents.
 
