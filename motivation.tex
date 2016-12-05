@@ -9,7 +9,7 @@ with $k$ being an integer index within $0 \le k < n$. This operation was found t
 
 \begin{equation}
   \label{eq:cooley-turkey}
-  X[k_1 + k_2n_1] = \sum_{j_2=0}^{n_2-1} \left( \left( \sum_{j_1=0}^{n_1-1} x[j_1n_2 + j_2] e^{\frac{-2\pi\sqrt{-1}j_1k_1}{n_1}} \right) e^{\frac{-2\pi\sqrt{-1}j_2k_1}{n}} \right) e^{\frac{-2\pi\sqrt{-1}j_2k_2}{n_2}}
+  X[k_1{+}k_2n_1] = \sum_{j_2=0}^{n_2-1} \left( \left( \sum_{j_1=0}^{n_1-1} x[j_1n_2{+}j_2] e^{\frac{-2\pi\sqrt{-1}j_1k_1}{n_1}} \right) e^{\frac{-2\pi\sqrt{-1}j_2k_1}{n}} \right) e^{\frac{-2\pi\sqrt{-1}j_2k_2}{n_2}}
 \end{equation}
 
 \cref{eq:cooley-turkey} describes a decomposition that can be performed recursively \cite{FFTW05}. Here, $n_1$ is denoted \emph{radix} as it refers to $n_1$ transforms of size $n_2$. These smaller transforms are combined by a \emph{butterfly} graph with $n_2$ DFTs of size $n_1$ on the outputs of the corresponding sub-transforms. Radix-2 DFTs ($n$ being a power of two) are mostly implemented with the Cooley-Tukey algorithm \cite{cooley1965algorithm}. Stockham's formulations of the FFT can be applied \cite{stockham1966high} to avoid incoherent memory accesses. Arbitrary and mixed radices are more complicated and can be tackled with the prime-factorization or Chirp Z-transform implemented by the Bluestein's algorithm \cite{bluestein}. 

@@ -1,7 +1,7 @@
-\gearshifft{} is developed as an open-source framework using C++ (following the 2014 ISO standard \cite{cpp14std}) and Boost Unit Test Framework (UTF, \cite{boost}) for managing the tree of all the different benchmark cases.
 
 \subsection{Using a Modern FFT Library}
 \label{ssec:modern_ffts}
+\gearshifft{} is developed as an open-source framework using C++ (following the 2014 ISO standard \cite{cpp14std}) and Boost Unit Test Framework (UTF, \cite{boost}) for managing the tree of all the different benchmark cases.
 
 Before discussing the design of \gearshifft{}, a brief introduction into the use and application programming interfaces (APIs) of modern FFT libraries is required to illustrate the design choices made.
 
@@ -32,7 +32,7 @@ fftwf_execute(r2c_plan);
 \texttt{FFTW\_WISDOM\_ONLY} is a special planning mode in which the plan is only created if wisdom is available for the given problem, and otherwise a NULL plan is returned.''
 \end{quote}
 %
-In \fftw{} terminology, \emph{wisdom} is a persistent data structure that the \texttt{fftw\_wisdom} binary in the persistent \fftw{} install tree can generate. It is meant to allow users to generate the plan for specific input data shapes offline to their application execution. The stored \emph{wisdom} file can then be read from disk through the \fftw{} wisdom API as mentioned above.
+In \fftw{} terminology, \emph{wisdom} is a data structure representing a more or less optimized plan for a given transform. The \texttt{fftw\_wisdom} binary which comes with the \fftw{} bundle generates hardware adapted wisdom files, which can be loaded by the wisdom API into any \fftw{} application.
 
 The \cufft{} and \clfft{} follow this API mostly, only discarding the plan rigors and \emph{wisdom} infrastructure, see \cref{lst:cufft_example}.
 
@@ -85,8 +85,9 @@ struct MyFFTClient;
 
 \begin{table}[ht]
 \centering
-\caption{FFT client implementation required by gearshifft front-end API}\label{tab:implfft}
-\begin{tabular}{*{3}{p{0.3\textwidth}}}
+\caption{Methods FFT client has to implement}\label{tab:implfft}
+\setlength{\tabcolsep}{12pt}
+\begin{tabular}{*{3}{c}}
   \toprule
   \mc{constructor} & \mc{get_alloc_size}    & \mc{execute_forward} \\
   \mc{destructor}  & \mc{get_transfer_size} & \mc{execute_inverse} \\
@@ -153,9 +154,9 @@ int main( int argc, char* argv[] ) {
 
 For each benchmark configuration, a number of benchmark repetitions are performed to allow statistical analysis on the stochastic fluctuations expected. This is currently defined as compile-time constant in \mc{Application::NR_RUNS=5}. After a benchmark has been completed, the round-trip transformed data is validated against the original input data. If a mismatch is present, the benchmark is marked as failed and \gearshifft{} continues with the next configuration in the benchmark tree. The error bound used for this error check is defined by \mc{Application::ERROR_BOUND=0.00001}. 
 
-A \gearshifft{} benchmark is defined in the back-end. It is meant to collect performance indicators of a set of operations, and repeats the execution several times. Different parameters like precision, FFT extents, transform variant, device type or FFT library relate to different benchmarks.
-\gearshifft{} controls many of them by command line arguments (\cref{tab:cmdargs}). The FFT libraries are related to different \gearshifft{} binaries (\mc{gearshifft_cufft}, \ldots).
-The back-end of \gearshifft{} uses Boost Unit Test Framework to generate the benchmark instances. % @todo ref
+A \gearshifft{} benchmark is defined in the backend. It is meant to collect performance indicators of a set of operations, and repeats the execution several times. Different parameters like precision, FFT extents, transform variant, device type or FFT library relate to different benchmarks.
+\gearshifft{} controls many of them by command line arguments. The FFT libraries are related to different \gearshifft{} binaries (\mc{gearshifft_cufft}, \ldots).
+The backend of \gearshifft{} uses Boost Unit Test Framework to generate the benchmark instances. % @todo ref
 %
 The measurement layout and benchmark framework is illustrated in \cref{fig:framework}.
 One single run comprises time measurement of each operation (allocate, \ldots). 
@@ -263,85 +264,15 @@ destroy\\
  \label{fig:framework}
 \end{figure}
 
-Currently, \gearshifft{} supports three different FFT libraries, \cufft{} (CUDA runtime, \cite{nvidia2010cufft}) for Nvidia GPUs , \clfft{} (OpenCL runtime, \cite{clfft}) for CPU and GPUs and \fftw{} for CPU (C/C++ runtime, \cite{FFTW05}).
-% \cufft{} is NVIDIA CUDA GPU-only using the Cooley-Tukey and Bluestein algorithms \cite{cooley65,bluestein}.
-% clFFT implements a variation of Cooley-Tukey and Stockham algorithm in OpenCL to run on heterogeneous platforms.
-% \fftw{} is CPU-only and primarily uses Cooley-Tukey supporting various SIMD (SSE, AVX, \ldots) optimizations.
-By this selection, an accelerator-only, a mixed CPU-GPU based and a CPU-optimized library is covered.
+Currently, \gearshifft{} supports three different FFT libraries, \cufft{} (CUDA runtime, \cite{nvidia2010cufft}) for \nvidia{} GPUs , \clfft{} (OpenCL runtime, \cite{clfft}) for CPU and GPUs and \fftw{} for CPU (C/C++ runtime, \cite{FFTW05}). By this selection, an accelerator-only, a mixed CPU-GPU based and a CPU-optimized library is covered.
 %
 We use \texttt{cmake} as build system to setup build paths to construct one executable for each supported FFT libraries found by \texttt{cmake} as well as for collecting the include paths during the build process and library locations for linking later on. There are options for disabling FFT libraries or pointing to non-standard installation paths and to configure compile-time constants such as the \fftw{} planning time limit. For more details about the build process, see \cite{gearshifft_github}.
-%The project structure is depicted in \cref{fig:projstruct}.
-%
-%% \begin{figure}[!htp]
-%%   \centering
-%% \begin{tikzpicture}
-%% \begin{scope}[grow via three points={one child at (0.4,-0.4) and
-%%   two children at (0.4,-0.4) and (0.4,-0.8)},
-%%   edge from parent path={(\tikzparentnode.south) |- (\tikzchildnode.west)},
-%%   every node/.style={anchor=west,font=\ttfamily}%
-%% ]
-%% \node {gearshifft}
-%%     child { node (cfg) {config}}		
-%%     child { node (inc) {inc}
-%%       child { node (core) {core}}
-%%       child { node (lib) {libraries}}
-%%     }
-%%     child [missing] {}				
-%%     child [missing] {}
-%%     child { node (scripts) {scripts}}
-%%     child { node (src) {src}}; 
-%% \end{scope}
-%% \begin{scope}[every node/.style={anchor=west}]
-%% \coordinate (d) at (4.1,0);
-%% \draw[dotted] (cfg) -- (cfg-|d) node { config files for extents (extents.csv, \ldots)};
-%% \draw[dotted] (inc) -- (inc-|d) node { header files};
-%% \draw[dotted] (core) -- (core-|d) node { gearshifft core headers (benchmark.hpp, \ldots};
-%% \draw[dotted] (lib) -- (lib-|d) node { FFT client directories with headers (fftw/fftw.hpp, \ldots)};
-%% \draw[dotted] (scripts) -- (scripts-|d) node { python scripted config generator};
-%% \draw[dotted] (src) -- (src-|d) node { gearshifft source files (benchmark.cpp, options.cpp)}; 
-%% \end{scope}
-%% \end{tikzpicture}
-%%  \caption{gearshifft project structure.}
-%%  \label{fig:projstruct}
-%% \end{figure}
 
-%% \vspace{-2em}
-
-\begin{table}[htp]
- \centering
- \caption{gearshifft command-line arguments}
- \label{tab:cmdargs}
-  \begin{tabular}{llp{6.4cm}}
-\toprule
-Flag & [Flag] Argument & Description \\
-\midrule
--h&[ -{}-help ]                    &Print help messages \\
--e&[ -{}-extent ] arg              &Specific extent (eg. 1024x1024)\newline[$\ge1$ 
-                                  arguments possible] \\
--f&[ -{}-file ] arg                &File with extents (row-wise csv)\newline[$\ge1$ 
-                                  arguments possible] \\
--o&[ -{}-output ] arg (=result.csv)&Output csv file, will be overwritten! \\
--v&[ -{}-verbose ]                 &Show statistics after benchmarks finished \\
--d&[ -{}-device ] arg (=gpu)       &Compute device = (gpu|cpu|acc|<ID>). If 
-                                  device is not supported by FFT lib, then it
-                                  is ignored and default is used. \\
--n&[ -{}-ndevices ] arg (=0)       &Number of devices (0=all), if supported by 
-                                  FFT lib (e.g. \clfft{} and fftw with n CPU 
-                                  threads). \\
--l&[ -{}-list-devices ]            &List of available compute devices with IDs,
-                                  if supported.  \\
--b&[ -{}-list-benchmarks ]         &Show registered benchmarks \\
--r&[ -{}-run-benchmarks ] arg      &Run specific benchmarks (wildcards 
-                                  possible, e.g. ClFFT/float/*/Inplace\_Real)\\
-\bottomrule
-  \end{tabular}
-\end{table}
-
-For illustration, an example call to \gearshifft{} would look like:
-%\newline
-\begin{center}
-  \verb!$ gearshifft_clfft -e 16,16 8x8x8 -r */float/*/Inplace_Real -d cpu!
-\end{center}
-%\newline
-Here, the \clfft{} benchmarks would be invoked on an $8\times8\times8$ input array as well as a $16\times16$ input array of single-precision each, performing with real-to-complex / complex-to-real transforms. The default setting implies to use all CPU cores and to store the results into result.csv. The \gearshifft{} benchmark selection syntax supports wildcards. The first wildcard \mc{*} relates to the title of the FFT client (\mc{ClFFT} in this example). The second one refers to the extents.
-
+For the command-line arguments Boost is utilized, particularly for benchmark lists and selection.
+There are several \gearshifft{} program options to control benchmark settings.
+One example is given here, the full documentation can be found online \citep{gearshifft_github}.
+\begin{lstlisting}[language=bash]
+gearshifft_clfft -e 16,16 8x8x8 -r */float/*/Inplace_Real -d cpu
+\end{lstlisting}
+Here, the \clfft{} benchmarks would be invoked on an $8\times8\times8$ input array as well as a $16\times16$ input array of single-precision each, performing with real-to-complex / complex-to-real transforms.
+The default setting implies to use all CPU cores and to store the results into result.csv. The \gearshifft{} benchmark selection syntax supports wildcards. The first wildcard \mc{*} relates to the title of the FFT client (\mc{ClFFT} in this example). The second one refers to the extents.
