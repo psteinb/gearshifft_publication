@@ -88,7 +88,7 @@ We begin the discussion with the classical use case for developers that might be
 \end{lstlisting}
 As during plan creation, the \emph{wisdom} has to be loaded from disk only, the planning times are drastically reduced and \cref{fig:plan_flags_b} shows that the user is rewarded by pure FFT runtimes of less than an order of magnitude for small signal sizes. However and unexpectedly, the FFT runtimes become larger than those of \mc{FFTW_ESTIMATE} for input signal sizes of more than \SI{32}{\kibi\byte}, which contradicts the \mc{FFTW_PATIENT} setting which should find better plans than \mc{FFTW_MEASURE}.
 
-It must emphasized that the planning times for \mc{FFTW_MEASURE} become prohibitively large for large input data sizes and reach minutes for data sets in the Gigabyte range. This is a well-known feature of \fftw{} as the authors note in \cite{FFTW05}:
+It must be emphasized that the planning times for \mc{FFTW_MEASURE} become prohibitively large for large input data sizes and reach minutes for data sets in the Gigabyte range. This is a well-known feature of \fftw{} as the authors note in \cite{FFTW05}:
 %
 \begin{quote}
   ``In performance critical applications, many transforms of the same
