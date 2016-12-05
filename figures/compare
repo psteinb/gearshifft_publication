@@ -85,11 +85,19 @@ open_gearshifft_csv <- function (fname){
         mutate(nx = ifelse(nx==0,1,nx) ) %>%
             mutate(ny = ifelse(ny==0,1,ny) ) %>%
                 mutate(nz = ifelse(nz==0,1,nz) )
-    local_frame = local_frame %>% mutate( nbytes = ifelse("Complex" %in% complex,2,1)*ifelse("float" %in% precision,4,8)*nx*ny*nz )
-    local_frame$hardware <- gpu_model
-    ## local_frame$architecture <- ifelse(gpu_model
-    local_frame$flags <- flags
-    local_frame = local_frame %>% mutate( library = tolower(library))
+    local_frame = local_frame %>% mutate( nbytes = ifelse("Complex" %in% complex,2,1)*ifelse("float" %in% precision,4,8)*nx*ny*nz,
+        hardware = gpu_model,
+        flags = flags,
+        library = tolower(library),
+        architecture = ifelse(grepl("[a-zA-Z][1-9]-",gpu_model),"cpu","gpu"))
+    
+    ## local_frame$hardware <- gpu_model
+
+    ## #TODO: watch out, this is Intel specific
+    ## local_frame$architecture <- 
+    ## head(local_frame)
+    ## local_frame$flags <- flags
+    ## local_frame = local_frame %>% mutate( library = tolower(library))
     
     return(local_frame)
 }
@@ -334,7 +342,8 @@ if( opts[["use-points"]] != FALSE ) {
 }
 moi_plot <- moi_plot + geom_errorbar(aes(ymin = moi_mean - moi_stddev,
                                          ymax = moi_mean + moi_stddev),
-                                     width=0.5)
+                                     width=0.5, linetype =1)
+#moi_plot <- moi_plot + scale_linetype_manual(values = c(1,2,3,5,4,22,33,55,44))
 
 cat("filtered by",paste(filtered_by, collapse=" "),"(n aesthetics = ",paste(aesthetics_length),")\n")
 if( opts[["notitle"]] == F ) {
