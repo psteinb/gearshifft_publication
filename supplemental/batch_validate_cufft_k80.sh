@@ -13,7 +13,7 @@
 
 k=$SLURM_ARRAY_TASK_ID
 
-RESULTS=results/K80/cuda-8.0.44
+RESULTS=../results/K80/cuda-8.0.44
 
 cd release
 
