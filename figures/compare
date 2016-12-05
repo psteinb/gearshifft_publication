@@ -21,6 +21,7 @@ library(gtable)
  --nolegend             Do not add a legend to the plot [default: FALSE]
  --notitle              Do not add a title to the plot [default: FALSE]
  --legend-only          Only save the legend to file [default: FALSE]
+ --use-points           Use points in the plots to indicate mean [default: FALSE]
  --legend-pos=LPOS      If legend is plotted, plot it at <LPOS> [default: top]
  -y --ymetric=YMETRIC 	Use metric YMETRIC for plotting along y, this can now be a valid R expression that computes a derived value [default: Time_Total]
  --ylabel=YLABEL 	Use YLABEL for labelling the ymetric, note that underscores will be replaced by white spaces as white spaces are not correctly handled through the CLI [default: ]
@@ -86,6 +87,7 @@ open_gearshifft_csv <- function (fname){
                 mutate(nz = ifelse(nz==0,1,nz) )
     local_frame = local_frame %>% mutate( nbytes = ifelse("Complex" %in% complex,2,1)*ifelse("float" %in% precision,4,8)*nx*ny*nz )
     local_frame$hardware <- gpu_model
+    ## local_frame$architecture <- ifelse(gpu_model
     local_frame$flags <- flags
     local_frame = local_frame %>% mutate( library = tolower(library))
     
@@ -326,8 +328,10 @@ moi_plot <- ggplot(data_for_plotting, ## aes(x=xmoi,
                    )
 
 
-moi_plot <- moi_plot + geom_line(aes(y=moi_mean),size=1.)
-moi_plot <- moi_plot + geom_point(aes(y=moi_mean),size=2)
+moi_plot <- moi_plot + geom_line(aes(y=moi_mean),size=.8)
+if( opts[["use-points"]] != FALSE ) {
+    moi_plot <- moi_plot + geom_point(aes(y=moi_mean),size=1)
+}
 moi_plot <- moi_plot + geom_errorbar(aes(ymin = moi_mean - moi_stddev,
                                          ymax = moi_mean + moi_stddev),
                                      width=0.5)
