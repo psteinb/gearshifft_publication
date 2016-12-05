@@ -1,11 +1,4 @@
 
-% - [open source] framework: c++14 with help of boost
-% - demonstrate usage of gearshifft framework
-% - cufft, clfft, fftw
-% - issues?
-% - #runs, cmake, project structure
-% - libraries : mem checks
-
 \subsection{Using a Modern FFT Library}
 \label{ssec:modern_ffts}
 \gearshifft{} is developed as an open-source framework using C++ (following the 2014 ISO standard \cite{cpp14std}) and Boost Unit Test Framework (UTF, \cite{boost}) for managing the tree of all the different benchmark cases.
@@ -53,14 +46,14 @@ cufftExecC2C(plan, input_buffer, output, CUFFT_FORWARD);
 \subsection{The Architecture of \gearshifft{}}
 \label{ssec:gearshifft_arch}
 
-The frontend API is a wrapper for the FFT client operations like plan initialization, forward or backward transformation which are motivated in \cref{sec:motivation}.
+The front-end API is a wrapper for the FFT client operations like plan initialization, forward or backward transformation which are motivated in \cref{sec:motivation}.
 The interface for the FFT client is designed to integrate any given FFT library, that provides forward and backward Fourier transforms.
 The wrapper code leverages C++ templates and the meta-programming language for compile-time constant expressions.
 
 This yields minimal overhead at runtime and provides a type-agnostic interface, i.\,e. \gearshifft{} is not fixed to single or double precision.
 However, the benchmark runtime environment allocates memory for samples and performance data.
 
-\begin{lstlisting}[caption={Context class required by gearshifft frontend API},label={lst:implcontext}]
+\begin{lstlisting}[caption={Context class required by gearshifft front-end API},label={lst:implcontext}]
 struct Context {
   /// title for all benchmarks associated with this context
   static std::string title();
@@ -73,7 +66,7 @@ struct Context {
 };
 \end{lstlisting}
 
-The frontend interface requires the user to implement the context class and a class with methods for the FFT client routines.
+The front-end interface requires the user to implement the context class and a class with methods for the FFT client routines.
 The context class in \cref{lst:implcontext} is instantiated only once for the application lifetime.
 FFT libraries like \clfft{} have a global setup routine, which should not be invoked in each benchmark for the sake of performance and proper measurements. 
 The context functions \mc{create} and \mc{destroy} are run only once and are measured separately.
@@ -159,7 +152,7 @@ int main( int argc, char* argv[] ) {
 }                                                        
 \end{lstlisting}
 
-For each benchmark configuration, a number of benchmark repetitions are performed to allow statistical analysis on the stochastic fluctuations expected. This is currently defined as compile-time constant in \mc{Application::NR_RUNS=5}. After a benchmark has been completed, the roundtrip transformed data is validated against the original input data. If a mismatch is present, the benchmark is marked as failed and \gearshifft{} continues with the next configuration in the benchmark tree. The error bound used for this error check is defined by \mc{Application::ERROR_BOUND=0.00001}. 
+For each benchmark configuration, a number of benchmark repetitions are performed to allow statistical analysis on the stochastic fluctuations expected. This is currently defined as compile-time constant in \mc{Application::NR_RUNS=5}. After a benchmark has been completed, the round-trip transformed data is validated against the original input data. If a mismatch is present, the benchmark is marked as failed and \gearshifft{} continues with the next configuration in the benchmark tree. The error bound used for this error check is defined by \mc{Application::ERROR_BOUND=0.00001}. 
 
 A \gearshifft{} benchmark is defined in the backend. It is meant to collect performance indicators of a set of operations, and repeats the execution several times. Different parameters like precision, FFT extents, transform variant, device type or FFT library relate to different benchmarks.
 \gearshifft{} controls many of them by command line arguments. The FFT libraries are related to different \gearshifft{} binaries (\mc{gearshifft_cufft}, \ldots).
