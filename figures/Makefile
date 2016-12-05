@@ -10,7 +10,7 @@ clfft_K80_gpu_files = $(wildcard ../results/K80*/clfft-2.12.2/*csv)
 clfft_P100_gpu_files = $(wildcard ../results/P100-P*/clfft-2.12.2/*csv)
 
 cufft8_K20xm_files = $(wildcard ../results/K20*/cuda-8*/*csv)
-cufft8_K80_files = $(wildcard ../results/K80/cuda-8*/*csv)
+cufft8_K80_files = $(wildcard ../results/K80/cuda-8*/cufft*csv)
 cufft8_P100_files = $(wildcard ../results/P100*/cuda-8*/cufft*.[0-9].csv)
 cufft8_GTX1080_files = $(wildcard ../results/GTX1080/cuda-8*/cufft*.[0-9].csv)
 
@@ -18,10 +18,10 @@ estimate_fftw_files = $(wildcard ../results/haswell/fftw-3.3.5/fftw_estimate*csv
 measure_fftw_files = $(wildcard ../results/haswell/fftw-3.3.5/fftw_gcc*csv)
 wisdom_fftw_files = $(wildcard ../results/haswell/fftw-3.3.5/fftw_wisdom*csv)
 
-cufft8_K80_verify_files = $(wildcard verify_cufft*_r2c_inplace.csv)
-cufft8_K80_verify_small_files = $(wildcard verify_cufft*_r2c_inplace_small.csv)
+cufft8_K80_validate_files = $(wildcard ../results/K80/cuda-8*/validate_cufft*_r2c_inplace.csv)
+cufft8_K80_validate_small_files = $(wildcard ../results/K80/cuda-8*/validate_cufft*_r2c_inplace_small.csv)
 
-TARGETS = results_tts results_plan_flags results_plan_time results_r2c_fwd results_non_power_of_2 results_r2c_vs_c2c results_placiness results_verify_cufft
+TARGETS = results_tts results_plan_flags results_plan_time results_r2c_fwd results_non_power_of_2 results_r2c_vs_c2c results_placiness results_validate_cufft
 
 all : $(TARGETS)
 
@@ -76,12 +76,12 @@ results_placiness : $(cufft8_P100_files) $(cufft8_K80_files) $(measure_fftw_file
 	./compare -k "powerof2" -c -s -n 3 -a "hardware,inplace" --xlabel="signal_size_[bytes]" --ylabel="t(FFT)_[ms]" --ymetric="Time_FFT" --nolegend --notitle --logy=10 --logx=2 -f $(@)_b $? $(cufft8_K80_files) $(cufft8_GTX1080_files) > $(@)_b.log 2>&1
 	./compare -k "powerof2" -c -s -n 3 -a "hardware,inplace" --xlabel="signal_size_[bytes]" --ylabel="t(FFT)_[ms]" --ymetric="Time_FFT" --legend-only --notitle --logy=10 --logx=2 -f $(@)_legend $? $(cufft8_K80_files) $(cufft8_GTX1080_files) > $(@)_legend.log 2>&1
 
-results_verify_cufft :
+results_validate_cufft :
 	@echo "input: $(?)"
-	./compare -n 1 -a "library" --legend-only --notitle -f $(@)_legend $(cufft8_K80_verify_files)  > $(@)_legend.log 2>&1
+	./compare -n 1 -a "library" --legend-only --notitle -f $(@)_legend $(cufft8_K80_validate_files)  > $(@)_legend.log 2>&1
 # small extent
-	./compare -n 1 --xlabel="iteration" --xmetric="id" --ylabel="t_[ms]" -a "library" --nolegend --notitle -f $(@)_a $(cufft8_K80_verify_small_files)  > $(@)_a.log 2>&1
-	./compare -n 1 --xlabel="iteration" --xmetric="id" --ylabel="t_[ms]" -a "library" --nolegend --notitle -f $(@)_b $(cufft8_K80_verify_files)  > $(@)_b.log 2>&1
+	./compare -n 1 --xlabel="iteration" --xmetric="id" --ylabel="t_[ms]" -a "library" --nolegend --notitle -f $(@)_a $(cufft8_K80_validate_small_files)  > $(@)_a.log 2>&1
+	./compare -n 1 --xlabel="iteration" --xmetric="id" --ylabel="t_[ms]" -a "library" --nolegend --notitle -f $(@)_b $(cufft8_K80_validate_files)  > $(@)_b.log 2>&1
 
 
 clean :
