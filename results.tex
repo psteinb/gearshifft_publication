@@ -8,7 +8,7 @@ For this study, we will concentrate on three modern and current FFT implementati
 \label{ssec:env}
 
 The results presented in the following sections were collected on three systems:
-
+%
 \begin{table}[tbp]
   \centering
   \caption{Benchmark Hardware}
@@ -29,7 +29,7 @@ The results presented in the following sections were collected on three systems:
     \bottomrule
   \end{tabular}
 \end{table}
-
+%
 All systems presented in \cref{tab:hardware} will be used for the benchmarks in this section. Access was performed via a \texttt{ssh} session without running a graphical user interface running on the target system. All measurements used the GNU compiler collection (GCC) version 5.3.0 as the underlying compiler if not stated otherwise. All used GPU implementations on \nvidia{} hardware interfaced with the proprietary driver listed in \cref{tab:hardware} and used the infrastructure provided by CUDA $8.0.44$ if not stated otherwise. 
 
 After a warmup step a benchmark is executed five times. From this, the arithmetic mean and sample standard deviations are used for figures presented below. As the number of repetitions is a configurable parameter of \gearshifft{}, we leave it to the user to produce a more comprehensive data set than used for this publication. %We consider five repetitions enough at this point to show and discuss several aspects of performance and usability of \gearshifft{} and the FFT libraries under study. 
