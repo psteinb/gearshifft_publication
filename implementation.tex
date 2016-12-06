@@ -65,7 +65,7 @@ This yields minimal overhead at runtime and provides a type-agnostic interface, 
 % };
 % \end{lstlisting}
 
-The API documentation can be found online \cite{gearshifft_github}, but we want to discuss the most relevant features in the following. The front-end interface requires the user to implement the context class and an FFT client class. The context methods \mc{create} and \mc{destroy} of the client encapsulate time-consuming device and library initialization, if e.g. the client does not store plan information as \fftw{} does. These methods are measured separately and run only once. 
+The API documentation can be found online \cite{gearshifft_github}, but we want to discuss the most relevant features in the following. The front-end interface requires the user to implement the context class and a FFT client class. The context methods \mc{create} and \mc{destroy} of the client encapsulate time-consuming device and library initialization, if e.g. the client does not store plan information as \fftw{} does. These methods are measured separately and run only once. 
 
 \begin{lstlisting}[caption={Required template arguments for FFT client implementation},label={lst:implfft_templ}]
 template<
@@ -107,7 +107,7 @@ namespace MyFFT {
 \end{lstlisting}
 
 \cref{lst:implfftusing} shows a type definition for the user implemented class \mc{MyFFTClient} and specifies an inplace-real transformation (cp. \cref{lst:implfft_templ}).
-This type is added to a list for the benchmark runner, as demonstrated in \mc{benchmark.cpp} (\cref{lst:implfftusingp2}). The \mc{gearshifft::List} is a compile-time constant list, which holds the different template instantiations of an FFT client. \mc{FFT_Is_Normalized} denotes a compile time flag if the backward transformed data needs to be normalized in order to achieve identity with the input.
+This type is added to a list for the benchmark runner, as demonstrated in \mc{benchmark.cpp} (\cref{lst:implfftusingp2}). The \mc{gearshifft::List} is a compile-time constant list, which holds the different template instantiations of a FFT client. \mc{FFT_Is_Normalized} denotes a compile time flag if the backward transformed data needs to be normalized in order to achieve identity with the input.
 
 \begin{lstlisting}[caption={Using FFT client types to run the benchmarks},label={lst:implfftusingp2}]
 using namespace gearshifft;
