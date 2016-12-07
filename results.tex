@@ -171,18 +171,3 @@ It is a common practice that complex-to-complex transforms are considered more p
 
  \cref{fig:r2c_vs_c2c_b} tries to answer the question, what gain can be expected if double precision is not needed for computing an FFT. On the high grade server GPU, the \nvidia{} Tesla P100, the performance difference remains around $2{\times}$ in the memory bound region due to double the memory bandwidth required. The results for \fftw{} vary more around \numrange{1.5}{2.5} fold regressions between single and double precision inputs across a wider input signal range. 
 
-
-%% \subsection{Memory Modes}
-%% \label{ssec:mem_mode}
-
-% The last analysis of this study is dedicated to the performance difference of inplace transforms versus out-of-place transforms. While the superficial argument is commonly mentioned that less memory is always better, it is worth having a look at the situation from data.
-
-% \begin{figure}[!tbp]
-%   \centering
-%   \includegraphics[width=\textwidth]{figures/results_placiness_legend.pdf}
-%   \includegraphics[width=0.45\textwidth]{figures/results_placiness_b.pdf}
-%   \caption{Time for computing single-precision real-to-complex forward transforms using the 3D power-of-2 input data. The figure uses a log10-versus-log2 scale.}
-%   \label{fig:placiness}
-% \end{figure}
-
-% \cref{fig:placiness} shows that in terms of performance and for large input signals, it does not matter whether the transform is performed inplace or out-of-place. There are only observable performance penalties for small input signals on the GPU.  
