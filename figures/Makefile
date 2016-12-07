@@ -22,7 +22,7 @@ wisdom_fftw_files = $(wildcard ../results/haswell/fftw-3.3.5/fftw_wisdom*csv)
 cufft8_K80_validate_files = $(wildcard ../results/K80/cuda-8*/validate_cufft*_r2c_inplace.csv)
 cufft8_K80_validate_small_files = $(wildcard ../results/K80/cuda-8*/validate_cufft*_r2c_inplace_small.csv)
 
-TARGETS = results_tts results_plan_flags results_plan_time results_r2c_fwd results_non_power_of_2 results_r2c_vs_c2c results_placiness results_validate_cufft
+TARGETS = results_tts results_plan_flags results_plan_time results_r2c_fwd results_non_power_of_2 results_r2c_vs_c2c results_placeness results_validate_cufft
 
 all : $(TARGETS)
 
@@ -65,13 +65,17 @@ results_non_power_of_2 : $(cufft8_K80_files) $(cufft8_P100_files) $(measure_fftw
 	@echo "input: $(?)"
 	./compare -k "all" -r -o -s -n 3 -a "hardware,kind,library" --xlabel="signal_size_[bytes]" --ylabel="t(FFT)_[ms]" --ymetric="Time_FFT" --nolegend --notitle --logy=10 --logx=2 -f $(@)_a $? > $(@)_a.log 2>&1
 	./compare -k "all" -r -o -s -n 3 -a "hardware,kind,library" --xlabel="signal_size_[bytes]" --ylabel="t(plan)_[ms]" --ymetric="Time_PlanInitFwd" --nolegend --notitle --logy=10 --logx=2 -f $(@)_b $? > $(@)_b.log 2>&1
-	./compare -k "all" -r -o -s -n 1 -a "hardware,kind,library" --xlabel="signal_size_[bytes]"  --ylabel="t(FFT)_[ms]" --ymetric="Time_FFT" --legend-only --notitle --logy=10 --logx=2 -f $(@)_legend $? > $(@)_legend.log 2>&1
+	./compare -k "all" -r -o -s -n 3 -a "hardware,kind,library" --xlabel="signal_size_[bytes]" --ylabel="t_[ms]" --nolegend --notitle --logy=10 --logx=2 -f $(@)_b_total $? > $(@)_b_total.log 2>&1
+	./compare -k "all" -r -o -s -n 3 -a "hardware,kind,library" --xlabel="signal_size_[bytes]"  --ylabel="t(FFT)_[ms]" --ymetric="Time_FFT" --legend-only --notitle --logy=10 --logx=2 -f $(@)_legend $? > $(@)_legend.log 2>&1
+
 results_r2c_vs_c2c : $(cufft8_P100_files) $(measure_fftw_files)
 	@echo "input: $(?)"
-	./compare -k "powerof2" -s -o -n 3 -a "hardware,complex" --ylimit=0.0625,1250 --xlimit=1,4096 --ylabel="t(FFT)_[ms]" --xlabel="signal_size_[bytes]" --ymetric="Time_FFT" --notitle --logy=2 --logx=2 -f $(@)_a $? > $(@)_a.log 2>&1
-	./compare -k "powerof2" -r -o -n 3 -a "hardware,precision" --ylimit=0.0625,1250 --xlimit=1,4096 --ylabel="t(FFT)_[ms]" --xlabel="signal_size_[bytes]" --ymetric="Time_FFT" --notitle --logy=2 --logx=2 -f $(@)_b $? > $(@)_b.log 2>&1
+	./compare -k "powerof2" -s -o -n 3 -a "hardware,complex" --ylimit=0.0625,1250 --xlimit=1,4096 --ylabel="t(FFT)_[ms]" --xlabel="signal_size_[bytes]" --ymetric="Time_FFT" --notitle --logy=2 --logx=2 -f $(@)_a_size $? > $(@)_a_size.log 2>&1
+	./compare -k "powerof2" -s -o -n 3 -a "hardware,complex" --ylabel="t(FFT)_[ms]" --xmetric="n_elements" --xlabel="n(elements)" --ymetric="Time_FFT" --notitle --logy=2 --logx=2 -f $(@)_a $? > $(@)_a.log 2>&1
+	./compare -k "powerof2" -r -o -n 3 -a "hardware,precision" --ylimit=0.0625,1250 --xlimit=1,4096 --ylabel="t(FFT)_[ms]" --xlabel="signal_size_[bytes]" --ymetric="Time_FFT" --notitle --logy=2 --logx=2 -f $(@)_b_size $? > $(@)_b_size.log 2>&1
+	./compare -k "powerof2" -r -o -n 3 -a "hardware,precision" --ylabel="t(FFT)_[ms]" --xmetric="n_elements" --xlabel="n(elements)" --ymetric="Time_FFT" --notitle --logy=2 --logx=2 -f $(@)_b $? > $(@)_b.log 2>&1
 
-results_placiness : $(cufft8_P100_files) $(cufft8_K80_files) $(measure_fftw_files)
+results_placeness : $(cufft8_P100_files) $(cufft8_K80_files) $(measure_fftw_files)
 	@echo "input: $(?)"
 	./compare -k "powerof2" -r -s -n 3 -a "hardware,inplace" --xlabel="signal_size_[bytes]" --ylabel="t(FFT)_[ms]" --ymetric="Time_FFT" --notitle --logy=10 --logx=2 -f $(@) $? > $(@).log 2>&1
 	./compare -k "powerof2" -c -s -n 3 -a "hardware,inplace" --xlabel="signal_size_[bytes]" --ylabel="t(FFT)_[ms]" --ymetric="Time_FFT" --nolegend --notitle --logy=10 --logx=2 -f $(@)_b $? $(cufft8_K80_files) $(cufft8_GTX1080_files) > $(@)_b.log 2>&1
