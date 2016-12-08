@@ -1,6 +1,6 @@
 # gearshifft_publication
 
-Publication Manuscript for results obtained with [https://github.com/mpicbg-scicomp/gearshifft](gearshifft).
+Publication Manuscript for results obtained with [gearshifft](https://github.com/mpicbg-scicomp/gearshifft).
 
 # How to reproduce?
 
