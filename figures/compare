@@ -36,6 +36,7 @@ library(gtable)
                         AES will be matched to (color,linetype,shape)
  -k --kind=KINDTYPE	Filter for KINDTYPE before plotting [default: powerof2], do not filter if KINDTYPE="all"
  -f --filename=FNAME    Use FNAME as base stem for output plots [default: gearshifft_plot]
+ --pdfheight=value      Height in inches for pdf output [default: 4.0]
 ' -> doc
 
 opts <- docopt(doc)
@@ -506,11 +507,15 @@ if(opts[["legend-only"]]){
     }
     ggsave(paste(opts[["filename"]],".png",sep=""),moi_plot)
     ggsave(paste(opts[["filename"]],".svg",sep=""),moi_plot)
+    pdfheight <- as.numeric(opts[["pdfheight"]])
     if(opts[["nolegend"]]) {
-        cairo_pdf(paste(opts[["filename"]],".pdf",sep=""),width=5,height=4)
+        cairo_pdf(paste(opts[["filename"]],".pdf",sep=""),
+                  width=5,
+                  height=pdfheight)
     }else{
-        cairo_pdf(paste(opts[["filename"]],".pdf",sep=""),width=5,height=4.5
-                  )
+        cairo_pdf(paste(opts[["filename"]],".pdf",sep=""),
+                  width=5,
+                  height=0.5+pdfheight)
     }
     print(moi_plot)
     dev.off()

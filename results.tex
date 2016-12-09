@@ -77,7 +77,7 @@ We begin the discussion with the classical use case for developers that might be
   \subfloat[time to solution]{\includegraphics[width=0.45\textwidth]{figures/results_plan_flags_a.pdf}\label{fig:plan_flags_a}}
   \hfill
   \subfloat[time for forward transform only]{\includegraphics[width=0.45\textwidth]{figures/results_plan_flags_b.pdf}\label{fig:plan_flags_b}}
-  \caption{\fftw{} (\mc{FFTW_ESTIMATE}, \mc{FFTW_MEASURE}, \mc{FFTW_WISDOM_ONLY}) computing \texttt{powerof2} 3D single-precision real-to-complex inplace forward transforms. \cref{fig:plan_flags_a} report the time to solution, whereas \cref{fig:plan_flags_b} is limited to the time spent for the execution of the forward transform only. Both figures use a log10-log2 scale.}
+  \caption{\fftw{} with \mc{FFTW_ESTIMATE}, \mc{FFTW_MEASURE} and \mc{FFTW_WISDOM_ONLY} computing \texttt{powerof2} 3D single-precision real-to-complex inplace forward transforms. \cref{fig:plan_flags_a} reports the time to solution, whereas \cref{fig:plan_flags_b} shows the time spent for the execution of the forward transform only. Both figures use a log10-log2 scale.}
   \label{fig:fftw_plan_flags}
 \end{figure}
 

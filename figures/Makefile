@@ -34,8 +34,8 @@ results_tts : $(cufft8_files) $(estimate_fftw_files)
 
 results_plan_flags : $(estimate_fftw_files) $(measure_fftw_files) $(wisdom_fftw_files)
 	@echo "input: $(?)"
-	./compare -r -s -i -k "powerof2" -n 3 -a "flags" --ylabel="t_[ms]" --xlabel="signal_size_[bytes]" --notitle --nolegend --logy=10 --logx=2 -f $(@)_a $? > $(@)_a.log 2>&1
-	./compare -r -s -i -k "powerof2" -n 3 -a "flags" --ylabel="t(FFT)_[ms]" --xlabel="signal_size_[bytes]" --notitle --nolegend --logy=10 --logx=2 --ymetric="Time_FFT" -f $(@)_b $? > $(@)_b.log 2>&1
+	./compare --pdfheight=3.0 -r -s -i -k "powerof2" -n 3 -a "flags" --ylabel="t_[ms]" --xlabel="signal_size_[bytes]" --notitle --nolegend --logy=10 --logx=2 -f $(@)_a $? > $(@)_a.log 2>&1
+	./compare --pdfheight=3.0 -r -s -i -k "powerof2" -n 3 -a "flags" --ylabel="t(FFT)_[ms]" --xlabel="signal_size_[bytes]" --notitle --nolegend --logy=10 --logx=2 --ymetric="Time_FFT" -f $(@)_b $? > $(@)_b.log 2>&1
 	./compare -r -s -i -k "powerof2" -n 3 -a "flags" --notitle --legend-only -f $(@)_legend $? > $(@)_legend.log 2>&1
 
 results_plan_time : $(clfft_K80_files) $(cufft8_K80_files) $(estimate_fftw_files) $(measure_fftw_files) $(wisdom_fftw_files)
@@ -85,8 +85,8 @@ results_validate_cufft :
 	@echo "input: $(?)"
 	./compare -n 1 -a "library" --legend-only --notitle -f $(@)_legend $(cufft8_K80_validate_files)  > $(@)_legend.log 2>&1
 # small extent
-	./compare -n 1 --xlabel="iteration" --xmetric="id" --ylabel="t_[ms]" -a "library" --nolegend --notitle -f $(@)_a $(cufft8_K80_validate_small_files)  > $(@)_a.log 2>&1
-	./compare -n 1 --xlabel="iteration" --xmetric="id" --ylabel="t_[ms]" -a "library" --nolegend --notitle -f $(@)_b $(cufft8_K80_validate_files)  > $(@)_b.log 2>&1
+	./compare --pdfheight=3.0 -n 1 --xlabel="iteration" --xmetric="id" --ylabel="t_[ms]" -a "library" --nolegend --notitle -f $(@)_a $(cufft8_K80_validate_small_files)  > $(@)_a.log 2>&1
+	./compare --pdfheight=3.0 -n 1 --xlabel="iteration" --xmetric="id" --ylabel="t_[ms]" -a "library" --nolegend --notitle -f $(@)_b $(cufft8_K80_validate_files)  > $(@)_b.log 2>&1
 
 
 clean :
