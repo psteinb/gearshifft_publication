@@ -61,7 +61,7 @@ results_r2c_fwd : $(cufft8_GTX1080_files) $(cufft8_P100_files) $(clfft_GTX1080_f
 	./compare -r -o -s -k "powerof2" --ylimit=0.00001,1000 -n 1 -a "hardware,library" --xlabel="signal_size_[bytes]" --ylabel="t(FFT)_[ms]" --ymetric="Time_FFT" --nolegend --notitle --logy=10 --logx=2 -f $(@)_b $? > $(@)_b.log 2>&1
 	./compare -r -o -s -k "powerof2" -n 1 -a "hardware,library" --xlabel="signal_size_[bytes]" --ylabel="t(FFT)_[ms]" --ymetric="Time_FFT" --legend-only --notitle --logy=10 --logx=2 -f $(@)_legend $? > $(@)_legend.log 2>&1
 
-results_non_power_of_2 : $(cufft8_K80_files) $(cufft8_P100_files) $(measure_fftw_files)
+results_non_power_of_2 : $(cufft8_P100_files) $(measure_fftw_files)
 	@echo "input: $(?)"
 	./compare -k "all" -r -o -s -n 3 -a "hardware,kind,library" --xlabel="signal_size_[bytes]" --ylabel="t(FFT)_[ms]" --ymetric="Time_FFT" --nolegend --notitle --logy=10 --logx=2 -f $(@)_a $? > $(@)_a.log 2>&1
 	./compare -k "all" -r -o -s -n 3 -a "hardware,kind,library" --xlabel="signal_size_[bytes]" --ylabel="t(plan)_[ms]" --ymetric="Time_PlanInitFwd" --nolegend --notitle --logy=10 --logx=2 -f $(@)_b $? > $(@)_b.log 2>&1

@@ -77,7 +77,7 @@ We begin the discussion with the classical use case for developers that might be
   \subfloat[time to solution]{\includegraphics[width=0.45\textwidth]{figures/results_plan_flags_a.pdf}\label{fig:plan_flags_a}}
   \hfill
   \subfloat[time for forward transform only]{\includegraphics[width=0.45\textwidth]{figures/results_plan_flags_b.pdf}\label{fig:plan_flags_b}}
-  \caption{Time-to-solution for \texttt{powerof2} 3D single-precision real-to-complex inplace forward transforms using \fftw{} (\mc{FFTW_ESTIMATE}, \mc{FFTW_MEASURE}, \mc{FFTW_WISDOM_ONLY}) and \cufft{}. \cref{fig:plan_flags_a} report the complete time to solution, whereas \cref{fig:plan_flags_b} is limited to the time spent for the execution of the forward transform only. Both figures use a log10-log2 scale.}
+  \caption{\fftw{} (\mc{FFTW_ESTIMATE}, \mc{FFTW_MEASURE}, \mc{FFTW_WISDOM_ONLY}) computing \texttt{powerof2} 3D single-precision real-to-complex inplace forward transforms. \cref{fig:plan_flags_a} report the time to solution, whereas \cref{fig:plan_flags_b} is limited to the time spent for the execution of the forward transform only. Both figures use a log10-log2 scale.}
   \label{fig:fftw_plan_flags}
 \end{figure}
 
@@ -102,7 +102,7 @@ It must be emphasized that the planning times for \mc{FFTW_MEASURE} become prohi
   \subfloat[3D transforms]{\includegraphics[width=0.45\textwidth]{figures/results_plan_time_a.pdf}\label{fig:plan_time_a}}
   \hfill
   \subfloat[1D transforms]{\includegraphics[width=0.45\textwidth]{figures/results_plan_time_b.pdf}\label{fig:plan_time_b}}
-  \caption{Time-to-plan for \texttt{powerof2} single-precision inplace real-to-complex forward transforms using \fftw{}, \cufft{} and \clfft{}. \cref{fig:plan_time_a} reports the complete time to plan for 3D transforms, whereas \cref{fig:plan_time_b} is limited to 1D transforms. ``None'' refers to the planning with \cufft{} as it does not support the plan rigor concept. Both figures use a log10-log2 scale.}
+  \caption{Time-to-plan for \texttt{powerof2} single-precision inplace real-to-complex forward transforms using \fftw{} (CPU), \cufft{} (K80 GPU) and \clfft{} (K80 GPU). \cref{fig:plan_time_a} reports the complete time to plan for 3D transforms, whereas \cref{fig:plan_time_b} is limited to 1D transforms. ``None'' refers to the planning with \cufft{} or \clfft{} as they do not support the plan rigor concept. Both figures use a log10-log2 scale.}
   \label{fig:plan_time}
 \end{figure}
 
@@ -122,7 +122,7 @@ The last section finished by discussing a design artifact, that the \fftw{} auth
   \subfloat[3D transforms]{\includegraphics[width=0.45\textwidth]{figures/results_r2c_fwd_a.pdf}\label{fig:r2c_fwd_a}}
   \hfill
   \subfloat[1D transforms]{\includegraphics[width=0.45\textwidth]{figures/results_r2c_fwd_b.pdf}\label{fig:r2c_fwd_b}}
-  \caption{Time for computing \texttt{powerof2} single-precision real-to-complex forward transforms using the 3D API (\cref{fig:r2c_fwd_a}) and the 1D API \clfft{} (\cref{fig:r2c_fwd_b}). Both figures use a log10-versus-log2 scale. Curves on the Intel E5-2680v3 based node were obtained with \fftw{}, the data on \nvidia{} GPUs was obtained with \cufft{}.}
+  \caption{Time for computing \texttt{powerof2} out-of-place single-precision real-to-complex forward transforms for 3D and for 1D shapes. Both figures use a log10-versus-log2 scale. Curves on the Intel E5-2680v3 based node were obtained with \fftw{}, the data on \nvidia{} GPUs was obtained with \cufft{} and \clfft{}.}
   \label{fig:r2c_fwd}
 \end{figure}
 
@@ -130,14 +130,13 @@ The last section finished by discussing a design artifact, that the \fftw{} auth
 
 Another observation in \cref{fig:r2c_fwd_a} is that the general structure of the runtime curves of GPU FFT implementations follows an inverse roofline curve \cite{williams2009roofline}. That is for input signals smaller than the roofline turning point at \SI{1}{\mebi\byte} the FFT implementation appears to be of constant cost, i.\,e. to be compute bound. Above the aforementioned threshold, the implementation appears to be memory bound and hence exposes a linear growth with growing input signals which corresponds to the $\mathcal{O}(n \log n)$ complexity observed in \cref{sec:motivation} and validates the considerations of algorithmic complexity therein as well. 
 
-It is interesting to see that \cufft{} performance curves apparently follow a roofline like shape the best, whereas \fftw{} does not---most of all in \cref{fig:r2c_fwd_b}. We note that \gearshifft{} benchmark data could be well suited for creating roofline plots. However, the output data is currently not as detailed to produce comprehensive roofline graphs as discussed in \cite{ofenbeck2014applying} as hardware details (e.g. number of flops per cycle, number of flops per byte etc) are not contained. We would like to potentially address this issue in a future development of \gearshifft{} as this offers a unique chance to learn more about the capabilities and efficiency of the used implementation on the given hardware. 
-
 Finally, it is not to our surprise that the \clfft{} results reported in \cref{fig:r2c_fwd} cannot be considered optimal. As we executed \clfft{} on \nvidia{} hardware interfacing with the OpenCL runtime coming with CUDA and interfaced to the \nvidia{} proprietary driver, OpenCL performance can not be considered a first-class citizen in this environment. Only in \cref{fig:r2c_fwd_b}, the \clfft{} runtimes are below those of \fftw{}. These experiments should be repeated on AMD hardware where the OpenCL performance is expected to be better.
  
 \subsection{Non-\texttt{powerof2} transforms}
 \label{ssec:nonpowerof2}
 
-In a lot of conversations, the hypothesis is still often communicated, that input signals should be padded to \texttt{powerof2} shapes in order to achieve the highest possible performance. With \gearshifft{}, we can now probe the availability and quality of the common mathematical approaches across many FFT libraries. 
+It is often communicated, that input signals should be padded to \texttt{powerof2} shapes in order to achieve the highest possible performance. With \gearshifft{}, we can now probe the availability and quality of the common mathematical approaches across many FFT libraries. 
+For the sake of simplicity, we only demonstrate the results for \fftw{} and \cufft{}.
 
 \begin{figure}[!tbp]
   \centering
@@ -145,13 +144,13 @@ In a lot of conversations, the hypothesis is still often communicated, that inpu
   \subfloat[Time for FFT]{\includegraphics[width=0.45\textwidth]{figures/results_non_power_of_2_a.pdf}\label{fig:non_power_of_2_a}}
   \hfill
   \subfloat[Time to Solution]{\includegraphics[width=0.45\textwidth]{figures/results_non_power_of_2_b_total.pdf}\label{fig:non_power_of_2_b}}
-  \caption{Time for computing single-precision real-to-complex forward transforms using the 3D API \cref{fig:non_power_of_2_a} and the time to solution \cref{fig:non_power_of_2_b}. Both figures use a log10-versus-log2 scale.}
+  \caption{\fftw{} on E5 CPU versus \cufft{} on P100 GPU computing single-precision real-to-complex out-of-place forward transforms of 3D shapes. Both figures use a log10-versus-log2 scale.}
   \label{fig:non_power_of_2}
 \end{figure}
 
-Even though our findings in \cref{fig:non_power_of_2} are restricted to \fftw{} and \cufft{} for the sake of simplicity, the figure shows that this urban myth of padding for a \texttt{powerof2} to achieve better performance can be falsified to some extent. Clearly, \texttt{powerof2} transforms are the fastest among the three categories we chose. \cref{fig:non_power_of_2_a} illustrates that \fftw{} is able to offer almost identical performance for different input signal shape types across a very wide range of input signal volumes. This however comes at the expense of long planning times, which make it no match for the GPU based FFT library, see \cref{fig:non_power_of_2_b}. The situation is not so clear for \cufft{}. For large input signals, a FFT runtime difference of up to one order of magnitude on the K80 and the P100 can be observed (\cref{fig:non_power_of_2_a}) but the time to solution converges to a common limit due to planning and transfer penalties (\cref{fig:non_power_of_2_a}). For small input signal sizes, the plain FFT performance of the K80 is even superior to the P100 (\cref{fig:non_power_of_2_a}). In terms of time to solution, \cufft{} on the K80 is well ahead of the P100 for \mc{powerof2} inputs. For anything else, both GPUs offer comparable performance.
+\cref{fig:non_power_of_2} confirms that \texttt{powerof2} transforms are generally faster than \texttt{radix357} and \texttt{oddshape} transforms. \cref{fig:non_power_of_2_a} illustrates that \fftw{} is able to offer almost identical performance for different input signal shape types across a very wide range of input signal volumes. This however comes at the expense of long planning times, which make it no match for the GPU based FFT library, see \cref{fig:non_power_of_2_b}. The situation is not so clear for \cufft{}. For large input signals, an FFT runtime difference of up to one order of magnitude on the P100 can be observed (\cref{fig:non_power_of_2_a}) but the time to solution converges to a common limit due to planning and transfer penalties (\cref{fig:non_power_of_2_a}).
 
-We conclude for a large range of input signal sizes between $\SIrange[exponent-base=2]{e-10}{e7}{\mebi\byte}$, a padding to \texttt{powerof2} might be justified when using \cufft{} if enough memory is available on the device. For \fftw{}, non-\mc{powerof2} signals can be padded at signal sizes above $\SI[exponent-base=2]{e-3}{\mebi\byte} = \SI{128}{\kibi\byte}$.
+We conclude for a large range of input signal sizes between \SIrange[exponent-base=2]{e-10}{e7}{\mebi\byte}, a padding to \texttt{powerof2} might be justified when using \cufft{} if enough memory is available on the device. For \fftw{}, non-\texttt{powerof2} signals can be padded at signal sizes above \SI[exponent-base=2]{e-3}{\mebi\byte} = \SI{128}{\kibi\byte}.
 
 \subsection{Data Types}
 \label{ssec:data_types}
@@ -165,7 +164,7 @@ It is a common practice that complex-to-complex transforms are considered more p
   \subfloat[single precision]{\includegraphics[width=0.45\textwidth]{figures/results_r2c_vs_c2c_a.pdf}\label{fig:r2c_vs_c2c_a}}
   \hfill
   \subfloat[real-to-complex]{\includegraphics[width=0.45\textwidth]{figures/results_r2c_vs_c2c_b.pdf}\label{fig:r2c_vs_c2c_b}}
-  \caption{Time for computing a forward FFT transform using 3D \texttt{powerof2} input signals using \fftw{} and \cufft{} on respective hardware versus the number of elements in the input signal. \cref{fig:r2c_vs_c2c_a} computes a real-to-complex transform and compares it to a complex-to-complex transform for single precision input data, whereas \cref{fig:r2c_vs_c2c_b} shows a real-to-complex transform for either single or double precision. Both figures use a log2-versus-log2 scale.}
+  \caption{Time for computing a forward FFT using 3D \texttt{powerof2} input signals using \fftw{} and \cufft{} on respective hardware versus the number of elements in the input signal. \cref{fig:r2c_vs_c2c_a} computes a real-to-complex transform and compares it to a complex-to-complex transform for single precision input data, whereas \cref{fig:r2c_vs_c2c_b} shows a real-to-complex transform for either single or double precision. Both figures use a log2-versus-log2 scale.}
   \label{fig:r2c_vs_c2c}
 \end{figure}
 

@@ -345,7 +345,8 @@ if( opts[["use-points"]] != FALSE ) {
 }
 moi_plot <- moi_plot + geom_errorbar(aes(ymin = moi_mean - moi_stddev,
                                          ymax = moi_mean + moi_stddev),
-                                     width=0.5, linetype =1)
+                                     width=0.25, linetype =1)
+#moi_plot <- moi_plot + scale_color_manual(name = "", values = c("red", 'blue'),labels=?)
 #moi_plot <- moi_plot + scale_linetype_manual(values = c(1,2,3,5,4,22,33,55,44))
 
 cat("filtered by",paste(filtered_by, collapse=" "),"(n aesthetics = ",paste(aesthetics_length),")\n")
