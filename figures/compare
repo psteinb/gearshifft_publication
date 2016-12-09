@@ -81,11 +81,15 @@ open_gearshifft_csv <- function (fname){
 
     }
 
+    
     local_frame = local_frame %>%
         mutate(nx = ifelse(nx==0,1,nx) ) %>%
             mutate(ny = ifelse(ny==0,1,ny) ) %>%
-                mutate(nz = ifelse(nz==0,1,nz) )
-    local_frame = local_frame %>% mutate( nbytes = ifelse("Complex" %in% complex,2,1)*ifelse("float" %in% precision,4,8)*nx*ny*nz,
+                mutate(nz = ifelse(nz==0,1,nz) ) %>%
+                    mutate( n_elements = nx*ny*nz )
+    #local_frame = local_frame %>% mutate( n_elements = nx*ny*nz )
+    local_frame = local_frame %>% mutate( 
+        nbytes = ifelse("Complex" %in% complex,2,1)*ifelse("float" %in% precision,4,8)*n_elements,
         hardware = gpu_model,
         flags = flags,
         architecture = ifelse(grepl("[a-zA-Z][1-9]-",gpu_model),"cpu","gpu"))
