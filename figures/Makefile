@@ -40,9 +40,9 @@ results_plan_flags : $(estimate_fftw_files) $(measure_fftw_files) $(wisdom_fftw_
 
 results_plan_time : $(clfft_K80_files) $(cufft8_K80_files) $(estimate_fftw_files) $(measure_fftw_files) $(wisdom_fftw_files)
 	@echo "input: $(?)"
-	./compare -r -s -i -k "powerof2" -n 3 -a "flags,library" --ylimit=0.005,50000 --xlabel="signal_size_[bytes]" --ylabel="t(plan)_[ms]" --ymetric="Time_PlanInitFwd"  --notitle --nolegend --logy=10 --logx=2 -f $(@)_a $? > $(@)_a.log 2>&1
+	./compare --pdfheight=3.0 -r -s -i -k "powerof2" -n 3 -a "flags,library" --ylimit=0.005,50000 --xlabel="signal_size_[bytes]" --ylabel="t(plan)_[ms]" --ymetric="Time_PlanInitFwd"  --notitle --nolegend --logy=10 --logx=2 -f $(@)_a $? > $(@)_a.log 2>&1
 	#./compare -r -s -o -k "powerof2" -n 1 -a "flags" --xlabel="signal_size_[bytes]" --ymetric="Time_PlanInitFwd" --ylabel="t(plan)_[ms]" --notitle --logy=10 --logx=2 -f $(@)_b  $(estimate_fftw_files) $(measure_fftw_files) $(wisdom_fftw_files) > $(@)_b.log 2>&1
-	./compare -r -s -i -k "powerof2" -n 1 -a "flags,library" --ylimit=0.005,50000 --xlabel="signal_size_[bytes]" --ymetric="Time_PlanInitFwd" --ylabel="t(plan)_[ms]" --notitle --nolegend --logy=10 --logx=2 -f $(@)_b  $(?) > $(@)_b.log 2>&1
+	./compare --pdfheight=3.0 -r -s -i -k "powerof2" -n 1 -a "flags,library" --ylimit=0.005,50000 --xlabel="signal_size_[bytes]" --ymetric="Time_PlanInitFwd" --ylabel="t(plan)_[ms]" --notitle --nolegend --logy=10 --logx=2 -f $(@)_b  $(?) > $(@)_b.log 2>&1
 	./compare -r -s -i -k "powerof2" -n 1 -a "flags,library" --xlabel="signal_size_[bytes]" --ymetric="Time_PlanInitFwd" --ylabel="t(plan)_[ms]" --legend-only --logy=10 --logx=2 -f $(@)_legend  $(?) > $(@)_legend.log 2>&1	
 
 results_transfer_times : $(cufft8_files)
@@ -57,8 +57,8 @@ results_transfer_times : $(cufft8_files)
 
 results_r2c_fwd : $(cufft8_GTX1080_files) $(cufft8_P100_files) $(clfft_GTX1080_files) $(clfft_P100_files) $(measure_fftw_files)
 	@echo "input: $(?)"
-	./compare -r -o -s -k "powerof2" --ylimit=0.00001,1000 -n 3 -a "hardware,library" --xlabel="signal_size_[bytes]" --ylabel="t(FFT)_[ms]" --ymetric="Time_FFT" --nolegend --notitle --logy=10 --logx=2 -f $(@)_a $? > $(@)_a.log 2>&1
-	./compare -r -o -s -k "powerof2" --ylimit=0.00001,1000 -n 1 -a "hardware,library" --xlabel="signal_size_[bytes]" --ylabel="t(FFT)_[ms]" --ymetric="Time_FFT" --nolegend --notitle --logy=10 --logx=2 -f $(@)_b $? > $(@)_b.log 2>&1
+	./compare --pdfheight=3.0 -r -o -s -k "powerof2" --ylimit=0.00001,1000 -n 3 -a "hardware,library" --xlabel="signal_size_[bytes]" --ylabel="t(FFT)_[ms]" --ymetric="Time_FFT" --nolegend --notitle --logy=10 --logx=2 -f $(@)_a $? > $(@)_a.log 2>&1
+	./compare --pdfheight=3.0 -r -o -s -k "powerof2" --ylimit=0.00001,1000 -n 1 -a "hardware,library" --xlabel="signal_size_[bytes]" --ylabel="t(FFT)_[ms]" --ymetric="Time_FFT" --nolegend --notitle --logy=10 --logx=2 -f $(@)_b $? > $(@)_b.log 2>&1
 	./compare -r -o -s -k "powerof2" -n 1 -a "hardware,library" --xlabel="signal_size_[bytes]" --ylabel="t(FFT)_[ms]" --ymetric="Time_FFT" --legend-only --notitle --logy=10 --logx=2 -f $(@)_legend $? > $(@)_legend.log 2>&1
 
 results_non_power_of_2 : $(cufft8_P100_files) $(measure_fftw_files)
