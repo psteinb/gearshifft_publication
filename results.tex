@@ -148,9 +148,11 @@ For the sake of simplicity, we only demonstrate the results for \fftw{} and \cuf
   \label{fig:non_power_of_2}
 \end{figure}
 
-\cref{fig:non_power_of_2} confirms that \texttt{powerof2} transforms are generally faster than \texttt{radix357} and \texttt{oddshape} transforms. \cref{fig:non_power_of_2_a} illustrates that \fftw{} is able to offer almost identical performance for different input signal shape types across a very wide range of input signal volumes. This however comes at the expense of long planning times, which make it no match for the GPU based FFT library, see \cref{fig:non_power_of_2_b}. The situation is not so clear for \cufft{}. For large input signals, an FFT runtime difference of up to one order of magnitude on the P100 can be observed (\cref{fig:non_power_of_2_a}) but the time to solution converges to a common limit due to planning and transfer penalties (\cref{fig:non_power_of_2_a}).
+\cref{fig:non_power_of_2} confirms that \texttt{powerof2} transforms are generally faster than \texttt{radix357} and \texttt{oddshape} transforms. Without the long planning time \fftw{} offers the fastest FFT runtime until the turning point at \SI{1}{\mebi\byte}, see \cref{fig:non_power_of_2_a}.
+However, looking at time to solution in \cref{fig:non_power_of_2_b} \clfft{} on CPU outperforms \fftw{} and \cufft{} until \SI{1}{\mebi\byte} for \texttt{radix357} shapes, where \cufft{} becomes superior.
+While \clfft{} only offers support for \texttt{powerof2} and \texttt{radix357} shape types---which has almost the same performance here---\cufft{} has an FFT runtime difference of up to one order of magnitude on the P100 for large input signals (\cref{fig:non_power_of_2_a}), where the time to solution converges due to planning and transfer penalties (\cref{fig:non_power_of_2_a}).
 
-We conclude for a large range of input signal sizes between \SIrange[exponent-base=2]{e-10}{e7}{\mebi\byte}, a padding to \texttt{powerof2} might be justified when using \cufft{} if enough memory is available on the device. For \fftw{}, non-\texttt{powerof2} signals can be padded at signal sizes above \SI[exponent-base=2]{e-3}{\mebi\byte} = \SI{128}{\kibi\byte}.
+We conclude for a large range of input signal sizes between \SIrange[exponent-base=2]{e-10}{e7}{\mebi\byte}, a padding to \texttt{powerof2} might be justified when using \cufft{} if enough memory is available on the device. For \fftw{} non-\texttt{powerof2} signals can be padded at signal sizes above \SI[exponent-base=2]{e-3}{\mebi\byte} = \SI{128}{\kibi\byte}. \clfft{} on CPU is only a good choice, when short planning times are more important than transform runtime. On P100 \clfft{} provides similar performance as on CPU, but is not shown here.
 
 \subsection{Data Types}
 \label{ssec:data_types}
