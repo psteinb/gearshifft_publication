@@ -73,8 +73,8 @@ The benchmark framework is independent of the used FFT library and provides the 
  \end{tabular}
 \end{table}
 
-In \gearshifft{} a benchmark is meant to collect performance indicators of the operations in \cref{tab:implfft} defining implicitly the interface for the FFT clients. Different parameters like precision, FFT extents, transform variant, device type or FFT library relate to different benchmarks. \gearshifft{} controls many of them by command line arguments. The FFT libraries are related to different \gearshifft{} binaries (\mc{gearshifft_cufft}, \ldots).
-The \gearshifft{} API documentation can be found online \cite{gearshifft_github}, but we want to discuss the most relevant features here. The front-end interface requires the user to implement the context class and an FFT client class. The context methods \mc{create} and \mc{destroy} of the client encapsulate time-consuming device and library initialization, if e.g. the client does not store plan information as \fftw{} does. These methods are measured separately and run only once. 
+In \gearshifft{} a benchmark is meant to collect performance indicators of the operations in \cref{tab:implfft} defining implicitly the interface for the FFT clients. Different parameters like precision, FFT extents, transform variant, device type or FFT library relate to different benchmarks. \gearshifft{} controls many of them by command line arguments. The FFT libraries are related to different \gearshifft{} binaries (\mc{gearshifft_cufft}, \ldots). The \gearshifft{} documentation can be found online \cite{gearshifft_github}, but we want to discuss the most relevant features here. 
+There is a common interface for context management and for the FFT workflow. It requires the user to implement the context class and an FFT client class. The context methods \mc{create} and \mc{destroy} of the client encapsulate time-consuming device and library initialization, if e.g. the client does not store plan information as \fftw{} does. These methods are measured separately and run only once. 
 
 \begin{lstlisting}[caption={Required template arguments for FFT client implementation},label={lst:implfft_templ}]
 template<
@@ -84,7 +84,6 @@ template<
  /* .. further template types if needed .. */ >
 struct MyFFTClient;
 \end{lstlisting}
-
 
 
 The FFT client implementation in \cref{lst:implfft_templ} is instantiated once per benchmark run and follows the {\textit{resource allocation is initialization}} (RAII) idiom \cite{stroustrup1994design}. \gearshifft{} invokes the FFT client methods listed in \cref{tab:implfft} to perform the benchmarks and populate the benchmark data. The FFT client can assign user-defined template types to create different FFT client classes to mimic various use cases. An example is given by the \fftw{} implementation, which involves a compile-time constant configuration structure to map plan rigors like \mc{FFTW_MEASURE} or \mc{FFTW_ESTIMATE} into the aforementioned FFT client classes.
@@ -216,12 +215,12 @@ destroy\\
 The back-end of \gearshifft{} uses Boost Unit Test Framework to generate the benchmark instances within a tree data structure which we refer to as the benchmark tree.
 The measurement layout and benchmark framework are illustrated in \cref{fig:framework}. One single run comprises time measurement of each operation (\mc{allocate}, \ldots). The total time measures all from \mc{allocate} to \mc{destroy}. The size of the allocated buffers and the memory information of the FFT library (if available) is recorded as well. The functor \mc{FFT} calls the FFT client operations wrapped with time measurements. The input data buffer, filled with random values in $[0,1]$, is held by the \mc{BenchmarkExecutor}. A copy is given to the \mc{FFT} functor in each run. For each benchmark configuration a number of benchmark repetitions is performed. The number is currently defined as a compile-time constant by \mc{Application::NR_RUNS=5}. After the last benchmark run the round-trip transformed data is validated against the original input data. The error $\varepsilon$ is computed by the sample standard deviation of input and round-trip output, see \cref{eq:stderr}. When that error is greater than \mc{Application::ERROR_BOUND=0.00001}, the benchmark is marked as failed and \gearshifft{} continues with the next configuration in the benchmark tree.
 
-\begin{equation}\label{eq:stderr}
- \varepsilon = \frac{1}{n-1}\left(\sum_{i=1}^n\left(\text{input}[i] - \text{output}[i] \right)^2 \right)^{\frac{1}{2}}
-\end{equation}
+% \begin{equation}\label{eq:stderr}
+%  \varepsilon = \frac{1}{n-1}\left(\sum_{i=1}^n\left(\text{input}[i] - \text{output}[i] \right)^2 \right)^{\frac{1}{2}}
+% \end{equation}
 
-
-Currently, \gearshifft{} supports three different FFT libraries, \cufft{} (CUDA runtime, \cite{nvidia2010cufft}) for \nvidia{} GPUs, \clfft{} (OpenCL runtime, \cite{clfft}) for CPU and GPUs and \fftw{} for CPU (C/C++ runtime, \cite{FFTW05}). By this selection, an accelerator-only, a mixed CPU-GPU and a CPU-optimized library is covered.
+\gearshifft{} adapts the API of the different FFT libraries to a common interface. The \mc{FFT} functor defines the interface of the common FFT workflow. This pattern refers to Wrapper Facades and Static Adapter design pattern which provides static polymorphism at compile-time \cite{bachmann}.
+Currently, \gearshifft{} implements three different FFT libraries, \cufft{} (CUDA runtime, \cite{nvidia2010cufft}) for \nvidia{} GPUs, \clfft{} (OpenCL runtime, \cite{clfft}) for CPU and GPUs and \fftw{} for CPU (C/C++ runtime, \cite{FFTW05}). By this selection, an accelerator-only, a mixed CPU-GPU and a CPU-optimized library is covered.
 %
 We use \texttt{cmake} as build system to setup build paths to construct one executable for each supported FFT library found by \texttt{cmake} as well as for collecting the include paths during the build process and library locations for linking later on. There are options for disabling FFT libraries or pointing to non-standard installation paths and to configure compile-time constants such as the \fftw{} planning time limit. 
 
