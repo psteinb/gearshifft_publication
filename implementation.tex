@@ -1,9 +1,9 @@
 
 \subsection{Using a Modern FFT Library}
 \label{ssec:modern_ffts}
-Before discussing the design of \gearshifft{}, a brief introduction into the use and application programming interfaces (APIs) of modern FFT libraries is required to illustrate the design choices made. Many FFT libraries today and moreover those used in this study base their API on \fftw{} $3.0$. 
+Before discussing the design of \gearshifft{}, a brief introduction into the use and application programming interfaces (APIs) of modern FFT libraries is required to illustrate the design choices made. Many FFT libraries today and particularly those used in this study base their API on \fftw{} $3.0$. 
 
-Here, in order to execute a FFT on a given pointer to data in memory, a plan data structure has to be created first using a planner. For this, the FFT problem is defined in terms of rank (1D, 2D or 3D), shape of the input signal (the dimensional extent), type of the input signal (single or double precision of real or complex inputs), type of the transformation (real-to-complex, complex-to-complex, real-to-half-complex) and memory mode of the transformation (inplace versus out-of-place). These parameters describing the FFT problem are then used as input to the planner. 
+Here, in order to execute an FFT on a given pointer to data in memory, a plan data structure has to be created first using a planner. For this, the FFT problem is defined in terms of rank (1D, 2D or 3D), shape of the input signal (the dimensional extent), type of the input signal (single or double precision of real or complex inputs), type of the transformation (real-to-complex, complex-to-complex, real-to-half-complex) and memory mode of the transformation (inplace versus out-of-place). These parameters describing the FFT problem are then used as input to the planner. 
 
 The planner is a piece of code inside \fftw{} that tries to find the best suited radix factorization based on the shape of the input signal. By default, it then performs several FFTs derived from the mathematical descriptions discussed in \cref{sec:motivation} on the input data to sample the runtime of different FFT implementations available inside \fftw{}. This ensemble of runtimes is then used to find the optimal FFT implementation to use. After the plan has been created, it is used to execute the FFT itself.
 
@@ -74,7 +74,7 @@ The benchmark framework is independent of the used FFT library and provides the 
 \end{table}
 
 In \gearshifft{} a benchmark is meant to collect performance indicators of the operations in \cref{tab:implfft} defining implicitly the interface for the FFT clients. Different parameters like precision, FFT extents, transform variant, device type or FFT library relate to different benchmarks. \gearshifft{} controls many of them by command line arguments. The FFT libraries are related to different \gearshifft{} binaries (\mc{gearshifft_cufft}, \ldots).
-The \gearshifft{} API documentation can be found online \cite{gearshifft_github}, but we want to discuss the most relevant features in the following. The front-end interface requires the user to implement the context class and a FFT client class. The context methods \mc{create} and \mc{destroy} of the client encapsulate time-consuming device and library initialization, if e.g. the client does not store plan information as \fftw{} does. These methods are measured separately and run only once. 
+The \gearshifft{} API documentation can be found online \cite{gearshifft_github}, but we want to discuss the most relevant features here. The front-end interface requires the user to implement the context class and an FFT client class. The context methods \mc{create} and \mc{destroy} of the client encapsulate time-consuming device and library initialization, if e.g. the client does not store plan information as \fftw{} does. These methods are measured separately and run only once. 
 
 \begin{lstlisting}[caption={Required template arguments for FFT client implementation},label={lst:implfft_templ}]
 template<

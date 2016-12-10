@@ -144,7 +144,7 @@ For the sake of simplicity, we only demonstrate the results for \fftw{} and \cuf
   \subfloat[Time for FFT]{\includegraphics[width=0.45\textwidth]{figures/results_non_power_of_2_a.pdf}\label{fig:non_power_of_2_a}}
   \hfill
   \subfloat[Time to Solution]{\includegraphics[width=0.45\textwidth]{figures/results_non_power_of_2_b_total.pdf}\label{fig:non_power_of_2_b}}
-  \caption{\fftw{} on E5 CPU versus \cufft{} on P100 GPU computing single-precision real-to-complex out-of-place forward transforms of 3D shapes. Both figures use a log10-versus-log2 scale.}
+  \caption{\fftw{} and \clfft{} on E5 CPU with 24 threads versus \cufft{} on P100 GPU computing single-precision real-to-complex out-of-place forward transforms of 3D shapes. Both figures use a log10-versus-log2 scale.}
   \label{fig:non_power_of_2}
 \end{figure}
 
