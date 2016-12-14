@@ -1,7 +1,7 @@
 \subsection{Experimental Environment}
 \label{ssec:env}
 
-Based on the experiences made for \cite{preibisch2014efficient, schmid2015real}, this section will discuss results obtained with \gearshifft{} \texttt{v0.1.0} on various hardware in order to showcase the capabilities of \gearshifft{}. A developer is assumed optimizing the use of FFTs in the context of the aforementioned publications, i.e. 3D real-to-complex transforms with contiguous single-precision input data. If not stated otherwise, this is the transform type assumed for all illustrations hereafter. 
+This section will discuss the results obtained with \gearshifft{} \texttt{v0.1.0} on various hardware in order to showcase the capabilities of \gearshifft{}. Based on the applications in \cite{preibisch2014efficient, schmid2015real}, 3D real-to-complex FFTs with contiguous single-precision input data are chosen for the experiments. If not stated, this is the transform type assumed for all illustrations hereafter. 
 %
 Expeditions into other use cases will be made where appropriate. The curious reader may rest assured that a more comprehensive study is possible with \gearshifft{}, however the mere multiplicity of all possible combinations and use cases of FFT render it neither feasible nor practical to discuss all of them here.
 
@@ -30,7 +30,7 @@ The results presented in the following sections were collected on three hardware
   \end{tabular}
 \end{table}
 %
-All systems presented in \cref{tab:hardware} will be used for the benchmarks in this section. Access was performed via a \texttt{ssh} session without running a graphical user interface on the target system. All measurements used the GNU compiler collection (GCC) version 5.3.0 as the underlying compiler. All used GPU implementations on \nvidia{} hardware interfaced with the proprietary driver and used the infrastructure provided by CUDA $8.0.44$ if not stated otherwise. 
+All systems presented in \cref{tab:hardware} will be used for the benchmarks in this section. Access was performed via an \texttt{ssh} session without running a graphical user interface on the target system. All measurements used the GNU compiler collection (GCC) version 5.3.0 as the underlying compiler. All used GPU implementations on \nvidia{} hardware interfaced with the proprietary driver and used the infrastructure provided by CUDA $8.0.44$ if not stated otherwise. 
 After a warmup step a benchmark is executed five times. From this, the arithmetic mean and sample standard deviations are used for figures presented below. 
 
 %TODO: why maximum size of transforms?
@@ -88,7 +88,7 @@ The discussion begins with the classical use case for developers that might be a
 
 As during plan creation, the \emph{wisdom} has to be loaded from disk only, the planning times for calling the planner with \mc{FFTW_WISDOM_ONLY} are drastically reduced. \cref{fig:plan_flags_b} shows that the user is rewarded by pure FFT runtimes of less than an order of magnitude for small signal sizes. Unexpectedly, the FFT runtimes become larger than those of \mc{FFTW_ESTIMATE} for input signal sizes of more than \SI{32}{\kibi\byte}, which apparently contradicts the \mc{FFTW_PATIENT} setting which should find better plans than \mc{FFTW_MEASURE}.
 %
-It must be emphasized that the planning times for \mc{FFTW_MEASURE} become prohibitively long and reach minutes for data sets in the Gigabyte range. This is a well-known feature of \fftw{} as the authors note in \cite{FFTW05}:
+It must be emphasized that the planning times for \mc{FFTW_MEASURE} become prohibitively long and reach minutes for data sets in the gigabyte range. This is a well-known feature of \fftw{} as the authors note in \cite{FFTW05}:
 %
 \begin{quote}
   ``In performance critical applications, many transforms of the same
@@ -106,7 +106,7 @@ It must be emphasized that the planning times for \mc{FFTW_MEASURE} become prohi
   \label{fig:plan_time}
 \end{figure}
 
-\gearshifft{} allows to dissect this problem further and isolate the planning time only.
+\gearshifft{} allows one to dissect this problem further and isolate the planning time only.
 \cref{fig:plan_time} illustrates the problem to its full extent. \mc{FFTW_MEASURE} consumes up to 3--4 orders of magnitude more planning time than other plan-rigors and plans from GPU based libraries. The 3D planning is compared with its counterpart in 1D (see \cref{fig:plan_time_b}). It is important to note that \fftw{} planning in 1D appears to be very time consuming as the \mc{FFTW_MEASURE} curve is very steep compared to \cref{fig:plan_time_a}. At input sizes of \SI{128}{\mebi\byte} in 1D, the planning phase exceeds the duration of \SI{100}{\second}. The multi-threaded environment could be a problem for \fftw{} (compiled against OpenMP): when using 24 threads in \fftw{} the time to solution with \mc{FFTW_MEASURE} was up to $6{\times}$ slower than using 1 thread. Even worse, \mc{FFTW_PATIENT} was up to $50{\times}$ slower than in a single-thread environment. Unfortunately, the number of threads used for wisdoms, which usually run in \mc{FFTW_PATIENT} mode, must be equal to the ones used by the client later on.
 
 In practice, this imposes a challenge on the client to the \fftw{} API. Not only is the time to solution affected by this behavior which is a crucial quantity in FFT-heavy applications. Moreover, in an HPC environment the runtime of applications needs to be known before executing them in order to allow efficient and rapid job placement on compute resources. From another perspective, this asserts a development pressure on the developer interfacing with \fftw{} as she has to create infrastructure in order to perform the planning of \fftw{} only once and reuse the resulting plan as much as possible. Furthermore, based on these observations of \cref{fig:fftw_plan_flags} and \cref{fig:plan_time} weighing plan time versus execution time, it becomes more and more unclear for a user of \fftw{} which plan rigor to use in general.
@@ -114,7 +114,7 @@ In practice, this imposes a challenge on the client to the \fftw{} API. Not only
 \subsection{Comparing CPU versus GPU runtimes}
 \label{ssec:cpu_vs_gpu}
 
-The last section finished by discussing a design artifact, that the \fftw{} authors introduced in their API and which other FFT libraries adopted. Another important question typically asked is if GPU accelerated FFT implementations are really faster than their CPU equivalents. Although this question cannot be answered comprehensively in our study, there are several aspects to be pointed out. First of all, modern GPU are connected via the PCIe bus to the host system in order to transfer data, receive instructions and to be supplied with power. This imposes a severe bottleneck to data transfer and is sometimes neglected during library design. Therefor, the time for data transfer needs to be accounted for or removed from the measurement. \gearshifft{}s results data model offers access to each individual step of a transformation, see \cref{fig:framework}. Hereby it is possible to isolate the runtime for the FFT transform.
+The last section finished by discussing a design artifact, that the \fftw{} authors introduced in their API and which other FFT libraries adopted. Another important and common question is whether GPU accelerated FFT implementations are really faster than their CPU equivalents. Although this question cannot be answered comprehensively in our study, there are several aspects to be explored. First of all, modern GPUs are connected via the PCIe bus to the host system in order to transfer data, receive instructions and to be supplied with power. This imposes a severe bottleneck to data transfer and is sometimes neglected during library design. Therefore, the time for data transfer needs to be accounted for or removed from the measurement. \gearshifft{}s results data model offers access to each individual step of a transformation, see \cref{fig:framework}. Hereby it is possible to isolate the runtime for the FFT transform.
 
 \begin{figure}[!tbp]
   \centering
@@ -157,7 +157,7 @@ For a large range of input signal sizes between \SIrange[exponent-base=2]{e-10}{
 \subsection{Data Types}
 \label{ssec:data_types}
 
-It is a common practice that complex-to-complex transforms are considered more performant than real-to-complex transforms. So, in order to transform a real input array, a complex array is allocated and the real part of each datum is filled with the signal. The imaginary part of each datum is left at $0$.
+It is a common practice that complex-to-complex transforms are considered more performant than real-to-complex transforms. Therefore, in order to transform a real input array, a complex array is allocated and the real part of each datum is filled with the signal. The imaginary part of each datum is left at $0$.
 
 % @todo remove K80 from plots
 \begin{figure}[!tbp]
@@ -172,5 +172,5 @@ It is a common practice that complex-to-complex transforms are considered more p
 
 \cref{fig:r2c_vs_c2c} restricts itself to larger signal sizes in order to aid the visualization. Note that in \cref{fig:r2c_vs_c2c_a}, a data point at the same number of elements of the input signal does have different size in memory. \fftw{} exposes a factor of 2 and more of runtime difference for signals larger than $2^{15}$ elements comparing real and complex input data types in \cref{fig:r2c_vs_c2c_a}. Below this threshold, the performance can be considered identical except for very small input signals although real FFTs always remain faster than complex ones. The situation is different for \cufft{}, where the overall difference is smaller in general. In the compute bound region of \cufft{} (below $2^{19}$ elements), complex transforms perform equally well than real transforms given the observed uncertainties. In the memory bound region (above $2^{19}$ elements), real transforms can be a factor of 2 ahead of complex ones which is clearly related to twice the memory accesses.    
 
- \cref{fig:r2c_vs_c2c_b} tries to answer the question, what gain can be expected if double precision is not needed for computing an FFT. On the high grade server GPU, the \nvidia{} Tesla P100, the performance difference remains around $2{\times}$ in the memory bound region due to double the memory bandwidth required. The results for \fftw{} vary more around \numrange{1.5}{2.5} fold regressions between single and double precision inputs across a wider input signal range. 
+If single-precision can be used instead of double-precision, then the possible performance gain can be estimated by \cref{fig:r2c_vs_c2c_b}. On the high grade server GPU, the \nvidia{} Tesla P100, the performance difference remains around $2{\times}$ in the memory bound region due to double the memory bandwidth required. The results for \fftw{} vary more around \numrange{1.5}{2.5} fold regressions between single and double precision inputs across a wider input signal range. 
 

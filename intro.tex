@@ -1,4 +1,4 @@
-Fast Fourier transforms (FFTs, \citep{van1992computational}) are at the heart of many signal processing and phase space exploration algorithms. Examples for their substantial usage come from image reconstruction in life sciences \citep{preibisch2014efficient,schmid2015real}, amino acid sequence alignment in bioinformatics \citep{katoh2002mafft}, phase space reduction for weather simulations \citep{maronga2015parallelized}, option price analysis and prediction in financial mathematics \citep{hurd2010fourier} or machine learning \citep{dlstudy} to just name a few.
+Fast Fourier transforms (FFTs, \citep{van1992computational}) are at the heart of many signal processing and phase space exploration algorithms. Examples for their substantial usage include image reconstruction in life sciences \citep{preibisch2014efficient,schmid2015real}, amino acid sequence alignment in bioinformatics \citep{katoh2002mafft}, phase space reduction for weather simulations \citep{maronga2015parallelized}, option price analysis and prediction in financial mathematics \citep{hurd2010fourier} and machine learning \citep{dlstudy} to just name a few.
 
 An FFT is a fast implementation of the discrete Fourier transform which is a standard text-book mathematical procedure. The forward transform is a mapping from an array $x$ of $n$ complex numbers in the time domain to an array $X$ of $n$ complex numbers in the frequency domain (referred to as Fourier domain):
 %
@@ -7,7 +7,7 @@ An FFT is a fast implementation of the discrete Fourier transform which is a sta
   X[k] = \sum_{j=0}^{n-1} x[j]e^{\frac{-2\pi \iu jk}{n}}
 \end{equation}
 %
-with $k$ being an integer index within $0 \le k < n$ and the imaginary unit $\iu^2{=}-1$. This operation was found to be computable in $\mathcal{O}(n \log n)$ complexity by Cooley-Turkey \cite{cooley1965algorithm}, which in turn rediscovered findings by Gauss \cite{gauss}. The basis of the Cooley-Turkey approach is the observation that the  DFT of size $n$ can be rewritten by smaller DFTs of size $n_1$ and $n_2$ by the factorization of $n=n_1n_2$. Given the indices $j{=}j_1n_2{+}j_2$ and $k{=}k_1{+}k_2n_1$, \cref{eq:dft} can be re-expressed as:
+with $k$ being an integer index within $0 \le k < n$ and the imaginary unit $\iu^2{=}-1$. This operation was found to be computable in $\mathcal{O}(n \log n)$ complexity by Cooley-Turkey \cite{cooley1965algorithm}, who rediscovered findings of Gauss \cite{gauss}. The basis of the Cooley-Turkey approach is the observation that the  DFT of size $n$ can be rewritten by smaller DFTs of size $n_1$ and $n_2$ by the factorization of $n=n_1n_2$. Given the indices $j{=}j_1n_2{+}j_2$ and $k{=}k_1{+}k_2n_1$, \cref{eq:dft} can be re-expressed as:
 %
 \begin{equation}
   \label{eq:cooley-turkey}
@@ -17,15 +17,15 @@ with $k$ being an integer index within $0 \le k < n$ and the imaginary unit $\iu
 \cref{eq:cooley-turkey} describes a decomposition that can be performed recursively \cite{FFTW05}. Here, $n_1$ is denoted \emph{radix} as it refers to $n_1$ transforms of size $n_2$. These smaller transforms are combined by a \emph{butterfly} graph with $n_2$ DFTs of size $n_1$ on the outputs of the corresponding sub-transforms. Radix-2 DFTs ($n$ being a power of two) are mostly implemented with the Cooley-Tukey algorithm \cite{cooley1965algorithm}. Stockham's formulations of the FFT can be applied \cite{stockham1966high} to avoid incoherent memory accesses. Arbitrary and mixed radices can be tackled with the prime-factorization or Chirp Z-transform implemented by the Bluestein's algorithm \cite{bluestein}. 
 
 
-The top ten list of the fastest worldwide computer installations (Top500 \citep{meuer2011top500}) shows that the used hardware is by far not homogeneous in terms of vendor and composition. As this trend can be observed in practice even more, library architects and domain specialists are confronted with an essential question: Which FFT implementation works best on what hardware?  
+The top ten list of the fastest worldwide computer installations (Top500 \citep{meuer2011top500}) shows that the used hardware is by far not homogeneous in terms of vendor and composition. This trend can be even more observed in practice, where library architects and domain specialists are confronted with an essential question: Which FFT implementation works best on what hardware?  
 
-With increasing experimental data production \citep{huisken2004optical} and simulation output bandwidths \citep{maronga2015parallelized}, input data to FFT libraries in the order of Gigabytes becomes the standard. With the advent of graphics processing units (GPUs) for scientific computing around the beginning of the 21st century and the subsequent availability of general purpose programming paradigms to program these \citep{du2012cuda}, vendor-specific and open-source libraries to perform FFTs on accelerators emerged (\cufft{} \citep{nvidia2010cufft} by \nvidia{}, open-source \clfft{} \citep{clfft}) to offer performance which supersedes traditional high-performance implementations running on standard Central Processing Units (CPUs) such as the open-source \fftw{} library \citep{FFTW05} or the Intel specific MKL \citep{intel2007intel}.
+With increasing experimental data production \citep{huisken2004optical} and simulation output bandwidths \citep{maronga2015parallelized}, input data to FFT libraries in the order of gigabytes becomes the standard. With the advent of graphics processing units (GPUs) for scientific computing around the beginning of the 21st century and the subsequent availability of general purpose programming paradigms to program these \citep{du2012cuda}, vendor-specific and open-source libraries to perform FFTs on accelerators emerged (\cufft{} \citep{nvidia2010cufft} by \nvidia{}, open-source \clfft{} \citep{clfft}) to offer performance which supersedes traditional high-performance implementations running on standard Central Processing Units (CPUs) such as the open-source \fftw{} library \citep{FFTW05} or the Intel specific MKL \citep{intel2007intel}.
 
 
 %
-To our surprise, comprehensive and peer-reviewed benchmarks of FFT implementations across different hardware platforms have not been published extensively. Either only specific hardware is chosen for the benchmark \citep{park2015fast,eleftheriou2005performance,Akin:15} or only specific FFT implementation variants are tested \citep{shoc2010,dongarra2013hpc}. Aside of that, many performance benchmarks are tied to domain-specific implementations \citep{fialka2006fft} that either lack comprehensiveness or the ability to map the obtained results to other implementation requirements.
+To our surprise, comprehensive and peer-reviewed benchmarks of FFT implementations across different hardware platforms have not been published extensively. Either only specific hardware is chosen for the benchmark \citep{park2015fast,eleftheriou2005performance,Akin:15} or only specific FFT implementation variants are tested \citep{shoc2010,dongarra2013hpc}. In addition, many performance benchmarks are tied to domain-specific implementations \citep{fialka2006fft} that either lack comprehensiveness or the ability to map the results obtained to other implementation requirements.
 
-Thus, a new open-source benchmark package called \gearshifft{} \citep{gearshifft_github} has been developed. It allows to benchmark available state-of-the-art FFT libraries in a reproducible, automated, comprehensive and vendor-independent fashion on CPUs and GPUs.
+Thus, a new open-source benchmark package called \gearshifft{} \citep{gearshifft_github} has been developed. It is able to benchmark available state-of-the-art FFT libraries in a reproducible, automated, comprehensive and vendor-independent fashion on CPUs and GPUs.
 \gearshifft{} helps library authors and domain-specific developers to choose the best FFT library available. The discussion above motivates the following design goals of \gearshifft{}:
 %
 \begin{itemize}
@@ -36,7 +36,7 @@ Thus, a new open-source benchmark package called \gearshifft{} \citep{gearshifft
 \item community-ready and vendor independent project infrastructure through version control and public accessibility
 \end{itemize}
 %
-Given the multitude of mathematical formulations and the heterogeneity of hardware, \gearshifft{} approaches the challenge of benchmarking a variety of FFT libraries from a user perspective. This means, that the following parameters shall be easy to study:
+Given the multitude of mathematical formulations and the heterogeneity of hardware, \gearshifft{} approaches the challenge of benchmarking a variety of FFT libraries from a user perspective. This means, that the following parameters should be easy to study:
 %
 \begin{itemize}
 \item FFT dimension and radix-type (e.g. $32{\times}32{\times}32$ as radix-2 3D FFT)
@@ -50,5 +50,5 @@ Given the multitude of mathematical formulations and the heterogeneity of hardwa
 \item transform direction, i.e. forward (from discrete space to frequency space) or backward (from frequency space to discrete space)
 \end{itemize}
 %
-The remainder of this article is organized as follows: after an introduction to modern FFT APIs the C++ implementation of \gearshifft{} is discussed in section \ref{sec:implementation}. The largest part of the paper is dedicated to the presentation of first results in section \ref{sec:results} after which our conclusions are presented in section \ref{sec:summary}.
+The remainder of this article is organized as follows: after an introduction to modern FFT APIs the C++ implementation of \gearshifft{} is discussed in \cref{sec:implementation}. The largest part of the paper is dedicated to the presentation of first results in \cref{sec:results}, after which our conclusions are presented in \cref{sec:summary}.
 

@@ -1,8 +1,8 @@
 \subsection{Using a Modern FFT Library}
 \label{ssec:modern_ffts}
-Before discussing the design of \gearshifft{}, a brief introduction into the use and application programming interfaces (APIs) of modern FFT libraries is required to illustrate the design choices made. Many FFT libraries today and particularly those used in this study base their API on \fftw{} $3.0$. 
+Before discussing the design of \gearshifft{}, a brief introduction into the use and application programming interfaces (APIs) of modern FFT libraries is required to illustrate the design choices made. Many FFT libraries today, and particularly those used in this study, base their API on \fftw{} $3.0$. 
 
-Here, in order to execute an FFT on a given pointer to data in memory, a plan data structure has to be created first using a planner. For this, the FFT problem is defined in terms of rank (1D, 2D or 3D), shape of the input signal (the dimensional extent), type of the input signal (single or double precision of real or complex inputs), type of the transformation (real-to-complex, complex-to-complex, real-to-half-complex) and memory mode of the transformation (inplace versus out-of-place). These parameters describing the FFT problem are then used as input to the planner. 
+Here, in order to execute an FFT on a given pointer to data in memory, a data structure for plans has to be created first using a planner. For this, the FFT problem is defined in terms of rank (1D, 2D or 3D), shape of the input signal (the dimensional extent), type of the input signal (single or double precision of real or complex inputs), type of the transformation (real-to-complex, complex-to-complex, real-to-half-complex) and memory mode of the transformation (inplace versus out-of-place). These parameters describing the FFT problem are then used as input to the planner. 
 
 The planner is a piece of code inside \fftw{} that tries to find the best suited radix factorization based on the shape of the input signal. By default, it then performs several FFTs derived from the mathematical descriptions discussed in \cref{sec:intro} on the input data to sample the runtime of different FFT implementations available inside \fftw{}. This ensemble of runtimes is then used to find the optimal FFT implementation to use. After the plan has been created, it is used to execute the FFT itself.
 
@@ -17,19 +17,19 @@ fftw_plan r2c_plan = fftw_plan_dft_r2c(
 fftwf_execute(r2c_plan);
 \end{lstlisting}
 
-\cref{lst:fftw_example} illustrates the \fftw{} API for a single precision real-to-complex out-of-place transform. \fftw{} offers the freedom to choose the degree of optimization for finding the most optimal FFT implementation for the signal at hand by means of planner flag, also referred to as plan rigors. \cref{lst:fftw_example} uses the \texttt{FFTW\_ESTIMATE} flag as example, which is described by the \fftw{} manual \cite{fftw_manual} as:
+\cref{lst:fftw_example} illustrates the \fftw{} API for a single precision real-to-complex out-of-place transform. \fftw{} offers the freedom to choose the degree of optimization for finding the most optimal FFT implementation for the signal at hand by means of the planner flag, also referred to as plan rigors. \cref{lst:fftw_example} uses the \texttt{FFTW\_ESTIMATE} flag as an example, which is described in the \fftw{} manual \cite{fftw_manual}:
 %
 \begin{quote}
 ``\texttt{FFTW\_ESTIMATE} specifies that, instead of actual measurements of different algorithms, a simple heuristic is used to pick a (probably sub-optimal) plan quickly. With this flag, the input/output arrays are not overwritten during planning.''
 \end{quote}
 %
-\fftw{} offers five levels for this planning flag. Two further levels would be:
+\fftw{} offers five levels for this planning flag, where two further descriptions are given here:
 \begin{quote}
 ``\texttt{FFTW\_MEASURE} tells \fftw{} to find an optimized plan by actually computing several FFTs and measuring their execution time. Depending on your machine, this can take some time (often a few seconds).\newline
 \texttt{FFTW\_WISDOM\_ONLY} is a special planning mode in which the plan is only created if wisdom is available for the given problem, and otherwise a NULL plan is returned.''
 \end{quote}
 %
-In \fftw{} terminology, \emph{wisdom} is a data structure representing a more or less optimized plan for a given transform. The \texttt{fftw\_wisdom} binary, coming with the \fftw{} bundle, generates hardware adapted wisdom files, which can be loaded by the wisdom API into any \fftw{} application.
+In \fftw{} terminology, \emph{wisdom} is a data structure representing a more or less optimized plan for a given transform. The \texttt{fftw\_wisdom} binary, that comes with the \fftw{} bundle, generates hardware adapted wisdom files, which can be loaded by the wisdom API into any \fftw{} application.
 %
 \cufft{} and \clfft{} follow this API mostly, only discarding the plan rigors and \emph{wisdom} infrastructure, cp. \cref{lst:cufft_example}.
 
@@ -42,8 +42,8 @@ cufftExecC2C(plan, input_buffer, output, CUFFT_FORWARD);
 
 \subsection{The Architecture of \gearshifft{}}
 \label{ssec:gearshifft_arch}
-\gearshifft{} is developed as an open-source framework using C++ (following the 2014 ISO standard \cite{cpp14std}) and Boost Unit Test Framework (UTF, \cite{boost}). One goal is to have a unified benchmark infrastructure and an extensible set of FFT library clients. 
-The benchmark framework is independent of the used FFT library and provides the measuring environment, data handling and processing of results. \gearshifft{} involves template meta-programming with a compile-time constant, implicit interface between the clients and benchmark framework. Such a generic approach is necessary to obtain comparable results between FFT libraries and reproducible data for later statistical analysis while keeping code redundancy and overhead at a minimum. 
+\gearshifft{} is developed as an open-source framework using C++ (following the 2014 ISO standard \cite{cpp14std}) and the Boost Unit Test Framework (UTF, \cite{boost}). One goal is to have a unified benchmark infrastructure and an extensible set of FFT library clients. 
+The benchmark framework is independent of the used FFT library and provides the measuring environment, data handling and processing of results. \gearshifft{} involves template meta-programming for a compile-time constant interface between the clients and the benchmark framework. Such a generic approach is necessary to obtain comparable results between FFT libraries and reproducible data for later statistical analysis while keeping code redundancy and overhead at a minimum. 
 
 % \begin{lstlisting}[caption={Context class required by gearshifft front-end API},label={lst:implcontext}]
 % struct Context {
@@ -72,9 +72,9 @@ The benchmark framework is independent of the used FFT library and provides the 
  \end{tabular}
 \end{table}
 
-In \gearshifft{} a benchmark is meant to collect performance indicators of the operations in \cref{tab:implfft} defining the interface for the FFT clients. Different parameters like precision, FFT extents, transform variant, device type or FFT library relate to different benchmarks. \gearshifft{} controls many of them by command line arguments. The FFT libraries are related to different \gearshifft{} binaries (\mc{gearshifft_cufft}, \ldots). For the full documentation of \gearshifft{} the reader is referred to \cite{gearshifft_github}. 
+In \gearshifft{} a benchmark is meant to collect performance indicators of the operations in \cref{tab:implfft} defining the interface for the FFT clients. Different parameters such as precision, FFT extents, transform variant, device type or FFT library relate to different benchmarks. \gearshifft{} controls many of them by command line arguments. The FFT libraries are related to different \gearshifft{} binaries (\mc{gearshifft_cufft}, \ldots). For the full documentation of \gearshifft{} the reader is referred to \cite{gearshifft_github}. 
 
-There are common interfaces for the context management and for the FFT workflow. It requires the user to implement the context and FFT client class. The context methods \mc{create} and \mc{destroy} of the client encapsulate time-consuming device and library initialization, if e.g. the client does not store plan information as \fftw{} does. These methods are measured separately and run only once. 
+There are common interfaces for the context management and for the FFT workflow. The user has to implement the context and the FFT client class. The \mc{create} and \mc{destroy} context methods of the client encapsulate time-consuming device and library initialization. The library only has to be initialized in the FFT client when the library stores plan information (cp. \fftw{} wisdoms). These methods are measured separately and run only once. 
 
 \begin{lstlisting}[caption={Required template arguments for FFT client implementation},label={lst:implfft_templ}]
 template<
@@ -88,8 +88,8 @@ struct MyFFTClient;
 
 The FFT client implementation in \cref{lst:implfft_templ} is instantiated once per benchmark run and follows the {\textit{resource allocation is initialization}} (RAII) idiom \cite{stroustrup1994design}. \gearshifft{} invokes the FFT client methods listed in \cref{tab:implfft} to perform the benchmarks and populate the benchmark data. The FFT client can assign user-defined template types to create different FFT client classes to mimic various use cases. An example is given by the \fftw{} implementation, which involves a compile-time constant configuration structure to map plan rigors like \mc{FFTW_MEASURE} or \mc{FFTW_ESTIMATE} into the aforementioned FFT client classes.
 
-Depending on the FFT library, after a forward transform the same plan handle might be recreated for backward transform. This saves memory as there is only one plan allocated at any point in time and, for example, the GPU FFT libraries allocate memory for the plan on the device. \fftw{} can overwrite input and output buffers during the planning phase, when e.g. \mc{FFTW_MEASURE} is used. Afterwards, the buffers can be filled with data. In turn, this plan handle cannot be recreated later on, as the result buffer of the previous plan would be overwritten at plan recreation. \gearshifft{}'s compile-time interface supports this use case, where both plans are allocated before the round-trip FFT starts.
-
+Depending on the FFT library, after a forward transform the same plan handle might be recreated for backward transform. This saves memory as there is only one plan allocated at any point in time. For example, a \cufft{} plan allocation can be several times bigger than the actual signal data for the FFT. \fftw{} can overwrite input and output buffers during the planning phase, when e.g. \mc{FFTW_MEASURE} is used. Afterwards, the buffers can be filled with data. In turn, this plan handle cannot be recreated later on, as the result buffer of the previous plan would be overwritten at plan recreation. \gearshifft{}'s compile-time interface supports this use case, where both plans are allocated before the round-trip FFT starts.
+%
 The \gearshifft{} interface also allows library-specific time measurements, which is only implemented for the \cufft{} library at the moment, where CUDA events measure the runtime on GPU. For \fftw{} and \clfft{}, the CPU timer exposed by the C++14 \mc{chrono} header is used.
 
 \begin{lstlisting}[caption={Define FFT client types for corresponding FFTs},label={lst:implfftusing}]
@@ -212,7 +212,7 @@ destroy\\
  \label{fig:framework}
 \end{figure}
 
-The back-end of \gearshifft{} uses Boost Unit Test Framework to generate the benchmark instances within a tree data structure which is referred to as the benchmark tree.
+The back-end of \gearshifft{} uses the Boost Unit Test Framework to generate the benchmark instances within a tree data structure, which is referred to as the benchmark tree.
 The measurement layout and benchmark framework are illustrated in \cref{fig:framework}. One single run comprises time measurement of each operation (\mc{allocate}, \ldots). The total time measures all from \mc{allocate} to \mc{destroy}. The size of the allocated buffers and the memory information of the FFT library (if available) is recorded as well. The functor \mc{FFT} calls the FFT client operations wrapped with time measurements. The input data buffer, filled with random values in $[0,1]$, is held by the \mc{BenchmarkExecutor}. A copy is given to the \mc{FFT} functor in each run. For each benchmark configuration a number of benchmark repetitions is performed. The number is currently defined as a compile-time constant by \mc{Application::NR_RUNS=5}. After the last benchmark run the round-trip transformed data is validated against the original input data. The error $\varepsilon$ is computed by the sample standard deviation of input and round-trip output. When that error is greater than \mc{Application::ERROR_BOUND=0.00001}, the benchmark is marked as failed and \gearshifft{} continues with the next configuration in the benchmark tree.
 
 % \begin{equation}\label{eq:stderr}
@@ -222,11 +222,11 @@ The measurement layout and benchmark framework are illustrated in \cref{fig:fram
 \gearshifft{} adapts the API of the different FFT libraries to a common interface. The \mc{FFT} functor defines the interface of the common FFT workflow. This pattern refers to Wrapper Facades and Static Adapter design pattern which provides static polymorphism at compile-time \cite{bachmann}.
 Currently, \gearshifft{} implements three different FFT libraries, \cufft{} (CUDA runtime, \cite{nvidia2010cufft}) for \nvidia{} GPUs, \clfft{} (OpenCL runtime, \cite{clfft}) for CPU and GPUs and \fftw{} for CPU (C/C++ runtime, \cite{FFTW05}). By this selection, an accelerator-only, a mixed CPU-GPU and a CPU-optimized library is covered.
 %
-As build system \texttt{cmake} is used to setup build paths to construct one executable for each supported FFT library found by \texttt{cmake} as well as for collecting the include paths during the build process and library locations for linking later on. There are options for disabling FFT libraries or pointing to non-standard installation paths and to configure compile-time constants such as the \fftw{} planning time limit. 
+The \texttt{cmake} build system is used to setup build paths to construct one executable for each supported FFT library found by \texttt{cmake} as well as for collecting the include paths during the build process and library locations for linking later on. There are options for disabling FFT libraries or pointing to non-standard installation paths and to configure compile-time constants such as the \fftw{} planning time limit. 
 
-For the command-line arguments Boost is utilized, particularly for benchmark list creation and selection.
-There are several \gearshifft{} program options to control benchmark settings, where an example would be:
+For the command-line arguments, Boost is utilized, particularly for benchmark list creation and selection.
+There are several \gearshifft{} program options to control benchmark settings, for example:
 \begin{lstlisting}[language=bash]
 gearshifft_clfft -e 128x128 1024 -r */float/*/Inplace_Real -d cpu
 \end{lstlisting}
-Here, the \clfft{} benchmarks would first run a $128{\times}128$-point FFT and then a $1024$-point FFT, performing inplace transforms with real input data in single-precision. The default setting instructs \gearshifft{} to use all CPU cores and to store the results into result.csv. The \gearshifft{} benchmark selection syntax supports wildcards. The first wildcard \mc{*} relates to the title of the FFT client (\mc{ClFFT} in this example). The second one refers to the extents.
+Here, the \clfft{} benchmarks would first run a $128{\times}128$-point FFT and then a $1024$-point FFT, performing inplace transforms with real input data in single-precision. The default setting instructs \gearshifft{} to use all CPU cores and to store the results into result.csv. The \gearshifft{} benchmark selection syntax supports wildcards. The first wildcard \mc{*} relates to the title of the FFT client (\mc{ClFFT} in this example). The second one refers to the FFT extents.
