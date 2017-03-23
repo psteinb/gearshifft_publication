@@ -1,11 +1,11 @@
 \subsection{Experimental Environment}
 \label{ssec:env}
 
-This section will discuss the results obtained with \gearshifft{} \texttt{v0.1.0} on various hardware in order to showcase the capabilities of \gearshifft{}. Based on the applications in \cite{preibisch2014efficient, schmid2015real}, 3D real-to-complex FFTs with contiguous single-precision input data are chosen for the experiments. If not stated, this is the transform type assumed for all illustrations hereafter. 
+This section will discuss the results obtained with \gearshifft{} \texttt{v0.2.0} on various hardware in order to showcase the capabilities of \gearshifft{}. Based on the applications in \cite{preibisch2014efficient, schmid2015real}, 3D real-to-complex FFTs with contiguous single-precision input data are chosen for the experiments. If not stated, this is the transform type assumed for all illustrations hereafter. 
 %
 Expeditions into other use cases will be made where appropriate. The curious reader may rest assured that a more comprehensive study is possible with \gearshifft{}, however the mere multiplicity of all possible combinations and use cases of FFT render it neither feasible nor practical to discuss all of them here.
 
-This study concentrates on three modern and current FFT implementations available free of charge: \fftw{} ($3.3.5$, on x86 CPUs), \cufft{} ($8.0.44$, on \nvidia{} GPUs) and \clfft{} ($2.12.2$, on x86 CPUs or \nvidia{} GPUs). This is considered as the natural starting point of developers beyond possible domain specific implementations. It should be noted, that this will infer not only a study in terms of hardware performance, but also how well the APIs designed by the authors of \fftw{}, \clfft{} and \cufft{} can be used in practice. 
+This study concentrates on three modern and current FFT implementations available free of charge: \fftw{} ($3.3.6$pl1, on x86 CPUs), \cufft{} ($8.0.44$, on \nvidia{} GPUs) and \clfft{} ($2.12.2$, on x86 CPUs or \nvidia{} GPUs). This is considered as the natural starting point of developers beyond possible domain specific implementations. It should be noted, that this will infer not only a study in terms of hardware performance, but also how well the APIs designed by the authors of \fftw{}, \clfft{} and \cufft{} can be used in practice. 
 
 The results presented in the following sections were collected on three hardware installations:
 %
@@ -25,7 +25,7 @@ The results presented in the following sections were collected on three hardware
     \textbf{GPU       } & 4x K80                                        & 2x K20x                   & 1x P100                & 1x GTX 1080            \\
     \textbf{GPU memory} & 4x \SI{12}{\gibi\byte}                        & \SI{6}{\gibi\byte}        & \SI{16}{\gibi\byte}    & \SI{8}{\gibi\byte}     \\
     \textbf{GPU driver} & $367.48$                                      & $367.48$                  & $367.48$               & $367.57$               \\
-    \textbf{OS}         & RHEL $7.2$                                    & RHEL $7.2$                & Ubuntu $14.04.3$       & CentOS $7.2$           \\
+    \textbf{OS}         & RHEL $6.8$                                    & RHEL $6.8$                & Ubuntu $14.04.3$       & CentOS $7.2$           \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -36,21 +36,26 @@ After a warmup step a benchmark is executed five times. From this, the arithmeti
 %TODO: why maximum size of transforms?
 
 \subsection{Overhead of \gearshifft{}}
-\gearshifft{} is designed to be a lightweight framework with a thin wrapper for the FFT clients, where the interface between back-end and front-end is resolved at compile-time. Performance indicators of each benchmark are collected and buffered to be processed after the last benchmark finished. For validation purposes, a \cufft{} standalone code \cite{gearshifft_github} was created that only measures the time to solution of a straightforward implementation of a round-trip FFT transform. Both invoke a warmup step and 5 repetitions of the benchmark. 
+\gearshifft{} is designed to be a lightweight framework with a thin wrapper for the FFT clients, where the interface between back-end and front-end is resolved at compile-time. Performance indicators of each benchmark are collected and buffered to be processed after the last benchmark finished. For validation purposes, a \cufft{} standalone code \cite{gearshifft_github} was created that either provides a timer harness like \gearshifft{} or only measures the time to solution of a straightforward implementation of a round-trip FFT transform. Both invoke a warmup step and 10 repetitions of the benchmark. 
 
-\cref{fig:verify_cufft} indicates a constant, almost zero overhead effect of \gearshifft{}.
-However, the first benchmark run in \cref{fig:tts_verify_b} shows a difference of \SI{5}{\percent}. For reliable statistics it is recommended to use at least 20 benchmark repetitions.
-These effects are also caused by an insufficient warmup phase, which will be fixed in an upcoming \gearshifft{} version. 
-Regarding the mean runtime differences all other benchmark iterations show no significant runtime impact and the conclusions drawn in the following subsections are based on differences which are much stronger than \SI{5}{\percent} runtime deviation.
+\cref{fig:verify_cufft} indicates a constant, insignificant overhead effect of \gearshifft{}, where \texttt{cufft} refers to the \gearshifft{} implementation, \texttt{cufft-standalone} to the reference code with \gearshifft{} based timer harness and \texttt{cufft-standalone-tts} to the reference code with only one timer for time to solution.
+In \cref{fig:tts_verify_a} \texttt{cufft-standalone-tts} shows slightly better performance. For larger FFTs a difference is not noticeable. The average performance can change between different process launches, whose statistical deviations are not examined here.
+
 
 \begin{figure}[!htbp]
 \vspace{-1em}
   \centering
   \includegraphics[width=\textwidth]{figures/results_validate_cufft_legend.pdf}\vspace{-1em}
-  \subfloat[1024-point FFT]{\includegraphics[width=0.45\textwidth]{figures/results_validate_cufft_a.pdf}\label{fig:tts_verify_a}}
+  \subfloat[1024-point FFT]{\parbox[b]{0.45\textwidth}{%
+    \includegraphics[width=0.45\textwidth]{figures/results_validate_cufft_a.pdf}\\
+    \includegraphics[width=0.45\textwidth]{figures/results_validate_cufft_c.pdf}
+    }\label{fig:tts_verify_a}}
   \hfill
-  \subfloat[16777216-point FFT]{\includegraphics[width=0.45\textwidth]{figures/results_validate_cufft_b.pdf}\label{fig:tts_verify_b}}
-  \caption{Comparison of runtimes of \gearshifft{} vs. standalone \cufft{}---while the standalone \cufft{} was executed 250 times, \gearshifft{} processed a file with 250 rows containing the same number for the FFT extent; real-to-complex, inplace, round-trip FFT, on a Taurus K80 node \cite{taurus}.}
+  \subfloat[16777216-point FFT]{\parbox[b]{0.45\textwidth}{%
+      \includegraphics[width=0.45\textwidth]{figures/results_validate_cufft_b.pdf}
+      \includegraphics[width=0.45\textwidth]{figures/results_validate_cufft_d.pdf}
+    }\label{fig:tts_verify_b}}
+  \caption{Comparison of runtimes of \gearshifft{} vs. standalone \cufft{}, single-precision real-to-complex, inplace, round-trip FFT, on Taurus K80 \cite{taurus}.}
   \label{fig:verify_cufft}
 \end{figure}
 
@@ -83,8 +88,8 @@ The discussion begins with the classical use case for developers that might be a
 
 \cref{fig:fftw_plan_flags} compares the time-to-solution to the actual time spent for the FFT operation itself. \mc{FFTW_MEASURE} imposes a total runtime penalty of 1 to 2 orders of magnitude with respect to \mc{FFTW_ESTIMATE}. It however offers superior performance considering FFT execution time compared to \mc{FFTW_ESTIMATE}. To compare \mc{FFTW_ESTIMATE} or \mc{FFTW_MEASURE} with plans using \emph{wisdom} (\mc{FFTW_WISDOM_ONLY} rigor), wisdom files are generated with the \mc{fftw_wisdom} binary. \mc{fftw_wisdom} precomputed plans for a canonical set of sizes (powers of two and ten up to $2^{20}$) in \mc{FFTW_PATIENT} mode, which in all took about one day on Taurus \cite{taurus} using (see \cite{fftw_manual} for command-line flag details):
 \begin{lstlisting}[language=bash]
- $ fftwf-wisdom -v -c -n -T 24 -o wisdomf
-\end{lstlisting}
+$ fftwf-wisdom -v -c -n -T 24 -o wisdomf
+\end{lstlisting}%$%for emacs
 
 As during plan creation, the \emph{wisdom} has to be loaded from disk only, the planning times for calling the planner with \mc{FFTW_WISDOM_ONLY} are drastically reduced. \cref{fig:plan_flags_b} shows that the user is rewarded by pure FFT runtimes of less than an order of magnitude for small signal sizes. Unexpectedly, the FFT runtimes become larger than those of \mc{FFTW_ESTIMATE} for input signal sizes of more than \SI{32}{\kibi\byte}, which apparently contradicts the \mc{FFTW_PATIENT} setting which should find better plans than \mc{FFTW_MEASURE}.
 %
@@ -102,7 +107,7 @@ It must be emphasized that the planning times for \mc{FFTW_MEASURE} become prohi
   \subfloat[3D transforms]{\includegraphics[width=0.45\textwidth]{figures/results_plan_time_a.pdf}\label{fig:plan_time_a}}
   \hfill
   \subfloat[1D transforms]{\includegraphics[width=0.45\textwidth]{figures/results_plan_time_b.pdf}\label{fig:plan_time_b}}
-  \caption{Time-to-plan for \texttt{powerof2} single-precision inplace real-to-complex forward transforms using \fftw{} (Intel E5-2680v3 CPU), \cufft{} (K80 GPU) and \clfft{} (K80 GPU). \cref{fig:plan_time_a} reports the complete time to plan for 3D transforms, whereas \cref{fig:plan_time_b} is limited to 1D transforms. ``None'' refers to the planning with \cufft{} or \clfft{} as they do not support the plan rigor concept. Both figures use a log10-log2 scale.}
+  \caption{Time-to-plan for \texttt{powerof2} single-precision inplace real-to-complex forward transforms using \fftw{} (Intel E5-2680v3 CPU), \cufft{} (K80 GPU) and \clfft{} (K80 GPU). \cref{fig:plan_time_a} reports the complete time to plan for 3D FFTs and \cref{fig:plan_time_b} for 1D FFTs. ``None'' refers to the planning with \cufft{} or \clfft{} as they do not support the plan rigor concept. Both figures use a log10-log2 scale.}
   \label{fig:plan_time}
 \end{figure}
 
@@ -174,3 +179,8 @@ It is a common practice that complex-to-complex transforms are considered more p
 
 If single-precision can be used instead of double-precision, then the possible performance gain can be estimated by \cref{fig:r2c_vs_c2c_b}. On the high grade server GPU, the \nvidia{} Tesla P100, the performance difference remains around $2{\times}$ in the memory bound region due to double the memory bandwidth required. The results for \fftw{} vary more around \numrange{1.5}{2.5} fold regressions between single and double precision inputs across a wider input signal range. 
 
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "gearshifft"
+%%% End:

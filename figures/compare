@@ -22,6 +22,7 @@ library(gtable)
  --notitle              Do not add a title to the plot [default: FALSE]
  --legend-only          Only save the legend to file [default: FALSE]
  --use-points           Use points in the plots to indicate mean [default: FALSE]
+ --noerrorbar          Do not draw errorbars in the plots [default: FALSE]
  --legend-pos=LPOS      If legend is plotted, plot it at <LPOS> [default: top]
  -y --ymetric=YMETRIC 	Use metric YMETRIC for plotting along y, this can now be a valid R expression that computes a derived value [default: Time_Total]
  --ylabel=YLABEL 	Use YLABEL for labelling the ymetric, note that underscores will be replaced by white spaces as white spaces are not correctly handled through the CLI [default: ]
@@ -37,6 +38,7 @@ library(gtable)
  -k --kind=KINDTYPE	Filter for KINDTYPE before plotting [default: powerof2], do not filter if KINDTYPE="all"
  -f --filename=FNAME    Use FNAME as base stem for output plots [default: gearshifft_plot]
  --pdfheight=value      Height in inches for pdf output [default: 4.0]
+ --freqpoly             Use freqpoly to draw histogram
 ' -> doc
 
 opts <- docopt(doc)
@@ -79,7 +81,7 @@ open_gearshifft_csv <- function (fname){
 
         if(grepl("SupportedThreads", line_1, ignore.case = TRUE)) {
             gpu_model <- paste("E5-2680v3 ",line_1_splited[[1]][4],"x (fftw)",sep="")
-            flags = gsub("_","-",line_1_splited[[1]][8])
+            flags = paste("fftw-",gsub("_","-",line_1_splited[[1]][8]),sep="")
             cat("THIS IS",local_frame$library[1],gpu_model,"\twith ",nrw,"(",flags,")\n")
             
         }
@@ -336,24 +338,30 @@ for(i in 1:length(aesthetics_keys)) {
         aesthetics_to_use[[aesthetics_keys[i]]] <- as.symbol(aesthetics_from_cli[[1]][i])
     }
 }
-aesthetics_to_use
-moi_plot <- ggplot(data_for_plotting, ## aes(x=xmoi,
-                                      ##     #y=mean_elapsed_sec,
-                                      ##     color=library,
-                   ##     linetype=hardware)
-                   aesthetics_to_use
-                   )
 
-
-moi_plot <- moi_plot + geom_line(aes(y=moi_mean),size=.8)
-if( opts[["use-points"]] != FALSE ) {
-    moi_plot <- moi_plot + geom_point(aes(y=moi_mean),size=1)
+if(opts[["freqpoly"]]) {
+    moi_plot <- ggplot(succeeded_reduced, aesthetics_to_use)
+    moi_plot <- moi_plot + geom_freqpoly(bins=200,size=.8)
+} else {
+    aesthetics_to_use
+    moi_plot <- ggplot(data_for_plotting, ## aes(x=xmoi,
+                       ##     #y=mean_elapsed_sec,
+                       ##     color=library,
+                       ##     linetype=hardware)
+                       aesthetics_to_use
+                       )
+    moi_plot <- moi_plot + geom_line(aes(y=moi_mean),size=.8)
+    if( opts[["use-points"]] != FALSE ) {
+        moi_plot <- moi_plot + geom_point(aes(y=moi_mean),size=1)
+    }
+    if( opts[["noerrorbar"]] == FALSE ) {    
+        moi_plot <- moi_plot + geom_errorbar(aes(ymin = moi_mean - moi_stddev,
+                                                 ymax = moi_mean + moi_stddev),
+                                             width=0.25, linetype =1)
+    }
+                                        #moi_plot <- moi_plot + scale_color_manual(name = "", values = c("red", 'blue'),labels=?)
+    moi_plot <- moi_plot + scale_linetype_manual(values = c("solid","dotted","longdash")) #2,3,5,4,22,33,55,44))
 }
-moi_plot <- moi_plot + geom_errorbar(aes(ymin = moi_mean - moi_stddev,
-                                         ymax = moi_mean + moi_stddev),
-                                     width=0.25, linetype =1)
-#moi_plot <- moi_plot + scale_color_manual(name = "", values = c("red", 'blue'),labels=?)
-moi_plot <- moi_plot + scale_linetype_manual(values = c("solid","dotted","longdash")) #2,3,5,4,22,33,55,44))
 
 cat("filtered by",paste(filtered_by, collapse=" "),"(n aesthetics = ",paste(aesthetics_length),")\n")
 if( opts[["notitle"]] == F ) {
@@ -483,10 +491,12 @@ if(opts[["legend-only"]]){
     moi_plot = moi_plot + theme(legend.title = element_blank(),
                                 legend.position="top",
                                 legend.box.just="top")
-    if( max(n_items_per_aesthetics) > 2 ) {
+    if( max(n_items_per_aesthetics) > 2 && length(n_items_per_aesthetics)>1) {
         moi_plot = moi_plot + guides(col = guide_legend(nrow = 2))
+        nrow_in_legend = 3    
     } else {
         moi_plot = moi_plot + guides(col = guide_legend(nrow = 1))
+        nrow_in_legend = 1
     }
     legend <- g_legend(moi_plot)
 
@@ -496,12 +506,11 @@ if(opts[["legend-only"]]){
     print(legend$widths[3])
     
     rows_with_guides = legend$layout %>% filter(grepl("guide",name))
-    nrow_in_legend = 3#nrow(rows_with_guides)
     cat("found",nrow_in_legend , "rows (max items: ",max(n_items_per_aesthetics),") in legend\n" )
 
-    ggsave(paste(opts[["filename"]],".png",sep=""),legend,width=12,height=.9)
-    ggsave(paste(opts[["filename"]],".svg",sep=""),legend,width=12,height=.9)
-    cairo_pdf(paste(opts[["filename"]],".pdf",sep=""),width=12,height=0.3*nrow_in_legend)
+    ggsave(paste(opts[["filename"]],".png",sep=""),legend,width=10,height=.9)
+    ggsave(paste(opts[["filename"]],".svg",sep=""),legend,width=10,height=.9)
+    cairo_pdf(paste(opts[["filename"]],".pdf",sep=""),width=10,height=0.3*nrow_in_legend)
     
     grid.arrange(legend,ncol=1)
     dev.off()

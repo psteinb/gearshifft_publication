@@ -28,7 +28,5 @@ if(CUDA_FOUND)
 endif()
 
 set(LIBS ${CUDA_LIBRARIES} ${CUDA_CUFFT_LIBRARIES})
-add_executable(cufft_time_c2c time_cufft_c2c.cpp)
 add_executable(cufft_time_r2c time_cufft_r2c.cpp)
-target_link_libraries(cufft_time_c2c ${LIBS})
 target_link_libraries(cufft_time_r2c ${LIBS})
