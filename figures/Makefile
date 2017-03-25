@@ -1,26 +1,25 @@
 
-k80_files = $(wildcard ../results/K80/cuda-8.0.44/*csv)
-gtx1080_files = $(wildcard ../results/GTX1080/cuda-8.0.44/*csv)
-
 cufft8_files = $(wildcard ../results/*/cuda-8.0.44/cufft*.[0-9].csv)
 
-clfft_cpu_files = $(wildcard ../results/haswell/clfft*/*csv)
-clfft_gpu_files = $(wildcard ../results/[A-Z]*/clfft-2.12.2/*csv)
-clfft_K80_files = $(wildcard ../results/K80*/clfft-2.12.2/cl*csv)
-clfft_P100_files = $(wildcard ../results/P100-P*/clfft-2.12.2/cl*csv)
-clfft_GTX1080_files = $(wildcard ../results/GTX10*/clfft-2.12.2/cl*csv)
+clfft_cpu_files = $(wildcard ../results/haswell/clfft-2.12.2/*csv)
 
-cufft8_K20xm_files = $(wildcard ../results/K20*/cuda-8*/*csv)
-cufft8_K80_files = $(wildcard ../results/K80/cuda-8*/cufft*csv)
+clfft_gpu_files = $(wildcard ../results/[A-Z]*/clfft-2.12.2/*.csv)
+clfft_K80_files = $(wildcard ../results/K80*/clfft-2.12.2/cl*.csv)
+clfft_P100_files = $(wildcard ../results/P100-P*/clfft-2.12.2/cl*.csv)
+clfft_GTX1080_files = $(wildcard ../results/GTX10*/clfft-2.12.2/cl*.csv)
+
+
+cufft8_K20xm_files = $(wildcard ../results/K20*/cuda-8*/*.csv)
+cufft8_K80_files = $(wildcard ../results/K80/cuda-8*/cufft*.csv)
 cufft8_P100_files = $(wildcard ../results/P100*/cuda-8*/cufft*.[0-9].csv)
 cufft8_GTX1080_files = $(wildcard ../results/GTX1080/cuda-8*/cufft*.[0-9].csv)
 
-estimate_fftw_files = $(wildcard ../results/haswell/fftw-3.3.5/fftw_estimate*csv)
-measure_fftw_files = $(wildcard ../results/haswell/fftw-3.3.5/fftw_gcc*csv)
-wisdom_fftw_files = $(wildcard ../results/haswell/fftw-3.3.5/fftw_wisdom*csv)
+estimate_fftw_files = $(wildcard ../results/haswell/fftw3.3.6pl1/fftw_estimate*csv)
+measure_fftw_files = $(wildcard ../results/haswell/fftw3.3.6pl1/fftw_gcc*csv)
+wisdom_fftw_files = $(wildcard ../results/haswell/fftw3.3.6pl1/fftw_wisdom*csv)
 
-cufft8_K80_validate_files = $(wildcard ../results/K80/cuda-8*/validate_cufft*_r2c_inplace.csv)
-cufft8_K80_validate_small_files = $(wildcard ../results/K80/cuda-8*/validate_cufft*_r2c_inplace_small.csv)
+cufft8_K80_validate_files = $(wildcard ../results/K80/cuda-8.0.44/validate_cufft*r2c*inplace_RHEL6.8.csv)
+cufft8_K80_validate_small_files = $(wildcard ../results/K80/cuda-8.0.44/validate_cufft*r2c*inplace_small_RHEL6.8.csv)
 
 TARGETS = results_tts results_plan_flags results_plan_time results_r2c_fwd results_non_power_of_2 results_r2c_vs_c2c results_placeness results_validate_cufft
 
@@ -83,11 +82,11 @@ results_placeness : $(cufft8_P100_files) $(cufft8_K80_files) $(measure_fftw_file
 
 results_validate_cufft :
 	@echo "input: $(?)"
-	./compare -n 1 -a "library" --legend-only --notitle -f $(@)_legend $(cufft8_K80_validate_files)  > $(@)_legend.log 2>&1
-# small extent
-	./compare --pdfheight=3.0 -n 1 --xlabel="iteration" --xmetric="id" --ylabel="t_[ms]" -a "library" --nolegend --notitle -f $(@)_a $(cufft8_K80_validate_small_files)  > $(@)_a.log 2>&1
-	./compare --pdfheight=3.0 -n 1 --xlabel="iteration" --xmetric="id" --ylabel="t_[ms]" -a "library" --nolegend --notitle -f $(@)_b $(cufft8_K80_validate_files)  > $(@)_b.log 2>&1
-
+	./compare --freqpoly -n 1 -a "library" --legend-only --notitle -f $(@)_legend $(cufft8_K80_validate_files)  > $(@)_legend.log 2>&1
+	./compare --freqpoly --pdfheight=2.0 -n 1 --xlabel="Time_Total_[ms]" --xmetric="Time_Total" --ylabel="frequency" -a "library" --nolegend --notitle -f $(@)_a $(cufft8_K80_validate_small_files)  > $(@)_a.log 2>&1
+	./compare --freqpoly --pdfheight=2.0 -n 1 --xlabel="Time_Total_[ms]" --xmetric="Time_Total" --ylabel="frequency" -a "library" --nolegend --notitle -f $(@)_b $(cufft8_K80_validate_files)  > $(@)_b.log 2>&1
+	./compare --pdfheight=2.0 -n 1 --xlabel="iteration" --xmetric="id" --ylabel="Time_Total" -a "library" --nolegend --noerrorbar --notitle -f $(@)_c $(cufft8_K80_validate_small_files)  > $(@)_c.log 2>&1
+	./compare --pdfheight=2.0 -n 1 --xlabel="iteration" --xmetric="id" --ylabel="Time_Total" -a "library" --nolegend --noerrorbar --notitle -f $(@)_d $(cufft8_K80_validate_files)  > $(@)_d.log 2>&1
 
 clean :
 	rm -vf  *tex
