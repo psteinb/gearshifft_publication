@@ -37,9 +37,15 @@ After a warmup step a benchmark is executed five times. From this, the arithmeti
 
 \subsection{Overhead of \gearshifft{}}
 \gearshifft{} is designed to be a lightweight framework with a thin wrapper for the FFT clients, where the interface between back-end and front-end is resolved at compile-time. Performance indicators of each benchmark are collected and buffered to be processed after the last benchmark finished. For validation purposes, a \cufft{} standalone code \cite{gearshifft_github} was created that either provides a timer harness like \gearshifft{} or only measures the time to solution of a straightforward implementation of a round-trip FFT transform. Both invoke a warmup step and 10 repetitions of the benchmark. 
+As a result, \cref{fig:verify_cufft} indicates a constant, insignificant overhead effect of \gearshifft{}, where:% \texttt{cufft} refers to the \gearshifft{} implementation, \texttt{cufft-standalone} to the reference code with timers for the operations from \cref{fig:framework} and \texttt{cufft-standalone-tts} to the reference code with only one timer for time to solution.
+\begin{itemize}
+\item \texttt{cufft} refers to the \gearshifft{} implementation,
+\item \texttt{cufft-standalone} is the reference timing the operations from \cref{fig:framework},
+\item \texttt{cufft-standalone-tts} is the reference only measuring time to solution.
+\end{itemize}
+\cref{fig:tts_verify_a} shows more noise than \cref{fig:tts_verify_b} as system factors have stronger influence on small time scales. For better reliability data from different process launches could be evaluated as well. In \cref{fig:tts_verify_a} \texttt{cufft-standalone-tts} shows slightly better performance as only one timer was used, otherwise reference and \gearshifft{} have the same runtime.
 
-\cref{fig:verify_cufft} indicates a constant, insignificant overhead effect of \gearshifft{}, where \texttt{cufft} refers to the \gearshifft{} implementation, \texttt{cufft-standalone} to the reference code with \gearshifft{} based timer harness and \texttt{cufft-standalone-tts} to the reference code with only one timer for time to solution.
-In \cref{fig:tts_verify_a} \texttt{cufft-standalone-tts} shows slightly better performance. For larger FFTs a difference is not noticeable. The average performance can change between different process launches, whose statistical deviations are not examined here.
+
 
 
 \begin{figure}[!htbp]
