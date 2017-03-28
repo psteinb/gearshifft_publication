@@ -37,7 +37,7 @@ After a warmup step a benchmark is executed ten times. From this, the arithmetic
 %TODO: why maximum size of transforms?
 
 \subsection{Overhead of \gearshifft{}}
-\gearshifft{} is designed to be a lightweight framework with a thin wrapper for the FFT clients, where the interface between back-end and front-end is resolved at compile-time. Performance indicators of each benchmark are collected and buffered to be processed after the last benchmark finished. For validation purposes, a \cufft{} standalone code \cite{gearshifft_github} was created that either provides a timer harness like \gearshifft{} or only measures the time to solution of a straightforward implementation of a round-trip FFT transform. Both invoke a warmup step and ten repetitions of the whole round-trip FFT process. 
+\gearshifft{} is designed to be a lightweight framework with a thin wrapper for the FFT clients, where the interface between back-end and front-end is resolved at compile-time. Performance indicators of each benchmark are collected and buffered to be processed after the last benchmark finished. For validation purposes, a \cufft{} standalone code \cite{gearshifft_github} was created that either provides a timer harness like \gearshifft{} or only measures the time to solution of a straightforward implementation of a round-trip FFT. Both invoke a warmup step and ten repetitions of the whole round-trip FFT process. 
 \cref{fig:verify_cufft} contains the distribution and the raw data of the time measurements. The diagrams indicate a constant, insignificant overhead effect of \gearshifft{}, where:
 \begin{itemize}
 \item \texttt{cufft} refers to the \gearshifft{} implementation,
@@ -62,7 +62,7 @@ After a warmup step a benchmark is executed ten times. From this, the arithmetic
       \includegraphics[width=0.45\textwidth]{figures/results_validate_cufft_b.pdf}
       \includegraphics[width=0.45\textwidth]{figures/results_validate_cufft_d.pdf}
     }\label{fig:tts_verify_b}}
-  \caption{Time-to-solution measured in \gearshifft{} and in a standalone \cufft{} application---multiple timer vs. one timer object (``tts'')---computing single-precision inplace real-to-complex round-trip FFTs on the K80 \cite{taurus}.}
+  \caption{Time-to-solution measured in \gearshifft{} and in a standalone \cufft{} application---multiple timer vs. one timer object (``tts'')---computing single-precision in-place real-to-complex round-trip FFTs on the K80 \cite{taurus}.}
   \label{fig:verify_cufft}
 \end{figure}
 
@@ -89,7 +89,7 @@ The discussion begins with the classical use case for developers that might be a
   \subfloat[time to solution]{\includegraphics[width=0.45\textwidth]{figures/results_plan_flags_a.pdf}\label{fig:plan_flags_a}}
   \hfill
   \subfloat[time for forward transform only]{\includegraphics[width=0.45\textwidth]{figures/results_plan_flags_b.pdf}\label{fig:plan_flags_b}}
-  \caption{\fftw{} on Intel E5-2680v3 CPU with \mc{FFTW_ESTIMATE}, \mc{FFTW_MEASURE} and \mc{FFTW_WISDOM_ONLY} computing \texttt{powerof2} 3D single-precision real-to-complex inplace forward transforms. \cref{fig:plan_flags_a} reports the time to solution, whereas \cref{fig:plan_flags_b} shows the time spent for the execution of the forward transform only. Both figures use a log10-log2 scale.}
+  \caption{\fftw{} on Intel E5-2680v3 CPU with \mc{FFTW_ESTIMATE}, \mc{FFTW_MEASURE} and \mc{FFTW_WISDOM_ONLY} computing \texttt{powerof2} 3D single-precision real-to-complex in-place forward transforms. \cref{fig:plan_flags_a} reports the time to solution, whereas \cref{fig:plan_flags_b} shows the time spent for the execution of the forward transform only. Both figures use a log10-log2 scale.}
   \label{fig:fftw_plan_flags}
 \end{figure}
 
@@ -114,7 +114,7 @@ It must be emphasized that the planning times for \mc{FFTW_MEASURE} become prohi
   \subfloat[3D transforms]{\includegraphics[width=0.45\textwidth]{figures/results_plan_time_a.pdf}\label{fig:plan_time_a}}
   \hfill
   \subfloat[1D transforms]{\includegraphics[width=0.45\textwidth]{figures/results_plan_time_b.pdf}\label{fig:plan_time_b}}
-  \caption{Time-to-plan for \texttt{powerof2} single-precision inplace real-to-complex forward transforms using \fftw{} (Intel E5-2680v3 CPU), \cufft{} (K80 GPU) and \clfft{} (K80 GPU). \cref{fig:plan_time_a} reports the complete time to plan for 3D FFTs and \cref{fig:plan_time_b} for 1D FFTs. ``None'' refers to the planning with \cufft{} or \clfft{} as they do not support the plan rigor concept. Both figures use a log10-log2 scale.}
+  \caption{Time-to-plan for \texttt{powerof2} single-precision in-place real-to-complex forward transforms using \fftw{} (Intel E5-2680v3 CPU), \cufft{} (K80 GPU) and \clfft{} (K80 GPU). \cref{fig:plan_time_a} reports the complete time to plan for 3D FFTs and \cref{fig:plan_time_b} for 1D FFTs. ``None'' refers to the planning with \cufft{} or \clfft{} as they do not support the plan rigor concept. Both figures use a log10-log2 scale.}
   \label{fig:plan_time}
 \end{figure}
 
