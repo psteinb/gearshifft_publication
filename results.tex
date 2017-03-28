@@ -60,6 +60,7 @@ After a warmup step a benchmark is executed ten times. From this, the arithmetic
 \label{ssec:tts}
 
 The discussion begins with the classical use case for developers that might be accustomed to small size transforms. As such, an out-of-place transform with \texttt{powerof2} 3D signal shapes will be assumed. The memory volume required for this operation amounts to the real input array plus an equally shaped complex output array of the same precision.
+\cref{fig:tts} reports a comparison of runtime results of \texttt{powerof2} single-precision 3D real-to-complex forward transforms from \fftw{} and \cufft{}. It is evident that given the largest device memory available of  \SI{16}{\gibi\byte}, the GPU data does not yield any points higher than \SI{8}{\gibi\byte}. The more recent GPU models supersede \fftw{} which used all $2{\times}12$ CPU Intel Haswell cores. Any judgment on the superiority of \cufft{} over \fftw{} can be considered premature at this point, as \fftw{} was used with the \mc{FFTW_ESTIMATE} planner flag.
 
 \begin{figure}[!htbp]
   \centering
@@ -71,8 +72,6 @@ The discussion begins with the classical use case for developers that might be a
   \label{fig:tts}
 \end{figure}
 
-\cref{fig:tts} reports a comparison of runtime results of \texttt{powerof2} single-precision 3D real-to-complex forward transforms from \fftw{} and \cufft{}. It is evident that given the largest device memory available of  \SI{16}{\gibi\byte}, the GPU data does not yield any points higher than \SI{8}{\gibi\byte}. The more recent GPU models supersede \fftw{} which used all $2{\times}12$ CPU Intel Haswell cores. Any judgment on the superiority of \cufft{} over \fftw{} can be considered premature at this point, as \fftw{} was used with the \mc{FFTW_ESTIMATE} planner flag.
-
 \begin{figure}[!htbp]
   \centering
   \includegraphics[width=\textwidth]{figures/results_plan_flags_legend.pdf}\vspace{-1em}
@@ -83,10 +82,8 @@ The discussion begins with the classical use case for developers that might be a
   \label{fig:fftw_plan_flags}
 \end{figure}
 
-\cref{fig:fftw_plan_flags} compares the time-to-solution to the actual time spent for the FFT operation itself. \mc{FFTW_MEASURE} imposes a total runtime penalty of 1 to 2 orders of magnitude with respect to \mc{FFTW_ESTIMATE}. It however offers superior performance considering FFT execution time compared to \mc{FFTW_ESTIMATE}. To compare \mc{FFTW_ESTIMATE} or \mc{FFTW_MEASURE} with plans using \emph{wisdom} (\mc{FFTW_WISDOM_ONLY} rigor), wisdom files are generated with the \mc{fftw_wisdom} binary. \mc{fftw_wisdom} precomputed plans for a canonical set of sizes (powers of two and ten up to $2^{20}$) in \mc{FFTW_PATIENT} mode, which in all took about one day on Taurus \cite{taurus} using (see \cite{fftw_manual} for command-line flag details):
-\begin{lstlisting}[language=bash]
-$ fftwf-wisdom -v -c -n -T 24 -o wisdomf
-\end{lstlisting}%$%for emacs
+\cref{fig:fftw_plan_flags} compares the time-to-solution to the actual time spent for the FFT operation itself. \mc{FFTW_MEASURE} imposes a total runtime penalty of 1 to 2 orders of magnitude with respect to \mc{FFTW_ESTIMATE}. It however offers superior performance considering FFT execution time compared to \mc{FFTW_ESTIMATE}. To compare \mc{FFTW_ESTIMATE} or \mc{FFTW_MEASURE} with plans using \mc{FFTW_WISDOM_ONLY}, wisdom files are generated with the \mc{fftw_wisdom} binary. \mc{fftw_wisdom} precomputed plans for a canonical set of sizes (powers of two and ten up to $2^{20}$) in \mc{FFTW_PATIENT} mode, which in all took about one day on Taurus \cite{taurus} using (see \cite{fftw_manual} for command-line flag details):
+\lstinline[language=bash]!fftwf-wisdom -v -c -n -T 24 -o wisdomf!.
 
 As during plan creation, the \emph{wisdom} has to be loaded from disk only, the planning times for calling the planner with \mc{FFTW_WISDOM_ONLY} are drastically reduced. \cref{fig:plan_flags_b} shows that the user is rewarded by pure FFT runtimes of less than an order of magnitude for small signal sizes. Unexpectedly, the FFT runtimes become larger than those of \mc{FFTW_ESTIMATE} for input signal sizes of more than \SI{32}{\kibi\byte}, which apparently contradicts the \mc{FFTW_PATIENT} setting which should find better plans than \mc{FFTW_MEASURE}.
 %
