@@ -22,8 +22,9 @@ library(gtable)
  --notitle              Do not add a title to the plot [default: FALSE]
  --legend-only          Only save the legend to file [default: FALSE]
  --use-points           Use points in the plots to indicate mean [default: FALSE]
- --noerrorbar          Do not draw errorbars in the plots [default: FALSE]
+ --noerrorbar           Do not draw errorbars in the plots [default: FALSE]
  --legend-pos=LPOS      If legend is plotted, plot it at <LPOS> [default: top]
+ --legend=ALT       If legend is plotted, use comma seperated list in <ALT> as content, note whitespaces have to be provided as underscores [default: ""]
  -y --ymetric=YMETRIC 	Use metric YMETRIC for plotting along y, this can now be a valid R expression that computes a derived value [default: Time_Total]
  --ylabel=YLABEL 	Use YLABEL for labelling the ymetric, note that underscores will be replaced by white spaces as white spaces are not correctly handled through the CLI [default: ]
  --ylimit=YLIMIT 	Use YLIMIT for marking the lowest and highest value shown on the y axis [default: 0,0]
@@ -317,26 +318,47 @@ my_theme <- my_theme + theme(legend.title = element_blank(),#legend.title = elem
                              legend.key.width = unit(1.1, "cm")
                              ) 
 
-aesthetics_from_cli <- strsplit(opts[["aesthetics"]],",")
+aesthetics_from_cli <- strsplit(opts[["aesthetics"]],",")[[1]]
 
 aesthetics_keys   <- c("colour","linetype","shape")
 aesthetics_to_use <- aes(x=xmoi)
-aesthetics_length <- length(aesthetics_from_cli[[1]])
+aesthetics_length <- length(aesthetics_from_cli)
 n_items_per_aesthetics = c()
 counter = 1
 for(i in 1:length(aesthetics_keys)) {
     
     if( i <= aesthetics_length ){
-        current_levels = eval(parse(text=paste("levels(as.factor(data_for_plotting$",
-                                        aesthetics_from_cli[[1]][i],"))",
-                                        sep="")))
+        ## current_levels = eval(parse(text=paste("levels(as.factor(data_for_plotting$",
+        ##                                 aesthetics_from_cli[i],"))",
+        ##                                 sep="")))
+        data_for_plotting[[ aesthetics_from_cli[i] ]] <- as.factor(data_for_plotting[[ aesthetics_from_cli[i] ]])
+        succeeded_reduced[[ aesthetics_from_cli[i] ]] <- as.factor(succeeded_reduced[[ aesthetics_from_cli[i] ]])
+
+        current_levels <- levels(data_for_plotting[[ aesthetics_from_cli[i] ]])
+
+        alt_legend = gsub("_"," ",strsplit(opts[["legend"]], ",")[[1]])
+        if(length(alt_legend) > 1){
+            
+            if(length(alt_legend) == length(current_levels)){
+                levels(data_for_plotting[[ aesthetics_from_cli[i] ]]) = alt_legend
+                levels(succeeded_reduced[[ aesthetics_from_cli[i] ]]) = alt_legend
+                cat("replaced",paste(current_levels),"by",alt_legend,"\n")
+                current_levels <- levels(data_for_plotting[[ aesthetics_from_cli[i] ]])
+                }
+                else {
+                cat("found alternative legend content",opts[["legend"]],"but number of items does not match",current_levels,"\n")
+            }
+        }
+        
+
+        
         n_items_per_aesthetics[counter] = length(current_levels)
         counter = counter + 1
         cat("ggplot aesthetics : ",aesthetics_keys[i]," = ",
-            aesthetics_from_cli[[1]][i]," possible values: ",
+            aesthetics_from_cli[i]," possible values: ",
             current_levels,
             "\n")
-        aesthetics_to_use[[aesthetics_keys[i]]] <- as.symbol(aesthetics_from_cli[[1]][i])
+        aesthetics_to_use[[aesthetics_keys[i]]] <- as.symbol(aesthetics_from_cli[i])
     }
 }
 
