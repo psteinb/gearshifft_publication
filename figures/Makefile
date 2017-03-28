@@ -85,8 +85,8 @@ results_validate_cufft :
 	./compare --freqpoly -n 1 -a "library" --legend-only --notitle -f $(@)_legend $(cufft8_K80_validate_files)  > $(@)_legend.log 2>&1
 	./compare --freqpoly --pdfheight=2.0 -n 1 --xlabel="Time_Total_[ms]" --xmetric="Time_Total" --ylabel="frequency" -a "library" --nolegend --notitle -f $(@)_a $(cufft8_K80_validate_small_files)  > $(@)_a.log 2>&1
 	./compare --freqpoly --pdfheight=2.0 -n 1 --xlabel="Time_Total_[ms]" --xmetric="Time_Total" --ylabel="frequency" -a "library" --nolegend --notitle -f $(@)_b $(cufft8_K80_validate_files)  > $(@)_b.log 2>&1
-	./compare --pdfheight=2.0 -n 1 --xlabel="iteration" --xmetric="id" --ylabel="Time_Total" -a "library" --nolegend --noerrorbar --notitle -f $(@)_c $(cufft8_K80_validate_small_files)  > $(@)_c.log 2>&1
-	./compare --pdfheight=2.0 -n 1 --xlabel="iteration" --xmetric="id" --ylabel="Time_Total" -a "library" --nolegend --noerrorbar --notitle -f $(@)_d $(cufft8_K80_validate_files)  > $(@)_d.log 2>&1
+	./compare --use-points-raw --pdfheight=2.0 -n 1 --xlabel="iteration" --xmetric="id" --ylabel="Time_Total" -a "library" --nolegend --notitle -f $(@)_c $(cufft8_K80_validate_small_files)  > $(@)_c.log 2>&1
+	./compare --use-points-raw --pdfheight=2.0 -n 1 --xlabel="iteration" --xmetric="id" --ylabel="Time_Total" -a "library" --nolegend --notitle -f $(@)_d $(cufft8_K80_validate_files)  > $(@)_d.log 2>&1
 
 clean :
 	rm -vf  *tex

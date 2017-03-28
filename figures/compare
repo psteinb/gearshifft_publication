@@ -38,7 +38,8 @@ library(gtable)
  -k --kind=KINDTYPE	Filter for KINDTYPE before plotting [default: powerof2], do not filter if KINDTYPE="all"
  -f --filename=FNAME    Use FNAME as base stem for output plots [default: gearshifft_plot]
  --pdfheight=value      Height in inches for pdf output [default: 4.0]
- --freqpoly             Use freqpoly to draw histogram
+ --freqpoly             Draw histogram of raw data [default: FALSE]
+ --use-points-raw       Draw points of raw data [default: FALSE]
 ' -> doc
 
 opts <- docopt(doc)
@@ -342,6 +343,23 @@ for(i in 1:length(aesthetics_keys)) {
 if(opts[["freqpoly"]]) {
     moi_plot <- ggplot(succeeded_reduced, aesthetics_to_use)
     moi_plot <- moi_plot + geom_freqpoly(bins=200,size=.8)
+} else if ( opts[["use-points-raw"]] ) {
+    ## cols_to_consider <- Filter(function(i){ !(i %in% filtered_by || i == "id" || i == "run") },c(colnames(succeeded_factors)))
+    ## cols_to_grp_by <- lapply(c(cols_to_consider,"library"), as.symbol)
+    ## cfs <- succeeded_reduced %>%
+    ##     group_by_(.dots = cols_to_grp_by) %>%
+    ##     summarize(moi_cf_a = t.test(ymoi)$conf.int[1],
+    ##               moi_cf_b = t.test(ymoi)$conf.int[2]
+    ##               )
+    ## glimpse(cfs)
+##    moi_plot <- ggplot(data_for_plotting, aesthetics_to_use)
+##    moi_plot <- moi_plot + geom_point(aes(y=moi_mean),size=0.3,alpha=0.4)
+    moi_plot <- ggplot(succeeded_reduced, aesthetics_to_use)
+    ## moi_plot <- moi_plot + geom_hline(data=cfs,aes(yintercept=moi_cf_a,colour=library),alpha=1)
+    ## moi_plot <- moi_plot + geom_hline(data=cfs,aes(yintercept=moi_cf_b,colour=library),alpha=1)
+    moi_plot <- moi_plot + geom_point(aes(y=ymoi),size=0.25,alpha=1)
+    ##    moi_plot <- moi_plot + geom_line(aes(y=moi_mean),size=.8)
+    moi_plot <- moi_plot + scale_linetype_manual(values = c("solid","dotted","longdash")) + theme_bw()
 } else {
     aesthetics_to_use
     moi_plot <- ggplot(data_for_plotting, ## aes(x=xmoi,
