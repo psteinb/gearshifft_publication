@@ -1,5 +1,5 @@
 
-cufft8_files = $(wildcard ../results/*/cuda-8.0.44/cufft*.[0-9].csv)
+cufft8_files = $(wildcard ../results/*/cuda-8.0*/cufft*.[0-9].csv)
 
 clfft_cpu_files = $(wildcard ../results/haswell/clfft-2.12.2/*csv)
 

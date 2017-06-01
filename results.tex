@@ -49,7 +49,7 @@ After a warmup step a benchmark is executed ten times. From this, the arithmetic
     }\label{fig:tts_verify_a}}
   \hfill
   \subfloat[16777216-point FFT]{\parbox[b]{0.45\textwidth}{%
-      \includegraphics[width=0.45\textwidth]{figures/results_validate_cufft_b.pdf}
+      \includegraphics[width=0.45\textwidth]{figures/results_validate_cufft_b.pdf}\\
       \includegraphics[width=0.45\textwidth]{figures/results_validate_cufft_d.pdf}
     }\label{fig:tts_verify_b}}
   \caption{Time-to-solution measured in \textit{gearshifft} (\cufft{}), in a \textit{standalone} \cufft{} application using multiple timer objects and in a standalone application using one timer object (\textit{standalone-tts}) for a single-precision in-place real-to-complex round-trip FFTs on the K80 \cite{taurus}.}
