@@ -313,8 +313,8 @@ my_theme <- my_theme + theme(legend.title = element_blank(),#legend.title = elem
                              legend.direction="vertical",
                              legend.box ="horizontal",
                              legend.box.just ="top",
-                             legend.background = element_rect(colour = 'white', fill = 'white', size = 0., linetype='dashed'),
-                             legend.key = element_rect(colour = 'white', fill = 'white', size = 0., linetype='dashed'),
+                             legend.background = element_rect(colour = NA, fill=NA, size = 0., linetype='dashed'),
+                             legend.key = element_rect(colour = NA, fill = NA, size = 0., linetype='dashed'),
                              legend.key.width = unit(1.1, "cm")
                              ) 
 
@@ -550,7 +550,7 @@ if(opts[["legend-only"]]){
 
     ggsave(paste(opts[["filename"]],".png",sep=""),legend,width=10,height=.9)
     ggsave(paste(opts[["filename"]],".svg",sep=""),legend,width=10,height=.9)
-    cairo_pdf(paste(opts[["filename"]],".pdf",sep=""),width=10,height=0.3*nrow_in_legend)
+    cairo_pdf(paste(opts[["filename"]],".pdf",sep=""),width=10,height=0.3*nrow_in_legend, bg="transparent")
     
     grid.arrange(legend,ncol=1)
     dev.off()

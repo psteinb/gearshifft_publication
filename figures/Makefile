@@ -1,5 +1,5 @@
 
-cufft8_files = $(wildcard ../results/*/cuda-8.0.44/cufft*.[0-9].csv)
+cufft8_files = $(wildcard ../results/*/cuda-8.0*/cufft*.[0-9].csv)
 
 clfft_cpu_files = $(wildcard ../results/haswell/clfft-2.12.2/*csv)
 
@@ -83,8 +83,8 @@ results_placeness : $(cufft8_P100_files) $(cufft8_K80_files) $(measure_fftw_file
 results_validate_cufft :
 	@echo "input: $(?)"
 	./compare --legend='gearshifft,standalone,standalone-tts' --freqpoly -n 1 -a "library" --legend-only --notitle -f $(@)_legend $(cufft8_K80_validate_files)  > $(@)_legend.log 2>&1
-	./compare --freqpoly --pdfheight=2.0 -n 1 --xlabel="Time_Total_[ms]" --xmetric="Time_Total" --ylabel="N" -a "library" --nolegend --notitle -f $(@)_a $(cufft8_K80_validate_small_files)  > $(@)_a.log 2>&1
-	./compare --freqpoly --pdfheight=2.0 -n 1 --xlabel="Time_Total_[ms]" --xmetric="Time_Total" --ylabel="N" -a "library" --nolegend --notitle -f $(@)_b $(cufft8_K80_validate_files)  > $(@)_b.log 2>&1
+	./compare --freqpoly --pdfheight=2.0 -n 1 --xlabel="Time_Total_[ms]" --xmetric="Time_Total" --ylabel="Frequency" -a "library" --nolegend --notitle -f $(@)_a $(cufft8_K80_validate_small_files)  > $(@)_a.log 2>&1
+	./compare --freqpoly --pdfheight=2.0 -n 1 --xlabel="Time_Total_[ms]" --xmetric="Time_Total" --ylabel="Frequency" -a "library" --nolegend --notitle -f $(@)_b $(cufft8_K80_validate_files)  > $(@)_b.log 2>&1
 	./compare --use-points-raw --pdfheight=2.0 -n 1 --xlabel="iteration" --xmetric="id" --ylabel="Time_Total" -a "library" --nolegend --notitle -f $(@)_c $(cufft8_K80_validate_small_files)  > $(@)_c.log 2>&1
 	./compare --use-points-raw --pdfheight=2.0 -n 1 --xlabel="iteration" --xmetric="id" --ylabel="Time_Total" -a "library" --nolegend --notitle -f $(@)_d $(cufft8_K80_validate_files)  > $(@)_d.log 2>&1
 
