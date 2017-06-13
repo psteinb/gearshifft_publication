@@ -196,7 +196,7 @@
  text width=3.0em,
  align=center,
  nodes in empty cells,
- row 1/.style={nodes={fill=black!20,draw=black!50,thick,rectangle,draw,minimum width=2.5em,font=\scriptsize}}
+ row 1/.style={nodes={fill=black!15,draw=black!40,text=black,thick,rectangle,draw,minimum width=2.5em,font=\scriptsize}}
 ]
 (mf) at (0,-0.5) {
 allocate \&
@@ -275,10 +275,10 @@ destroy\\
 \begin{document}
 \frame[plain]{\titlepage}
 
-\begin{frame}{FFTs}
+\begin{frame}{Fields of Fast Fourier Transformations}
   \centering
   \begin{tikzpicture}
-    \begin{scope}[every node/.style={align=center, anchor=north}, xscale=1.15, yscale=2.5]
+    \begin{scope}[every node/.style={align=center, anchor=north, font=\bfseries}, xscale=1.15, yscale=2.6]
       \node[fill=yellow,inner sep=5pt,draw,rectangle,rounded corners] at (0,-0.5) {\textbf{FFTs}};
       % https://commons.wikimedia.org/wiki/File:JPEG_compression_Example.jpg
       \node at (-3, 0.0) {\includegraphics[width=0.25\textwidth]{jpeg-compression.jpg}\\ compression};
@@ -294,17 +294,17 @@ destroy\\
       \node at (-3,-1.0) {\includegraphics[width=0.25\textwidth]{usa-nm-vla.jpg}\\ astronomy};
       \node at ( 0,-1.5) {\Large\textbf{\ldots}};
       % https://en.wikipedia.org/wiki/Geology_applications_of_Fourier_transform_infrared_spectroscopy#/media/File:FTIR_spectrum.jpg
-      \node at ( 3,-1.0) {\includegraphics[width=0.25\textwidth]{FTIR_spectrum.jpg}\\ geology};
+      \node at ( 3,-1.1) {\includegraphics[width=0.25\textwidth]{FTIR_spectrum.jpg}\\ geology};
     \end{scope}
   \end{tikzpicture}
 \end{frame}
 
 
-\begin{frame}{Introduction}{FFTs}
+\begin{frame}{Introduction}{Fourier Transformations}
 
   \begin{equation}
     \label{eq:dft}
-    \text{DFT: }\quad X[k] = \sum_{j=0}^{n-1} x[j]\cdot\exp\left(\frac{-2\pi \iu jk}{n}\right),\quad x,X\in\mathbb{C}^n
+    \text{\textbf{DFT:} }\quad X[k] = \sum_{j=0}^{n-1} x[j]\cdot\exp\left(\frac{-2\pi \iu jk}{n}\right),\quad x,X\in\mathbb{C}^n
   \end{equation}
   
   \begin{itemize}
@@ -319,7 +319,7 @@ destroy\\
 
 \end{frame}
 
-\begin{frame}{FFTs}{Factor analysis}
+\begin{frame}{Introduction}{FFTs and their parameters}
   \centering  
   \begin{tikzpicture}
     \begin{scope}[every node/.style={align=center, anchor=north},xscale=2.5, yscale=1.75]
@@ -335,7 +335,7 @@ destroy\\
     \end{scope}
   \end{tikzpicture}
 
-  \pause
+  \vfill
 
   $\Rightarrow$ \textbf{Which FFT implementation works best on what hardware?}
 
@@ -451,24 +451,9 @@ for( T_Precision : {float, double})
 \end{frame}
 
 \begin{frame}[fragile]{gearshifft}{Command-line}
-%   cmake-based C++11/14 project:
-% \dirtree{%
-% .1 {gearshifft}.
-% .2 {config}\DTcomment{config files with FFT extents}.
-% .2 {inc}.
-% .3 \color{mc1}{core}\DTcomment{benchmark suite header files}.
-% .3 \color{mc3}{libraries}\DTcomment{FFT library instantiations}.
-% .4 \color{mc3}{cufft}.
-% .4 \color{mc3}{clfft}.
-% .4 \color{mc3}{fftw}.
-% .4 \color{mc3}{\ldots}.
-% .2 {src}.
-% }
-
-% \vfill
   \begin{itemize}[<+->]
 \item 
-benchmark clFFT on CPU loading extents.csv dumping results to result.csv
+benchmark clFFT on CPU; load extents.csv; dump results to result.csv
 \begin{lstlisting}[numbers=none,language=bash]
 ./gearshifft_clfft -f ../config/extents.csv
                    -o result.csv -d cpu
@@ -483,8 +468,34 @@ benchmark clFFT on GPU with extent=1048576, float and out-of-place real transfor
 # -r <Lib> / <Precision> / <Extents> / <Transform>
 \end{lstlisting}
 \end{itemize}  
-
 \end{frame}
+
+
+\begin{frame}{gearshifft}{Libraries}
+  cuFFT 
+  \begin{itemize}
+  \item Nvidia's CUDA implementation of FFTs for Nvidia GPUs only
+  \item supports arbitrary and mixed radices
+  \end{itemize}
+
+  clFFT
+  \begin{itemize}
+  \item AMD's OpenCL implementation of FFTs
+  \item optimized for AMD GPUs, but also works on CPUs and other compute devices
+  \item supports mixed radices 2, 3, 5, 7, 11 and 13
+  \end{itemize}
+
+  fftw
+  \begin{itemize}
+  \item for CPUs only
+  \item code 20 years old, not designed for modern multi-core CPUs
+  \item search-depth for optimal plan can be controlled by rigor flags
+  \item precomputed plans can be stored to ``wisdoms''
+  \end{itemize}
+  
+\end{frame}
+
+
 
 
 \begin{frame}{Results}{Validation gearshifft cufft vs. standalone cufft}
@@ -510,9 +521,9 @@ benchmark clFFT on GPU with extent=1048576, float and out-of-place real transfor
 \begin{figure}[!htbp]
   \centering
   \includegraphics[width=\textwidth]{figures/results_plan_flags_legend.pdf}\\[-.5em]
-  \subfloat[Time to Solution]{\includegraphics[width=0.49\textwidth]{figures/results_plan_flags_a.pdf}\label{fig:plan_flags_a}}
+  \subfloat[Time to Solution]{\includegraphics[width=0.5\textwidth]{figures/results_plan_flags_a.pdf}\label{fig:plan_flags_a}}
   \hfill
-  \subfloat[Time for Forward Transform only]{\includegraphics[width=0.49\textwidth]{figures/results_plan_flags_b.pdf}\label{fig:plan_flags_b}}
+  \subfloat[Time for Forward Transform only]{\includegraphics[width=0.5\textwidth]{figures/results_plan_flags_b.pdf}\label{fig:plan_flags_b}}
   \caption{\fftw{} on Intel E5-2680v3 CPU with \mc{FFTW_ESTIMATE}, \mc{FFTW_MEASURE} and \mc{FFTW_WISDOM_ONLY} computing \texttt{powerof2} 3D single-precision real-to-complex in-place forward transforms.}
   \label{fig:fftw_plan_flags}
 \end{figure}
@@ -523,19 +534,19 @@ benchmark clFFT on GPU with extent=1048576, float and out-of-place real transfor
 \begin{figure}[!tbp]
   \centering
   \includegraphics[width=\textwidth]{figures/results_non_power_of_2_legend.pdf}\\[-1em]
-  \subfloat[Time for FFT]{\includegraphics[width=0.49\textwidth]{figures/results_non_power_of_2_a.pdf}\label{fig:non_power_of_2_a}}
+  \subfloat[Time for FFT]{\includegraphics[width=0.5\textwidth]{figures/results_non_power_of_2_a.pdf}\label{fig:non_power_of_2_a}}
   \hfill
-  \subfloat[Time to Solution]{\includegraphics[width=0.49\textwidth]{figures/results_non_power_of_2_b_total.pdf}\label{fig:non_power_of_2_b}}
+  \subfloat[Time to Solution]{\includegraphics[width=0.5\textwidth]{figures/results_non_power_of_2_b_total.pdf}\label{fig:non_power_of_2_b}}
   \caption{\fftw{} and \clfft{} on Intel E5-2680v3 CPU with 24 threads versus \cufft{} on P100 GPU computing single-precision real-to-complex out-of-place forward transforms of 3D shapes.}
   \label{fig:non_power_of_2}
 \end{figure}
 \end{frame}
 
-
-\begin{frame}{Plotting the results}{R-Shiny}
-  \centering
-  \includegraphics[width=0.8\textwidth]{rshiny.png}
+\setbeamertemplate{background canvas}{\includegraphics[width=\paperwidth]{rshiny.png}}
+\begin{frame}[plain]
 \end{frame}
+
+\resetbeamertemplate
 
 \begin{frame}{Summary}{}
 \end{frame}

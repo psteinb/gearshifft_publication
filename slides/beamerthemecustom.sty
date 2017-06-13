@@ -1,6 +1,5 @@
 \newcommand{\resetbeamertemplate}{%
-\setbeamertemplate{background canvas}[vertical shading]
-[bottom=white, middle=middlecolor, top=topcolor]
+\setbeamertemplate{background canvas}[bottom=white]
 }
 \renewcommand\sfdefault{phv}
 \renewcommand\familydefault{\sfdefault}
@@ -16,37 +15,38 @@
 \definecolor{textcolor}{rgb}{0.1,0.1 ,0.1}
 \setbeamerfont{title}{size=\Huge}
 \setbeamercolor{structure}{fg=fgheadcolor}
-%\setbeamertemplate{frametitle}[default]%[center]
-%\setbeamerfont{framesubtitle}{size=\large}
 \setbeamercolor{normal text}{bg=white, fg=textcolor}
 %\setbeamertemplate{items}[circle]
-%\setbeamerfont{frametitle}{size=\huge}
 \setbeamertemplate{navigation symbols}{} %no nav symbols
 \resetbeamertemplate
-
-
+\setbeamercolor{frametitle}{fg=black!85,bg=black!15}
 
 \setbeamertemplate{frametitle}
-{\vspace{.5em}
-\leavevmode
-  %\hbox{%
-  %\begin{beamercolorbox}[wd=\paperwidth,ht=2.25ex,dp=1.0ex, leftskip=.5em]{frametitle}%
-\ifx\insertframesubtitle\empty
-\large{\textbf{\insertframetitle}}
-\else
-\large{\textbf{\insertframetitle}}:~\insertframesubtitle
-\fi
-  %\end{beamercolorbox}
-  %\begin{beamercolorbox}[wd=\paperwidth,ht=2.25ex,dp=1.0ex, leftskip=.5em]{framesubtitle}%
-  %\end{beamercolorbox}
-  %}%
+{\nointerlineskip
+\begin{beamercolorbox}[sep=0.3cm,ht=1.8em,wd=\paperwidth]{frametitle}
+  \vbox{}\vskip-2ex%
+  \strut%
+  \ifx\insertframesubtitle\empty
+  \large{\textbf{\insertframetitle}}
+  \else
+  \large{\textbf{\insertframetitle}}:~\insertframesubtitle
+  \fi
+  \strut%
+  \vskip-0.8ex%
+\end{beamercolorbox}
 }
+
+% \setbeamertemplate{frametitle}
+% {\vspace{.5em}
+% \leavevmode
+
+% }
 
 
 \setbeamertemplate{footline}
 {%
 \begin{beamercolorbox}[wd=\textwidth,ht=3ex,dp=1.5ex,leftskip=.5em,rightskip=.5em]{author in head/foot}%
 \usebeamerfont{author in head/foot}%
-%{\hfill\small\insertframenumber{} von \inserttotalframenumber}%
+{\hfill\small\insertframenumber{} of \inserttotalframenumber}%
 \end{beamercolorbox}%
 }
