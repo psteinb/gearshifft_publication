@@ -310,11 +310,14 @@ destroy\\
   \begin{itemize}
   \item fast implementation of the discrete Fourier transform (DFT) \eqref{eq:dft}
   \item forward transform: time domain $\Rightarrow$ frequency domain
-  \item by factorization of $n$ and recursive decomposition smaller DFTs are computed with $\mathcal{O}(n\log n)$
-  \item Cooley-Tukey: Radix-2 DFTs
-  \item Stockham's formulations avoid incoherent memory access
-  \item Bluestein's algorithm allows arbitrary and mixed radices
-%  \item FFT libraries fftw, clFFT, cuFFT, \ldots 
+  \item factorization of $n$ and recursive decomposition smaller DFTs are computed with $\mathcal{O}(n\log n)$
+
+    \begin{itemize}
+    \item Cooley-Tukey: Radix-2 DFTs
+    \item Stockham's formulations avoid incoherent memory access
+    \item Bluestein's algorithm allows arbitrary and mixed radices
+    \end{itemize}
+
   \end{itemize}
 
 \end{frame}
