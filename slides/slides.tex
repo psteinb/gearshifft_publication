@@ -1,4 +1,4 @@
-\documentclass[t,10pt,hyperref={
+\documentclass[t,11pt,hyperref={
   %pdfpagemode=FullScreen,
   pdftitle = {gearshifft},
   pdfsubject = {gearshifft},
@@ -81,20 +81,21 @@
     gearshifft\\[.5em]\Large The FFT Benchmark Suite\\ for Heterogeneous Platforms}}
 
 \author[Steinbach, Werner]{\texorpdfstring{%
-    \begin{minipage}[b]{.45\textwidth}
-      \centering
+    \begin{minipage}[t]{.49\textwidth}%
+      \centering%
       Peter Steinbach\\[.5em]
       {\footnotesize{Max Planck Institute of Molecular Cell Biology and Genetics\\
           01307 Dresden, Germany}}\\
-      {\small{\url{steinbac@mpi-cbg.de}}}
+      {\footnotesize{\url{steinbac@mpi-cbg.de}}}
     \end{minipage}%
-    \begin{minipage}[b]{.5\textwidth}
-      \centering
+    \begin{minipage}[t]{.49\textwidth}%
+      \centering%
       Matthias Werner\\[.5em]
       {\footnotesize{Center for Information Services and High Performance Computing\\
           TU Dresden, Germany}}\\
-      {\small{\url{Matthias.Werner1@tu-dresden.de}}}
-    \end{minipage}}{The Author}}
+      {\footnotesize{\url{Matthias.Werner1@tu-dresden.de}}}
+    \end{minipage}}{The Author}%
+}
 
 \date{2017/06/20}
 
@@ -302,20 +303,25 @@ destroy\\
 
 \begin{frame}{Introduction}{Fourier Transformations}
 
+\vfill
   \begin{equation}
     \label{eq:dft}
     \text{\textbf{DFT:} }\quad X[k] = \sum_{j=0}^{n-1} x[j]\cdot\exp\left(\frac{-2\pi \iu jk}{n}\right),\quad x,X\in\mathbb{C}^n
   \end{equation}
-  
+\vfill  
   \begin{itemize}
   \item fast implementation of the discrete Fourier transform (DFT) \eqref{eq:dft}
   \item forward transform: time domain $\Rightarrow$ frequency domain
-  \item by factorization of $n$ and recursive decomposition smaller DFTs are computed with $\mathcal{O}(n\log n)$
-  \item Cooley-Tukey: Radix-2 DFTs
-  \item Stockham's formulations avoid incoherent memory access
-  \item Bluestein's algorithm allows arbitrary and mixed radices
-%  \item FFT libraries fftw, clFFT, cuFFT, \ldots 
+  \item factorization of $n$ and recursive decomposition smaller DFTs are computed with $\mathcal{O}(n\log n)$
+
+    \begin{itemize}
+    \item Cooley-Tukey: Radix-2 DFTs
+    \item Stockham's formulations avoid incoherent memory access
+    \item Bluestein's algorithm allows arbitrary and mixed radices
+    \end{itemize}
+
   \end{itemize}
+\vfill
 
 \end{frame}
 
@@ -337,7 +343,13 @@ destroy\\
 
   \vfill
 
-  $\Rightarrow$ \textbf{Which FFT implementation works best on what hardware?}
+  \setbeamertemplate{itemize items}[triangle]
+  \begin{itemize}
+  \item Which FFT implementation works best on what hardware?
+  \item What hardware is best for my domains problem configuration?
+  \item What has changed between library versions?
+  \end{itemize}
+  \setbeamertemplate{itemize items}[circle]
 
 \end{frame}
 
