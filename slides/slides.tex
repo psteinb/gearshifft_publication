@@ -21,6 +21,7 @@
 \usetikzlibrary{positioning}
 \usetikzlibrary{arrows}
 \usetikzlibrary{trees}
+\usetikzlibrary{backgrounds}
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -98,6 +99,12 @@
 \date{2017/06/20}
 
 %%%%%%%%%%%%%%%%%%%%%%%%
+\tikzset{invisible/.style={opacity=0},
+      visible on/.style={alt=#1{}{invisible}},
+      alt/.code args={<#1>#2#3}{%
+        \alt<#1>{\pgfkeysalso{#2}}{\pgfkeysalso{#3}} % \pgfkeysalso doesn't change the path
+      }
+    }
 \tikzset{class/.style={inner sep=5pt,font=\footnotesize}}
 \newcommand{\pclass}[5][]{
 \ifthenelse { \equal {#1} {} }
@@ -123,8 +130,21 @@
 \tikzset{gr1/.style={}}
 \tikzset{bts/.style={draw,circle,inner sep=3pt,fill=white}}
 \tikzset{btc/.style={draw,circle,inner sep=3pt,fill=black}}
-%
+
+% fft parameters
 \visible<4>{
+\begin{scope}[yshift=3.75cm,xshift=-5.5cm,every node/.style={anchor=west,align=left,font=\small,draw,rectangle,rounded corners,fill=white}]
+
+\node[fill=green!50] at (0,0) {cuFFT};
+\node at (0.2,-0.4) {float, \ldots};
+\node at (0.4,-0.8) {1024x1024, \ldots};
+\node[fill=black,text=white] (mplc) at (0.6,-1.2) {Inplace\_Real, \ldots};
+
+\end{scope}
+}
+
+% tree
+\visible<5->{
 \begin{scope}[yshift=3.5cm,xshift=-3.6cm]
 \node[bts,fill=green!50] (b0) at (0,0) {};
 \node[bts] (b10) at (-0.5,-0.6) {}; \draw (b10) -- (b0);
@@ -136,16 +156,7 @@
 \node[font=\small] at (0, 0.4) {{\textbf{Boost}} Test Suites};
 \node[font=\small] at (0,-1.7) {{\textbf{Boost}} Test Cases};
 
-\end{scope}}\visible<5->{
-\begin{scope}[yshift=3.75cm,xshift=-5.5cm,every node/.style={anchor=west,align=left,font=\small,draw,rectangle,rounded corners,fill=white}]
-
-\node[fill=green!50] at (0,0) {cuFFT};
-\node at (0.2,-0.4) {float, \ldots};
-\node at (0.4,-0.8) {1024x1024, \ldots};
-\node[fill=black,text=white] (mplc) at (0.6,-1.2) {Inplace\_Real, \ldots};
-
-\end{scope}
-}
+\end{scope}}
 
 % 
 \begin{scope}[xshift=1.75cm]
@@ -156,7 +167,7 @@
 \pclass[Functor]{BenchmarkSuite}{-2}{3.2}{bs}
 \pclass[Functor]{BenchmarkExecutor}{-2}{2.1}{be}
 }
-\pclass[Functor]{FFT}{-2}{1.0}{fft}
+\pclassfill[Functor]{FFT}{-2}{1.0}{fft}{yellow}
 
 \end{scope}
 \begin{scope}
@@ -206,7 +217,7 @@ destroy\\
 \draw (mf-1-1.south west) ++(-0.75em,-0.5em) coordinate (cl) -- ([xshift=0.75em,yshift=-0.5em]mf-1-8.south east) coordinate (cr);
 \draw[dotted] (cl) -- ++(-2ex,0); \draw[dotted] (cr) -- ++(2ex,0);
 % total time
-\draw[dashed,|-|] (mf-1-1.south west) ++(0,-1.5em) -- ([yshift=-1.5em]mf-1-8.south east) node[pos=0.5,fill=white,font=\small\itshape] {total time};
+\draw[dashed,|-|] (mf-1-1.south west) ++(0,-1.5em) -- ([yshift=-1.5em]mf-1-8.south east) node[pos=0.5,fill=white,font=\small\itshape,align=center,anchor=north] {total time\\(measured separately)};
 % (mf-1-1.south west) -- ++(0,-1.5em) -| (mf-1-8.south east) node[pos=0.25,fill=white,font=\small] {total time};
 }
 
@@ -218,7 +229,7 @@ destroy\\
 \draw[black!80] (be.south west) -- (be.south east);
 \draw[-angle 60] (b) -- (app.west|-b);
 }
-\visible<5->{
+\visible<4>{
   \draw[black!80, dashed] (b.south west) -- ++(-1em, 1.25em) -- ++(-5em,0); % test suite marker
   \draw[black!80, dashed] (bs.south west) -- ++(-1em,-1.5em) -- ++(-4em,0); % test suite marker
 }
@@ -234,7 +245,7 @@ destroy\\
 \end{scope}
 
 \visible<6->{
-  \node[align=left, anchor=north] (mpl) at (-1,0.5) {Meta-Programming of loops for precision and transform, i.\,e.:\\[.5em]\usebox\mybox};
+  \node[align=left, anchor=north] (mpl) at (-1,-0.65) {Meta-Programming of loops for precision and transform, i.\,e.:\\[.5em]\usebox\mybox};
   \draw[-latex] (mpl) -- (mplc);
 }
 \end{tikzpicture}
@@ -330,6 +341,73 @@ destroy\\
 
 \end{frame}
 
+
+\begin{frame}[fragile]{gearshifft}
+
+  Simplified Workflow for a single FFT benchmark of an FFT lib\\
+  (e.g. 1024-FFT real-inplace single-precision):\\[.5em]
+\begin{tikzpicture}[every node/.style={anchor=north west,align=left}]
+    \node (a) {\textbf{FFT/lib operations}\\[.5em]
+\begin{lstlisting}[numbers=none]
+init_context();
+
+init_plan();
+exec_plan();
+destroy_plan();
+
+destroy_context();
+\end{lstlisting}};
+
+\node[visible on=<3->] (b) at (3.75,0) {
+  \textbf{+ timer}\\[.5em]
+      \begin{lstlisting}[numbers=none]
+// ...
+
+timer_start();
+init_plan(...);
+val = timer_stop();
+
+// ...
+  \end{lstlisting}};
+
+\node[visible on=<4>] (c) at (7.5,0){
+  \textbf{+ store times}\\[.5em]
+     \begin{lstlisting}[numbers=none]
+// ...
+
+timer_start();
+init_plan(...);
+val = timer_stop();
+store(val, PlanInit);
+
+// ...
+  \end{lstlisting}};
+\end{tikzpicture}
+
+\only<2>{
+\begin{itemize}
+\item data transfers not listed here
+\item context has application lifetime
+\item \gearshifft{} uses round-trip FFTs
+\item workflow is templated by \mc{FFT.hpp}, implemented by cuFFT et. al
+\end{itemize}}
+
+\only<3>{
+\begin{itemize}
+\item time FFT operations
+\item \gearshifft{} templates and reuses timer objects\newline
+  (developer can provide own timer class)
+\end{itemize}}
+
+\only<4>{
+\begin{itemize}
+\item time values are collected
+\item \gearshifft{} dumps results to csv in the end
+\end{itemize}}
+
+\end{frame}
+  
+
 % code used in tkzgearshifft
 \begin{lrbox}{\mybox}
 \begin{lstlisting}[numbers=none]
@@ -344,6 +422,32 @@ for( T_Precision : {float, double})
 \begin{frame}[fragile]{gearshifft}{Basic Framework in C++/Boost}
   \centering
   \tkzgearshifft
+\vspace{-2em}
+\only<1>{  
+  \begin{itemize}
+  \item \mc{FFTClient} implements FFT workflow template class
+  \end{itemize}
+  }
+\only<2>{  
+  \begin{itemize}
+  \item Application controls context object and results
+  \end{itemize}
+}
+\only<3>{  
+  \begin{itemize}
+  \item Boost UTF driven generation of benchmark instances
+  \end{itemize}
+  }
+\only<4>{  
+  \begin{itemize}
+  \item Boost test suites are generated by lib, precision and extents, the Boost test case is a specialized FFT client
+  \end{itemize}
+  }
+\only<5>{  
+  \begin{itemize}
+  \item the benchmark tree is traversed by Boost \ldots
+  \end{itemize}
+  }
 \end{frame}
 
 \begin{frame}[fragile]{gearshifft}{Command-line}
