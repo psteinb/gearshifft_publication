@@ -213,7 +213,7 @@
 \vfill
 \end{frame}
 
-\begin{frame}[fragile]{gearshifft}{rational}
+\begin{frame}[fragile]{gearshifft}{Rational}
 
   Simplified Workflow for a single FFT benchmark of an FFT lib\\
   (e.g. 1024-FFT real-inplace single-precision):\\[.5em]
@@ -259,8 +259,8 @@ store(val, PlanInit);
 \begin{itemize}
 \item data transfers not listed here
 \item context has application lifetime
-\item \gearshifft{} uses round-trip FFTs
-\item workflow is templated by \mc{FFT.hpp}, implemented by cuFFT et. al
+\item \gearshifft{} uses round-trip FFTs (checks numerical sanity)
+\item workflow is templated, specialized by library clients
 \end{itemize}}
 
 \only<3>{
@@ -273,7 +273,7 @@ store(val, PlanInit);
 \only<4>{
 \begin{itemize}
 \item time values are collected
-\item \gearshifft{} dumps results to csv in the end
+\item \gearshifft{} stores results in csv eventually
 \end{itemize}}
 
 \end{frame}
@@ -321,28 +321,38 @@ for( T_Precision : {float, double})
   }
 \end{frame}
 
-\begin{frame}[fragile]{gearshifft}{Command-line}
+\begin{frame}[fragile]{gearshifft}{Command-line Examples}
   \begin{itemize}[<+->]
 \item 
-benchmark clFFT on CPU; load extents.csv; dump results to result.csv
+\textbf{benchmark clFFT on CPU}: load extents.csv and store results in result.csv
 \begin{lstlisting}[numbers=none,language=bash]
-./gearshifft_clfft -f ../config/extents.csv
-                   -o result.csv -d cpu
+$ ./gearshifft_clfft -f ../config/extents.csv
+                     -o result.csv -d cpu
 \end{lstlisting}
 
 \item Command-line supports wildcards from Boost options
 \item 
-benchmark clFFT on GPU with extent=1048576, float and out-of-place real transforms
+\textbf{benchmark clFFT on GPU} with $extent=1048576$, float and out-of-place real transforms
 \begin{lstlisting}[numbers=none,language=bash]
-./gearshifft_clfft -e 1048576
-                   -r */float/*/Outplace_Real
-# -r <Lib> / <Precision> / <Extents> / <Transform>
+$ ./gearshifft_clfft -e 1048576
+                     -r */float/*/Outplace_Real
+# -r <regex> with 
+#    <Lib>/<Precision>/<Extents>/<Transform>
 \end{lstlisting}
+\item \href{https://github.com/mpicbg-scicomp/gearshifft/tree/master/config}{predefined extent lists} available in the gearshifft repository
 \end{itemize}  
 \end{frame}
 
 
 \begin{frame}{gearshifft}{Libraries}
+  fftw
+  \begin{itemize}
+  \item for CPUs only
+  \item code 20 years old, not designed for modern multi-core CPUs
+  \item search-depth for optimal plan can be controlled by rigor flags
+  \item precomputed plans can be stored to ``wisdoms''
+  \end{itemize}
+  
   cuFFT 
   \begin{itemize}
   \item Nvidia's CUDA implementation of FFTs for Nvidia GPUs only
@@ -356,20 +366,13 @@ benchmark clFFT on GPU with extent=1048576, float and out-of-place real transfor
   \item supports mixed radices 2, 3, 5, 7, 11 and 13
   \end{itemize}
 
-  fftw
-  \begin{itemize}
-  \item for CPUs only
-  \item code 20 years old, not designed for modern multi-core CPUs
-  \item search-depth for optimal plan can be controlled by rigor flags
-  \item precomputed plans can be stored to ``wisdoms''
-  \end{itemize}
   
 \end{frame}
 
 
 
 
-\begin{frame}{Results}{Validation gearshifft cufft vs. standalone cufft}
+\begin{frame}{Results}{Validating gearshifft cufft vs. standalone cufft}
 \begin{figure}[!htb]
   \centering
   \includegraphics[width=\textwidth]{figures/results_validate_cufft_legend.pdf}\\[-.5em]
@@ -388,7 +391,7 @@ benchmark clFFT on GPU with extent=1048576, float and out-of-place real transfor
 \end{frame}
 
 
-\begin{frame}{Results}{fftw plan-rigor flags}
+\begin{frame}{Results}{Exploring fftw plan-rigor flags}
 \begin{figure}[!htbp]
   \centering
   \includegraphics[width=\textwidth]{figures/results_plan_flags_legend.pdf}\\[-.5em]
@@ -398,6 +401,14 @@ benchmark clFFT on GPU with extent=1048576, float and out-of-place real transfor
   \caption{\fftw{} on Intel E5-2680v3 CPU with \mc{FFTW_ESTIMATE}, \mc{FFTW_MEASURE} and \mc{FFTW_WISDOM_ONLY} computing \texttt{powerof2} 3D single-precision real-to-complex in-place forward transforms.}
   \label{fig:fftw_plan_flags}
 \end{figure}
+
+\pause
+
+\begin{itemize}
+\item mean and standard deviations over 20 runs per signal shape
+\item \mc{FFTW_MEASURE} imposes considerable time for planning
+\item \mc{FFTW_MEASURE} beats \mc{FFTW_WISDOM_ONLY} for large input signals
+\end{itemize}
 \end{frame}
 
 
@@ -413,11 +424,16 @@ benchmark clFFT on GPU with extent=1048576, float and out-of-place real transfor
 \end{figure}
 \end{frame}
 
-\setbeamertemplate{background canvas}{\includegraphics[width=\paperwidth]{rshiny.png}}
-\begin{frame}[plain]
+%\setbeamertemplate{background canvas}{\includegraphics[width=\paperwidth]{rshiny.png}}
+\begin{frame}{Results on the web}
+  \begin{center}
+    \includegraphics[width=.8\textwidth]{rshiny.png}\\[20pt]
+    \href{http://v22017054645049618.nicesrv.de/gearshifft/}{v22017054645049618.nicesrv.de/gearshifft}
+  \end{center}
+
 \end{frame}
 
-\resetbeamertemplate
+%\resetbeamertemplate
 
 \begin{frame}{Summary}{}
 \end{frame}
