@@ -1,0 +1,32 @@
+\providecommand\thispdfpagelabel[1]{}
+
+
+\lstset{literate={~} {$\sim\,$}{1}}
+\lstset{upquote=true}
+\lstset{language=C++,
+  basicstyle=\small\fontfamily{fvm}\selectfont,%\ttfamily,
+% 	columns=fullflexible,
+  columns=fixed,
+  keepspaces=true,
+%       keywordstyle=\color{black}\bf,
+%       stringstyle=\color{red}\ttfamily,
+  showstringspaces=false,
+  commentstyle=\color[rgb]{0.3,0.3,0.3}\textit,
+%       morecomment=[l][\color{gray}]{\#},
+  identifierstyle=\color{black},
+  morekeywords={size_t},
+  emph={__global__,__device__},
+        emphstyle=\textit,
+        numbers=left,
+  numberstyle=\small\color{gray},
+  breaklines=true,
+  numbersep=5pt,
+  xleftmargin=.19in,
+}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% \mode<presentation>{%
+% \setbeameroption{show notes}
+% }
+
+\newcolumntype{M}{>{$\displaystyle}l<{$\vspace{1ex}}}
