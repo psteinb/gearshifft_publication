@@ -22,6 +22,7 @@
 \usetikzlibrary{arrows}
 \usetikzlibrary{trees}
 \usetikzlibrary{backgrounds}
+\usetikzlibrary{mindmap}
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -54,8 +55,8 @@
       \centering%
       Peter Steinbach\\[.5em]
       {\footnotesize{Max Planck Institute of Molecular Cell Biology and Genetics\\
-          01307 Dresden, Germany}}\\
-      {\footnotesize{\url{steinbac@mpi-cbg.de}}}
+          Dresden, Germany}}\\
+      {\small{\url{steinbac@mpi-cbg.de}}}
     \end{minipage}%
     \begin{minipage}[t]{.49\textwidth}%
       \centering%
@@ -146,27 +147,33 @@
 
 \begin{frame}{Introduction}{FFTs and their parameters}
   \centering  
-  \begin{tikzpicture}
-    \begin{scope}[every node/.style={align=center, anchor=north},xscale=2.5, yscale=1.75]
-      \node[fill=yellow,inner sep=5pt,draw,rectangle,rounded corners] at (0,0) {\textbf{FFTs}};
-    \node at (-1, 1.0) {\textbf{library}\\ cuFFT\\ clFFT\\ fftw\\ \ldots};
-    \node at ( 1, 1.0) {\textbf{placeness}\\ inplace\\ outplace};
-    \node at (-1, 0.0) {\textbf{precision}\\ single\\ double\\ \ldots};
-    \node at ( 1, 0.0) {\textbf{transform}\\ real\\ complex};
-    \node at ( 0, 1.0) {\textbf{lib-specific}\\ plan-rigor\\\ldots};
-    \node at ( 0,-1.0) {\textbf{radices}\\ power-of-2\\ power-of-n\\ mixed};
-    \node at (-1,-1.0) {\textbf{dim}\\ 1D\\ 2D\\ 3D\\ \ldots};
-    \node at ( 1,-1.0) {\textbf{hardware}\\ CPU(s)\\ GPU\\ \ldots};
-    \end{scope}
+  \begin{tikzpicture}[root concept/.style={rectangle},
+    small mindmap]
+%level 1 concept/.append style={sibling angle=20}, small mindmap]
+
+    \path[concept color=white,text=black]
+    node[concept] {\Large{Fast Fourier Transforms}}
+    [grow=down]
+    child[concept color=red, text=white] { node[concept] {\textbf{library}\\ cuFFT, clFFT, fftw, \ldots} }
+    child[concept color=green] { node[concept] {\textbf{transform}\\ real, complex} }
+    %child[concept color=brown] { node[concept] {\textbf{specifics}\\ rigors} }
+    child[concept color=black,text=white] { node[concept] {\textbf{radices}\\ $2^n$, mixed} }
+    child[concept color=cyan] { node[concept] {\textbf{dims}\\ $1$, $2$, $3$} }
+    child[concept color=gray,text=white] { node[concept] {\textbf{hardware}\\ CPU, \\GPU} }
+    child[concept color=orange] { node[concept] {\textbf{memory}\\ inplace, outofplace} }
+    child[concept color=blue,text=white] { node[concept] {\textbf{precision}\\ single, double, \ldots} };
+
   \end{tikzpicture}
 
   \vfill
+  \pause
 
   \setbeamertemplate{itemize items}[triangle]
   \begin{itemize}
   \item Which FFT implementation works best on what hardware?
-  \item What hardware is best for my domains problem configuration?
+  \item What hardware is best for my transform configuration?
   \item What has changed between library versions?
+  \item \ldots
   \end{itemize}
   \setbeamertemplate{itemize items}[circle]
 
