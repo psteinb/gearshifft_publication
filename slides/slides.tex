@@ -369,18 +369,18 @@ $ ./gearshifft_clfft -e 1048576
   {\scriptsize{
   \caption{Benchmark Hardware}
   \label{tab:hardware}
-  \begin{tabular}{llll}
+  \begin{tabular}{lll}
     \toprule
-                        & \textbf{Taurus}           & \textbf{Hypnos}         & \textbf{Islay}                                  \\
-                        & HPC Cluster               & HPC Cluster             & Workstation                                     \\
+                        & \multicolumn{2}{c}{\textbf{Taurus}}                                         \\
+                        & \multicolumn{2}{c}{HPC Cluster}                                             \\
     \midrule
-    \textbf{CPU family} & Haswell Xeon               & Haswell Xeon           & Haswell Xeon           \\
-    \textbf{CPU model } & $2{\times}$ E5-2680 v3     & $2{\times}$ E5-2603 v3 & $2{\times}$ E5-2640 v3 \\
-    \textbf{RAM       } & \SI{64}{\gibi\byte}        & \SI{64}{\gibi\byte}    & \SI{64}{\gibi\byte}    \\
-    \textbf{GPU} {\scriptsize{(PCIe3.0)}} & 4x K80   & 1x P100                & 1x GTX 1080            \\
-    \textbf{GPU memory} & 4x \SI{12}{\gibi\byte}     & \SI{16}{\gibi\byte}    & \SI{8}{\gibi\byte}     \\
-    \textbf{GPU driver} & $367.48$                   & $367.48$               & $367.57$               \\
-    \textbf{OS}         & RHEL $6.8$                 & Ubuntu $14.04.3$       & CentOS $7.2$           \\
+    \textbf{CPU family} & Haswell Xeon               & Haswell Xeon           \\
+    \textbf{CPU model } & $2{\times}$ E5-2680 v3     & $2{\times}$ E5-2680 v3 \\
+    \textbf{RAM       } & \SI{64}{\gibi\byte}        & \SI{64}{\gibi\byte}    \\
+    \textbf{GPU} {\scriptsize{(PCIe3.0)}} & 4x K80   & 1x P100                \\
+    \textbf{GPU memory} & 4x \SI{12}{\gibi\byte}     & \SI{16}{\gibi\byte}    \\
+    \textbf{GPU driver} & $367.48$                   & $367.48$               \\
+    \textbf{OS}         & RHEL $6.8$                 & Ubuntu $14.04.3$       \\
     \bottomrule
   \end{tabular}}}
 \end{table}
@@ -422,9 +422,8 @@ $ ./gearshifft_clfft -e 1048576
   \caption{\fftw{} on Intel E5-2680v3 CPU computing \texttt{powerof2} 3D single-precision real-to-complex in-place forward transforms.}
   \label{fig:fftw_plan_flags}
 \end{figure}
-
 \pause
-
+\vspace{-1em}
 \begin{itemize}
 \item mean and standard deviations over 10 runs per signal shape
 \item \mc{FFTW_MEASURE} imposes considerable time for planning
@@ -457,30 +456,41 @@ $ ./gearshifft_clfft -e 1048576
 %\resetbeamertemplate
 
 \begin{frame}{Summary}{}
+  
   \begin{itemize}
-  \item in-depth analysis of FFT libraries
+  \item \gearshifft{} enables in-depth analysis of FFT libraries
   \item there is a $<3\%$ latency overhead due to the timer objects
   \item when benchmarking fix the CPU/GPU clock if possible
   \item found bugs in each library
+    % clfft: CPU, complex-to-real fails for 4096-FFT (not fixed yet)
+    % clfft: memory leak
+    % fftw: multi-core slowdown at planning stage, 2d/3d out-of-place not part of default wisdoms [undocumented]
+    % cufft: recreating plans after context has been destroyed crashed in cuda 7.5 (fixed in cuda8)
   \end{itemize}
 \end{frame}
 
 \begin{frame}{Summary Cont.}{}
   fftw has long planning times, but finds better plans:
   \begin{itemize}
-  \item plan is computed once and reused thousands of times
-  \item single-core delivers sufficient performance
+  \item useful when plan is computed once and reused thousands of times
+  \item not intended for multi-core and NUMA systems
+  \item has some pitfalls in compiling fftw, plan-rigors and wisdom generations
+    % (sse2 vs. avx, openmp vs. mpi vs. threads, do not mix float and double , fixes used number of cores to wisdom, patient vs measure and their vulnerability to multi-core slow-down issue)
+  %\item multi-core increases planning time a lot, still same FFT performance as single-core is chosen by fftw
   \end{itemize}
 
   clFFT works on GPU and CPU.
   \begin{itemize}
-  \item 
+  \item fast planning, but low FFT performance
+  \item cannot handle arbitrary radices
+    %(only combos of powers of 2,3,5,7,11,13)
   \end{itemize}
 
+  cuFFT works on Nvidia GPUs.
   \begin{itemize}
-  \item 
+  \item fast planning, average FFT performance on small FFTs
+  \item outperforms on large FFTs
   \end{itemize}
-
   
 \end{frame}
 
