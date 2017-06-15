@@ -1,4 +1,4 @@
-\documentclass[t,10pt,hyperref={
+\documentclass[t,11pt,hyperref={
   %pdfpagemode=FullScreen,
   pdftitle = {gearshifft},
   pdfsubject = {gearshifft},
@@ -38,7 +38,6 @@
 \graphicspath{{../}}
 \usepackage{colortbl}
 \usepackage{listings}
-\usepackage{dirtree}
 
 \usepackage[%per=slash,
 %            decimalsymbol=comma,
@@ -94,34 +93,35 @@
 %%        what is templated, what is runtime
 
 \begin{document}
+
 \frame[plain]{\titlepage}
 
-\begin{frame}{Fields of Fast Fourier Transformations}
+\begin{frame}{Fields of the Fast Fourier Transformation}
   \centering
   \begin{tikzpicture}
     \begin{scope}[every node/.style={align=center, anchor=north, font=\bfseries}, xscale=1.15, yscale=2.6]
       \node[fill=yellow,inner sep=5pt,draw,rectangle,rounded corners] at (0,-0.5) {\textbf{FFTs}};
       % https://commons.wikimedia.org/wiki/File:JPEG_compression_Example.jpg
-      \node at (-3, 0.0) {\includegraphics[width=0.25\textwidth]{jpeg-compression.jpg}\\ compression};
+      \node[visible on=<3->] at (-3.5, 0.0) {\includegraphics[width=0.25\textwidth]{jpeg-compression.jpg}\\ compression};
       % https://imagej.net/Multiview-Reconstruction
-      \node at ( 3, 0.0) {\includegraphics[width=0.25\textwidth]{imagej.jpg}\\ biology};
+      \node[visible on=<3->] at ( 3.5, 0.0) {\includegraphics[width=0.25\textwidth]{imagej.jpg}\\ biology};
       % https://commons.wikimedia.org/wiki/File:Deep_learning.png
-      \node at (-3, 1.0) {\includegraphics[width=0.21\textwidth]{deep-learning.png}\\ machine learning};
+      \node[visible on=<2->] at (-3, 1.0) {\includegraphics[width=0.21\textwidth]{deep-learning.png}\\ machine learning};
       % https://en.wikipedia.org/wiki/Trader_%28finance%29#/media/File:Philippine-stock-market-board.jpg
-      \node at ( 3, 1.0) {\includegraphics[width=0.25\textwidth]{Philippine-stock-market-board.jpg}\\ financial math};
+      \node[visible on=<2->] at ( 3, 1.0) {\includegraphics[width=0.25\textwidth]{Philippine-stock-market-board.jpg}\\ financial math};
       % https://de.wikipedia.org/wiki/Sinc-Funktion#/media/File:Si_sinc.svg
-      \node at ( 0, 1.0) {\includegraphics[width=0.25\textwidth]{sin-cos.png}\\ signal processing};
+      \node at ( 0, 1.15) {\includegraphics[width=0.25\textwidth]{sin-cos.png}\\ signal processing};
       % https://en.wikipedia.org/wiki/Interferometry#/media/File:USA.NM.VeryLargeArray.02.jpg
-      \node at (-3,-1.0) {\includegraphics[width=0.25\textwidth]{usa-nm-vla.jpg}\\ astronomy};
-      \node at ( 0,-1.5) {\Large\textbf{\ldots}};
+      \node[visible on=<4->] at (-3,-1.0) {\includegraphics[width=0.25\textwidth]{usa-nm-vla.jpg}\\ astronomy};
       % https://en.wikipedia.org/wiki/Geology_applications_of_Fourier_transform_infrared_spectroscopy#/media/File:FTIR_spectrum.jpg
-      \node at ( 3,-1.1) {\includegraphics[width=0.25\textwidth]{FTIR_spectrum.jpg}\\ geology};
+      \node[visible on=<4->] at ( 3,-1.1) {\includegraphics[width=0.25\textwidth]{FTIR_spectrum.jpg}\\ geology};
+      \node[visible on=<5->] at ( 0,-1.65) {\Large\textbf{\ldots}};
     \end{scope}
   \end{tikzpicture}
 \end{frame}
 
 
-\begin{frame}{Introduction}{Fourier Transformations}
+\begin{frame}{Introduction}{Fourier Transformation}
 
 \vfill
   \begin{equation}
@@ -130,9 +130,9 @@
   \end{equation}
 \vfill  
   \begin{itemize}
-  \item fast implementation of the discrete Fourier transform (DFT) \eqref{eq:dft}
+  \item fast implementation of discrete Fourier transform (DFT) \eqref{eq:dft}
   \item forward transform: time domain $\Rightarrow$ frequency domain
-  \item factorization of $n$ and recursive decomposition smaller DFTs are computed with $\mathcal{O}(n\log n)$
+  \item factorization of $n$ and recursive decomposition yield smaller DFTs $\Rightarrow$ FFT$\sim\mathcal{O}(n\log n)$
 
     \begin{itemize}
     \item Cooley-Tukey: Radix-2 DFTs
@@ -152,7 +152,7 @@
 %level 1 concept/.append style={sibling angle=20}, small mindmap]
 
     \path[concept color=white,text=black]
-    node[concept] {\Large{Fast Fourier Transforms}}
+    node[concept,font=\large\bfseries] {Fast Fourier Transforms}
     [grow=down]
     child[concept color=red, text=white] { node[concept] {\textbf{library}\\ cuFFT, clFFT, fftw, \ldots} }
     child[concept color=green] { node[concept] {\textbf{transform}\\ real, complex} }
@@ -186,18 +186,14 @@
         \href{https://github.com/mpicbg-scicomp/gearshifft}{\textbf{github.com/mpicbg-scicomp/gearshifft}}
       \end{center}
 
-  % \begin{columns}[c]
-  %   \begin{column}{.8\textwidth}
-  %   \end{column}
-    
-  %   \begin{column}{.2\textwidth}
-  %     \\[-.5em]
-  %   \end{column}
-
-  % \end{columns}
 \vfill
   \begin{itemize}
   \item free and open-source benchmark suite for FFT libraries
+    \begin{itemize}
+    \item various conditions of FFTs can be benchmarked
+    \item currently supports cuFFT, clFFT and fftw
+    \item implements round-trip FFTs with validation
+    \end{itemize}
   \item licensed under Apache License 2.0
   \item community-ready
   \item vendor independent 
@@ -215,52 +211,52 @@
 
 \begin{frame}[fragile]{gearshifft}{rational}
 
-  Simplified Workflow for a single FFT benchmark of an FFT lib\\
+Simplified Workflow for a \textbf{single} FFT benchmark of an FFT lib\\
   (e.g. 1024-FFT real-inplace single-precision):\\[.5em]
-\begin{tikzpicture}[every node/.style={anchor=north west,align=left}]
-    \node (a) {\textbf{FFT/lib operations}\\[.5em]
+
+\begin{minipage}[t]{0.34\textwidth}
+\textbf{FFT/lib operations}
 \begin{lstlisting}[numbers=none]
 init_context();
-
 init_plan();
 exec_plan();
 destroy_plan();
-
 destroy_context();
-\end{lstlisting}};
-
-\node[visible on=<3->] (b) at (3.75,0) {
-  \textbf{+ timer}\\[.5em]
-      \begin{lstlisting}[numbers=none]
+\end{lstlisting}
+\end{minipage}
+\begin{minipage}[t]{0.3\textwidth}
+\begin{onlyenv}<3->
+  \textbf{+ Timer}
+  \begin{lstlisting}[numbers=none]
 // ...
-
 timer_start();
-init_plan(...);
+init_plan();
 val = timer_stop();
-
 // ...
-  \end{lstlisting}};
-
-\node[visible on=<4>] (c) at (7.5,0){
-  \textbf{+ store times}\\[.5em]
-     \begin{lstlisting}[numbers=none]
+  \end{lstlisting}
+\end{onlyenv}
+\end{minipage}
+\begin{minipage}[t]{0.3\textwidth}
+\begin{onlyenv}<4->
+  \textbf{+ Results}
+  \begin{lstlisting}[numbers=none,emph={PlanInit}]
 // ...
-
 timer_start();
-init_plan(...);
+init_plan();
 val = timer_stop();
 store(val, PlanInit);
-
 // ...
-  \end{lstlisting}};
-\end{tikzpicture}
+  \end{lstlisting}
+\end{onlyenv}
+\end{minipage}
+
 
 \only<2>{
 \begin{itemize}
 \item data transfers not listed here
 \item context has application lifetime
 \item \gearshifft{} uses round-trip FFTs
-\item workflow is templated by \mc{FFT.hpp}, implemented by cuFFT et. al
+\item workflow is templated by \mc{FFT.hpp}, implemented by cuFFT, fftw, \ldots
 \end{itemize}}
 
 \only<3>{
@@ -285,13 +281,13 @@ store(val, PlanInit);
 for( T_Precision : {float, double})
  for( extent : {32, 64x32, 16x16x16})
   for( T_FFT : {Inplace_Real, Outplace_Complex})
-   // instantiate and run benchmark instance
+   // instantiate and run benchmark
 \end{lstlisting}
 \end{lrbox}
 
 
 \begin{frame}[fragile]{gearshifft}{Basic Framework in C++/Boost}
-  \centering
+\hspace*{-2em}
   \tkzgearshifft
 \vspace{-2em}
 \only<1>{  
@@ -345,7 +341,7 @@ benchmark clFFT on GPU with extent=1048576, float and out-of-place real transfor
 \begin{frame}{gearshifft}{Libraries}
   cuFFT 
   \begin{itemize}
-  \item Nvidia's CUDA implementation of FFTs for Nvidia GPUs only
+  \item Nvidia's CUDA implementation of FFTs for Nvidia GPUs
   \item supports arbitrary and mixed radices
   \end{itemize}
 
@@ -358,8 +354,8 @@ benchmark clFFT on GPU with extent=1048576, float and out-of-place real transfor
 
   fftw
   \begin{itemize}
-  \item for CPUs only
-  \item code 20 years old, not designed for modern multi-core CPUs
+  \item for CPUs only, code 20 years old
+  \item not designed for modern multi-core CPUs    
   \item search-depth for optimal plan can be controlled by rigor flags
   \item precomputed plans can be stored to ``wisdoms''
   \end{itemize}
@@ -419,7 +415,19 @@ benchmark clFFT on GPU with extent=1048576, float and out-of-place real transfor
 
 \resetbeamertemplate
 
-\begin{frame}{Summary}{}
+\begin{frame}{Summary Cont.}{}
+  fftw has long planning times, but finds better plans:
+  \begin{itemize}
+  \item plan is computed once and reused thousands of times
+  \item single-core delivers sufficient performance
+  \end{itemize}
+
+  clFFT works on GPU and CPU.
+  \begin{itemize}
+  \item 
+  \end{itemize}
+
+  
 \end{frame}
 
 
