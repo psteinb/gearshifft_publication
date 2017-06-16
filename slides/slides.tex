@@ -23,6 +23,7 @@
 \usetikzlibrary{trees}
 \usetikzlibrary{backgrounds}
 \usetikzlibrary{mindmap}
+\usetikzlibrary{shadows}
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -99,9 +100,9 @@
   \centering
   \begin{tikzpicture}
     \begin{scope}[every node/.style={align=center, anchor=north, font=\bfseries}, xscale=1.15, yscale=2.6]
-      \node[fill=yellow,inner sep=5pt,draw,rectangle,rounded corners] at (0,-0.5) {\textbf{FFTs}};
+      \node[fill=gray,text=white,inner sep=5pt, minimum width=3cm,minimum height=2cm,rectangle,rounded corners, anchor=center, drop shadow] at (0,-0.5) {\Huge\textbf{FFTs}};
       % https://commons.wikimedia.org/wiki/File:JPEG_compression_Example.jpg
-      \node[visible on=<3->] at (-3.5, 0.0) {\includegraphics[width=0.25\textwidth]{jpeg-compression.jpg}\\ compression};
+      \node [visible on=<3->] (comprimage) at (-3.5, 0.0) {\includegraphics[width=0.25\textwidth]{jpeg-compression.jpg}\\ compression};
       % https://imagej.net/Multiview-Reconstruction
       \node[visible on=<3->] at ( 3.5, 0.0) {\includegraphics[width=0.25\textwidth]{imagej.jpg}\\ biology};
       % https://commons.wikimedia.org/wiki/File:Deep_learning.png
@@ -146,12 +147,12 @@
 
 \begin{frame}{Introduction}{FFTs and their parameters}
   \centering  
-  \begin{tikzpicture}[root concept/.style={rectangle},
+  \begin{tikzpicture}[root concept/.style={rectangle, rounded corners},
     small mindmap]
 %level 1 concept/.append style={sibling angle=20}, small mindmap]
 
     \path[concept color=white,text=black]
-    node[concept,font=\large\bfseries] {Fast Fourier Transforms}
+    node[concept,font=\huge\bfseries] {FFTs}
     [grow=down]
     child[concept color=red, text=white] { node[concept] {\textbf{library}\\ cuFFT, clFFT, fftw, \ldots} }
     child[concept color=green] { node[concept] {\textbf{transform}\\ real, complex} }
@@ -190,11 +191,13 @@
   \item free and open-source benchmark suite for FFT libraries
     \begin{itemize}
     \item various conditions of FFTs can be benchmarked
-    \item currently supports cuFFT, clFFT and fftw
-    \item implements round-trip FFTs with validation
+    \item supports cuFFT, clFFT and fftw (mkl and hcfft planned)
+    \item performs round-trip $fft^{-1}(fft(signal))$ and validation
     \end{itemize}
+    \pause
+    \vfill
   \item licensed under Apache License 2.0
-  \item community-ready
+  \item community-ready for contributions
   \item vendor independent 
   \item standardized output format
   \item open and extensible architecture written in C++14
@@ -202,7 +205,7 @@
 \vfill
 \pause
 \begin{center}
-  \includegraphics[width=.4\textwidth]{gearshifft_logo_img_100.png}
+  \includegraphics[width=.35\textwidth]{gearshifft_logo_img_100.png}
 \end{center}
 
 \vfill
