@@ -1,4 +1,4 @@
-\documentclass[t,10pt,hyperref={
+\documentclass[t,11pt,hyperref={
   %pdfpagemode=FullScreen,
   pdftitle = {gearshifft},
   pdfsubject = {gearshifft},
@@ -38,10 +38,8 @@
 \graphicspath{{../}}
 \usepackage{colortbl}
 \usepackage{listings}
-\usepackage{dirtree}
 
-\usepackage[%per=slash,
-%            decimalsymbol=comma,
+\usepackage[binary-units=true,
             locale=US,
             ]{siunitx}
 
@@ -94,34 +92,35 @@
 %%        what is templated, what is runtime
 
 \begin{document}
+
 \frame[plain]{\titlepage}
 
-\begin{frame}{Fields of Fast Fourier Transformations}
+\begin{frame}{Fields of the Fast Fourier Transformation}
   \centering
   \begin{tikzpicture}
     \begin{scope}[every node/.style={align=center, anchor=north, font=\bfseries}, xscale=1.15, yscale=2.6]
       \node[fill=yellow,inner sep=5pt,draw,rectangle,rounded corners] at (0,-0.5) {\textbf{FFTs}};
       % https://commons.wikimedia.org/wiki/File:JPEG_compression_Example.jpg
-      \node at (-3, 0.0) {\includegraphics[width=0.25\textwidth]{jpeg-compression.jpg}\\ compression};
+      \node[visible on=<3->] at (-3.5, 0.0) {\includegraphics[width=0.25\textwidth]{jpeg-compression.jpg}\\ compression};
       % https://imagej.net/Multiview-Reconstruction
-      \node at ( 3, 0.0) {\includegraphics[width=0.25\textwidth]{imagej.jpg}\\ biology};
+      \node[visible on=<3->] at ( 3.5, 0.0) {\includegraphics[width=0.25\textwidth]{imagej.jpg}\\ biology};
       % https://commons.wikimedia.org/wiki/File:Deep_learning.png
-      \node at (-3, 1.0) {\includegraphics[width=0.21\textwidth]{deep-learning.png}\\ machine learning};
+      \node[visible on=<2->] at (-3, 1.0) {\includegraphics[width=0.21\textwidth]{deep-learning.png}\\ machine learning};
       % https://en.wikipedia.org/wiki/Trader_%28finance%29#/media/File:Philippine-stock-market-board.jpg
-      \node at ( 3, 1.0) {\includegraphics[width=0.25\textwidth]{Philippine-stock-market-board.jpg}\\ financial math};
+      \node[visible on=<2->] at ( 3, 1.0) {\includegraphics[width=0.25\textwidth]{Philippine-stock-market-board.jpg}\\ financial math};
       % https://de.wikipedia.org/wiki/Sinc-Funktion#/media/File:Si_sinc.svg
-      \node at ( 0, 1.0) {\includegraphics[width=0.25\textwidth]{sin-cos.png}\\ signal processing};
+      \node at ( 0, 1.15) {\includegraphics[width=0.25\textwidth]{sin-cos.png}\\ signal processing};
       % https://en.wikipedia.org/wiki/Interferometry#/media/File:USA.NM.VeryLargeArray.02.jpg
-      \node at (-3,-1.0) {\includegraphics[width=0.25\textwidth]{usa-nm-vla.jpg}\\ astronomy};
-      \node at ( 0,-1.5) {\Large\textbf{\ldots}};
+      \node[visible on=<4->] at (-3,-1.0) {\includegraphics[width=0.25\textwidth]{usa-nm-vla.jpg}\\ astronomy};
       % https://en.wikipedia.org/wiki/Geology_applications_of_Fourier_transform_infrared_spectroscopy#/media/File:FTIR_spectrum.jpg
-      \node at ( 3,-1.1) {\includegraphics[width=0.25\textwidth]{FTIR_spectrum.jpg}\\ geology};
+      \node[visible on=<4->] at ( 3,-1.1) {\includegraphics[width=0.25\textwidth]{FTIR_spectrum.jpg}\\ geology};
+      \node[visible on=<5->] at ( 0,-1.65) {\Large\textbf{\ldots}};
     \end{scope}
   \end{tikzpicture}
 \end{frame}
 
 
-\begin{frame}{Introduction}{Fourier Transformations}
+\begin{frame}{Introduction}{Fourier Transformation}
 
 \vfill
   \begin{equation}
@@ -130,9 +129,9 @@
   \end{equation}
 \vfill  
   \begin{itemize}
-  \item fast implementation of the discrete Fourier transform (DFT) \eqref{eq:dft}
+  \item fast implementation of discrete Fourier transform (DFT) \eqref{eq:dft}
   \item forward transform: time domain $\Rightarrow$ frequency domain
-  \item factorization of $n$ and recursive decomposition smaller DFTs are computed with $\mathcal{O}(n\log n)$
+  \item factorization of $n$ and recursive decomposition yield smaller DFTs $\Rightarrow$ FFT$\sim\mathcal{O}(n\log n)$
 
     \begin{itemize}
     \item Cooley-Tukey: Radix-2 DFTs
@@ -152,7 +151,7 @@
 %level 1 concept/.append style={sibling angle=20}, small mindmap]
 
     \path[concept color=white,text=black]
-    node[concept] {\Large{Fast Fourier Transforms}}
+    node[concept,font=\large\bfseries] {Fast Fourier Transforms}
     [grow=down]
     child[concept color=red, text=white] { node[concept] {\textbf{library}\\ cuFFT, clFFT, fftw, \ldots} }
     child[concept color=green] { node[concept] {\textbf{transform}\\ real, complex} }
@@ -186,18 +185,14 @@
         \href{https://github.com/mpicbg-scicomp/gearshifft}{\textbf{github.com/mpicbg-scicomp/gearshifft}}
       \end{center}
 
-  % \begin{columns}[c]
-  %   \begin{column}{.8\textwidth}
-  %   \end{column}
-    
-  %   \begin{column}{.2\textwidth}
-  %     \\[-.5em]
-  %   \end{column}
-
-  % \end{columns}
 \vfill
   \begin{itemize}
   \item free and open-source benchmark suite for FFT libraries
+    \begin{itemize}
+    \item various conditions of FFTs can be benchmarked
+    \item currently supports cuFFT, clFFT and fftw
+    \item implements round-trip FFTs with validation
+    \end{itemize}
   \item licensed under Apache License 2.0
   \item community-ready
   \item vendor independent 
@@ -215,65 +210,74 @@
 
 \begin{frame}[fragile]{gearshifft}{Rational}
 
-  Simplified Workflow for a single FFT benchmark of an FFT lib\\
+Simplified Workflow for a \textbf{single} FFT benchmark of an FFT lib\\
   (e.g. 1024-FFT real-inplace single-precision):\\[.5em]
-\begin{tikzpicture}[every node/.style={anchor=north west,align=left}]
-    \node (a) {\textbf{FFT/lib operations}\\[.5em]
+
+\begin{minipage}[t]{0.34\textwidth}
+\textbf{FFT/lib operations}
 \begin{lstlisting}[numbers=none]
-init_context();
-
-init_plan();
-exec_plan();
+init_forward();
+exec_forward();
+init_inverse();
+exec_inverse();
 destroy_plan();
-
-destroy_context();
-\end{lstlisting}};
-
-\node[visible on=<3->] (b) at (3.75,0) {
-  \textbf{+ timer}\\[.5em]
-      \begin{lstlisting}[numbers=none]
+\end{lstlisting}
+\end{minipage}
+\begin{minipage}[t]{0.3\textwidth}
+\begin{onlyenv}<3->
+  \textbf{+ Timer}
+  \begin{lstlisting}[numbers=none]
 // ...
-
 timer_start();
-init_plan(...);
+init_forward();
 val = timer_stop();
-
 // ...
-  \end{lstlisting}};
-
-\node[visible on=<4>] (c) at (7.5,0){
-  \textbf{+ store times}\\[.5em]
-     \begin{lstlisting}[numbers=none]
+  \end{lstlisting}
+\end{onlyenv}
+\end{minipage}
+\begin{minipage}[t]{0.3\textwidth}
+\begin{onlyenv}<4->
+  \textbf{+ Results}
+  \begin{lstlisting}[numbers=none,emph={PlanInit}]
 // ...
-
 timer_start();
-init_plan(...);
+init_forward();
 val = timer_stop();
 store(val, PlanInit);
-
 // ...
-  \end{lstlisting}};
-\end{tikzpicture}
+  \end{lstlisting}
+\end{onlyenv}
+\end{minipage}
 
+\vfill
 \only<2>{
 \begin{itemize}
-\item data transfers not listed here
-\item context has application lifetime
-\item \gearshifft{} uses round-trip FFTs (checks numerical sanity)
-\item workflow is templated, specialized by library clients
+\item context and data management excluded here
+\item context in \gearshifft{} has application lifetime
+\item round-trip FFT API is templated, specialized by library clients
 \end{itemize}}
 
 \only<3>{
 \begin{itemize}
 \item time FFT operations
-\item \gearshifft{} templates and reuses timer objects\newline
-  (developer can provide own timer class)
+\item \gearshifft{} templates and reuses timer objects
+  \begin{itemize}
+  \item developer can provide own timer class
+  \item reusing timer objects minimizes latency
+  \end{itemize}
 \end{itemize}}
 
 \only<4>{
 \begin{itemize}
 \item time values are collected
+  \begin{itemize}
+  \item \gearshifft{} uses \mc{std::array[<run_id>][<fft_op_id>]}
+  \end{itemize}
 \item \gearshifft{} stores results in csv eventually
+  \begin{itemize}
+  \item also contains meta-data, allocation and transfer sizes and times for context setup 
+  \item statistics of benchmarks can be displayed
+  \end{itemize}
 \end{itemize}}
 
 \end{frame}
@@ -282,18 +286,18 @@ store(val, PlanInit);
 % code used in tkzgearshifft
 \begin{lrbox}{\mybox}
 \begin{lstlisting}[numbers=none]
-for( T_Precision : {float, double})
+for( T_Precision : {float, double}) // compile-time
  for( extent : {32, 64x32, 16x16x16})
-  for( T_FFT : {Inplace_Real, Outplace_Complex})
-   // instantiate and run benchmark instance
+  for( T_FFT : {Inplace_Real, Outplace_Complex})  // compile-time
+   // instantiate and run benchmark
 \end{lstlisting}
 \end{lrbox}
 
 
 \begin{frame}[fragile]{gearshifft}{Basic Framework in C++/Boost}
-  \centering
+\hspace*{-2em}
   \tkzgearshifft
-\vspace{-2em}
+\vspace{-3em}
 \only<1>{  
   \begin{itemize}
   \item \mc{FFTClient} implements FFT workflow template class
@@ -309,9 +313,9 @@ for( T_Precision : {float, double})
   \item Boost UTF driven generation of benchmark instances
   \end{itemize}
   }
-\only<4>{  
+\only<4>{\vspace{-1em}
   \begin{itemize}
-  \item Boost test suites are generated by lib, precision and extents, the Boost test case is a specialized FFT client
+  \item Boost \tikz[baseline=-4pt]{\node[draw,rounded corners,rectangle] {test suites};} are generated by lib, precision and extents, the Boost \tikz[baseline=-4pt]{\node[draw,rounded corners,rectangle,fill=black,text=white] {test case};} is a specialized FFT client
   \end{itemize}
   }
 \only<5>{  
@@ -336,7 +340,7 @@ $ ./gearshifft_clfft -f ../config/extents.csv
 \begin{lstlisting}[numbers=none,language=bash]
 $ ./gearshifft_clfft -e 1048576
                      -r */float/*/Outplace_Real
-# -r <regex> with 
+# -r <run_filter> with 
 #    <Lib>/<Precision>/<Extents>/<Transform>
 \end{lstlisting}
 \item \href{https://github.com/mpicbg-scicomp/gearshifft/tree/master/config}{predefined extent lists} available in the gearshifft repository
@@ -347,15 +351,15 @@ $ ./gearshifft_clfft -e 1048576
 \begin{frame}{gearshifft}{Libraries}
   fftw
   \begin{itemize}
-  \item for CPUs only
-  \item code 20 years old, not designed for modern multi-core CPUs
-  \item search-depth for optimal plan can be controlled by rigor flags
+  \item for CPUs only, code 20 years old
+  \item not designed for modern multi-core CPUs    
+  \item search-depth for optimal plan is controlled by rigor flags
   \item precomputed plans can be stored to ``wisdoms''
   \end{itemize}
   
   cuFFT 
   \begin{itemize}
-  \item Nvidia's CUDA implementation of FFTs for Nvidia GPUs only
+  \item Nvidia's CUDA implementation of FFTs for Nvidia GPUs
   \item supports arbitrary and mixed radices
   \end{itemize}
 
@@ -365,11 +369,37 @@ $ ./gearshifft_clfft -e 1048576
   \item optimized for AMD GPUs, but also works on CPUs and other compute devices
   \item supports mixed radices 2, 3, 5, 7, 11 and 13
   \end{itemize}
-
   
 \end{frame}
 
+\begin{frame}{gearshifft}{Setup}
+\begin{table}[tbp]
+  \centering
+  {\scriptsize{
+  \caption{Benchmark Hardware}
+  \label{tab:hardware}
+  \begin{tabular}{lll}
+    \toprule
+                        & \multicolumn{2}{c}{\textbf{Taurus}}                                         \\
+                        & \multicolumn{2}{c}{HPC Cluster}                                             \\
+    \midrule
+    \textbf{CPU family} & Haswell Xeon               & Haswell Xeon           \\
+    \textbf{CPU model } & $2{\times}$ E5-2680 v3     & $2{\times}$ E5-2680 v3 \\
+    \textbf{RAM       } & \SI{64}{\gibi\byte}        & \SI{64}{\gibi\byte}    \\
+    \textbf{GPU} {\scriptsize{(PCIe3.0)}} & 4x K80   & 1x P100                \\
+    \textbf{GPU memory} & 4x \SI{12}{\gibi\byte}     & \SI{16}{\gibi\byte}    \\
+    \textbf{GPU driver} & $367.48$                   & $375.66$               \\
+    \textbf{OS}         & RHEL $6.8$                 & CentOS $7.3$       \\
+    \bottomrule
+  \end{tabular}}}
+\end{table}
 
+  
+  \begin{itemize}
+  \item 12 runs = 2 warmups + 10 warm runs
+  \item CPU and GPU clock fixed to non-boost where possible
+  \end{itemize}
+\end{frame}
 
 
 \begin{frame}{Results}{Validating gearshifft cufft vs. standalone cufft}
@@ -392,22 +422,22 @@ $ ./gearshifft_clfft -e 1048576
 
 
 \begin{frame}{Results}{Exploring fftw plan-rigor flags}
-\begin{figure}[!htbp]
+\begin{figure}[!htbp]\vspace{-1em}
   \centering
   \includegraphics[width=\textwidth]{figures/results_plan_flags_legend.pdf}\\[-.5em]
   \subfloat[Time to Solution]{\includegraphics[width=0.5\textwidth]{figures/results_plan_flags_a.pdf}\label{fig:plan_flags_a}}
   \hfill
   \subfloat[Time for Forward Transform only]{\includegraphics[width=0.5\textwidth]{figures/results_plan_flags_b.pdf}\label{fig:plan_flags_b}}
-  \caption{\fftw{} on Intel E5-2680v3 CPU with \mc{FFTW_ESTIMATE}, \mc{FFTW_MEASURE} and \mc{FFTW_WISDOM_ONLY} computing \texttt{powerof2} 3D single-precision real-to-complex in-place forward transforms.}
+  \caption{\fftw{} on Intel E5-2680v3 CPU computing \texttt{powerof2} 3D single-precision real-to-complex in-place forward transforms.}
   \label{fig:fftw_plan_flags}
 \end{figure}
-
 \pause
-
+\vspace{-1em}
 \begin{itemize}
-\item mean and standard deviations over 20 runs per signal shape
+\item mean and standard deviations over 10 runs per signal shape
 \item \mc{FFTW_MEASURE} imposes considerable time for planning
 \item \mc{FFTW_MEASURE} beats \mc{FFTW_WISDOM_ONLY} for large input signals
+  % this is actually a contradiction to that wisdoms use patient mode to get more optimal plans -> weird fftw behavior probably due to multi-core use
 \end{itemize}
 \end{frame}
 
@@ -416,9 +446,10 @@ $ ./gearshifft_clfft -e 1048576
 \begin{figure}[!tbp]
   \centering
   \includegraphics[width=\textwidth]{figures/results_non_power_of_2_legend.pdf}\\[-1em]
-  \subfloat[Time for FFT]{\includegraphics[width=0.5\textwidth]{figures/results_non_power_of_2_a.pdf}\label{fig:non_power_of_2_a}}
-  \hfill
   \subfloat[Time to Solution]{\includegraphics[width=0.5\textwidth]{figures/results_non_power_of_2_b_total.pdf}\label{fig:non_power_of_2_b}}
+  \hfill
+  \subfloat[Time for Forward Transform only]{\includegraphics[width=0.5\textwidth]{figures/results_non_power_of_2_a.pdf}\label{fig:non_power_of_2_a}}
+  % changed order of a and b to be consistent with previous slide
   \caption{\fftw{} and \clfft{} on Intel E5-2680v3 CPU with 24 threads versus \cufft{} on P100 GPU computing single-precision real-to-complex out-of-place forward transforms of 3D shapes.}
   \label{fig:non_power_of_2}
 \end{figure}
@@ -428,7 +459,7 @@ $ ./gearshifft_clfft -e 1048576
 \begin{frame}{Results on the web}
   \begin{center}
     \includegraphics[width=.8\textwidth]{rshiny.png}\\[20pt]
-    \href{http://v22017054645049618.nicesrv.de/gearshifft/}{v22017054645049618.nicesrv.de/gearshifft}
+    \href{https://github.com/mpicbg-scicomp/gearshifft/tree/master/rshiny}{mpicbg-scicomp/gearshifft/tree/master/rshiny}
   \end{center}
 
 \end{frame}
@@ -436,12 +467,43 @@ $ ./gearshifft_clfft -e 1048576
 %\resetbeamertemplate
 
 \begin{frame}{Summary}{}
+  
+  \begin{itemize}
+  \item \gearshifft{} enables in-depth analysis of FFT libraries
+  \item there is a $<3\%$ latency overhead due to the timer objects
+  \item when benchmarking fix the CPU/GPU clock if possible
+  \item found bugs in each library
+    % clfft: CPU, complex-to-real fails for 4096-FFT (not fixed yet)
+    % clfft: memory leak
+    % fftw: multi-core slowdown at planning stage, 2d/3d out-of-place not part of default wisdoms [undocumented]
+    % cufft: recreating plans after context has been destroyed crashed in cuda 7.5 (fixed in cuda8)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Discussion}{}
+  fftw has long planning times, but finds better plans:
+  \begin{itemize}
+  \item useful when plan is computed once and reused thousands of times
+  \item not intended for multi-core and NUMA systems
+  \item has some pitfalls in compiling fftw, plan-rigors and wisdom generations
+    % (sse2 vs. avx, openmp vs. mpi vs. threads, do not mix float and double , fixes used number of cores to wisdom, patient vs measure and their vulnerability to multi-core slow-down issue)
+  %\item multi-core increases planning time a lot, still same FFT performance as single-core is chosen by fftw
+  \end{itemize}
+
+  clFFT works on GPU and CPU.
+  \begin{itemize}
+  \item fast planning, but low FFT performance
+  \item cannot handle arbitrary radices
+    %(only combos of powers of 2,3,5,7,11,13)
+  \end{itemize}
+
+  cuFFT works on Nvidia GPUs.
+  \begin{itemize}
+  \item fast planning, average FFT performance on small FFTs
+  \item outperforms on large FFTs
+  \end{itemize}
+  
 \end{frame}
 
 
 \end{document}
-
-%%% Local Variables:
-%%% mode: latex
-%%% TeX-master: t
-%%% End:
