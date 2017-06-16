@@ -67,12 +67,12 @@
 \pclass[Functor]{BenchmarkExecutor}{-2}{2.1}{be}
 }
 \pclassfill[Functor]{FFT}{-2}{0.9}{fft}{yellow}
-
+\visible<-2>{\draw[thick,latex-] (fft) --++(-2,2) node[pos=1.0,above,align=center] {templated\\round-trip FFT API};}
 \end{scope}
 \begin{scope}
 
 \pclassfill[Realisation]{Context}{1.5}{2.5}{ctx}{green!50}
-\pclassfill[Realisation]{FFTClient}{1.5}{1.1}{impl}{green!50}
+\pclassfill[Realisation]{FFTClient}{1.5}{0.95}{impl}{green!50}
 \visible<2->{
 \pclass[Singleton]{Application}{1.5}{4}{app}
 % \draw[rounded corners, dashed] (ctx.north west) rectangle (impl.south east);
@@ -116,7 +116,7 @@ destroy\\
 \draw (mf-1-1.south west) ++(-0.75em,-0.5em) coordinate (cl) -- ([xshift=0.75em,yshift=-0.5em]mf-1-8.south east) coordinate (cr);
 \draw[dotted] (cl) -- ++(-2ex,0); \draw[dotted] (cr) -- ++(2ex,0);
 % total time
-\draw[dashed,|-|] (mf-1-1.south west) ++(0,-1.5em) -- ([yshift=-1.5em]mf-1-8.south east) node[pos=0.5,fill=white,font=\small\itshape,align=center,anchor=north] {total time\\(measured separately)};
+\draw[dashed,|-|] (mf-1-1.south west) ++(0,-1.5em) -- ([yshift=-1.5em]mf-1-8.south east) node[pos=0.5,fill=white,font=\small\itshape,align=center,anchor=north] {total time (measured separately)};
 % (mf-1-1.south west) -- ++(0,-1.5em) -| (mf-1-8.south east) node[pos=0.25,fill=white,font=\small] {total time};
 }
 
@@ -139,8 +139,8 @@ destroy\\
 \draw[-angle 60] (impl) -- (ctx.south);
 % \draw[densely dashed,-angle 90] (be.east) -| (impl.north);
 % \draw[densely dashed,-open triangle 60] (impl) -- (fft.east|-impl) node[midway] (q) {};
-\draw[-angle 90] (fft) -- (impl.west|-fft) node[midway] (q) {};
-\visible<-5>{\draw[] (q.center) -- (ctl-|q);}
+\draw[-angle 90,latex-,dashed] (fft) -- (impl.west|-fft) node[midway] (q) {};
+\visible<-5>{\draw[dashed] (q.center) -- (ctl-|q);}
 \end{scope}
 
 \visible<6->{
