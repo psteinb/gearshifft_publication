@@ -429,7 +429,7 @@ $ ./gearshifft_clfft -e 1048576
   \subfloat[Time to Solution]{\includegraphics[width=0.5\textwidth]{figures/results_plan_flags_a.pdf}\label{fig:plan_flags_a}}
   \hfill
   \subfloat[Time for Forward Transform only]{\includegraphics[width=0.5\textwidth]{figures/results_plan_flags_b.pdf}\label{fig:plan_flags_b}}
-  \caption{\fftw{} on Intel E5-2680v3 CPU computing \texttt{powerof2} 3D single-precision real-to-complex in-place forward transforms.}
+  \caption{\texttt{powerof2} 3D single-precision real-to-complex in-place forward transforms.}
   \label{fig:fftw_plan_flags}
 \end{figure}
 \pause
@@ -451,16 +451,36 @@ $ ./gearshifft_clfft -e 1048576
   \hfill
   \subfloat[Time for Forward Transform only]{\includegraphics[width=0.5\textwidth]{figures/results_non_power_of_2_a.pdf}\label{fig:non_power_of_2_a}}
   % changed order of a and b to be consistent with previous slide
-  \caption{\fftw{} and \clfft{} on Intel E5-2680v3 CPU with 24 threads versus \cufft{} on P100 GPU computing single-precision real-to-complex out-of-place forward transforms of 3D shapes.}
+  \caption{single-precision real-to-complex out-of-place forward transforms of 3D shapes.}
   \label{fig:non_power_of_2}
 \end{figure}
 \end{frame}
+
+\begin{frame}{Results}{cuFFT on different hardware}
+\vfill
+\begin{figure}[!tbp]
+  \centering
+  \includegraphics[width=\textwidth]{figures/results_r2c_fwd_legend.pdf}\vspace{-1em}
+  \subfloat[3D transforms]{\includegraphics[width=0.45\textwidth]{figures/results_r2c_fwd_a.pdf}\label{fig:r2c_fwd_a}}
+  \hfill
+  \subfloat[1D transforms]{\includegraphics[width=0.45\textwidth]{figures/results_r2c_fwd_b.pdf}\label{fig:r2c_fwd_b}}
+  \caption{\texttt{powerof2} out-of-place single-precision real-to-complex forward transforms.}
+  \label{fig:power_of_2}
+\end{figure}
+\vfill
+\begin{center}
+  \large
+  Which hardware would you buy?
+\end{center}
+\vfill
+\end{frame}
+
 
 %\setbeamertemplate{background canvas}{\includegraphics[width=\paperwidth]{rshiny.png}}
 \begin{frame}{Results on the web}
   \begin{center}
     \includegraphics[width=.8\textwidth]{rshiny.png}\\[20pt]
-    \href{https://github.com/mpicbg-scicomp/gearshifft/tree/master/rshiny}{mpicbg-scicomp/gearshifft/tree/master/rshiny}
+    \href{https://github.com/mpicbg-scicomp/gearshifft/tree/master/rshiny}{github.com/mpicbg-scicomp/gearshifft/tree/master/rshiny}
   \end{center}
 
 \end{frame}
@@ -468,30 +488,83 @@ $ ./gearshifft_clfft -e 1048576
 %\resetbeamertemplate
 
 \begin{frame}{Summary}{}
-  
+
+\vfill  
   \begin{itemize}
   \item \gearshifft{} enables in-depth analysis of FFT libraries
-%    \begin{itemize}
+    \begin{itemize}
     \item compile-time constant interface between clients and benchmark framework
     \item reproducible and comparable results
     \item low code redundancy and overhead\newline ($<3\%$ latency overhead due to the timer)
-      % \end{itemize}
-  \item compared cuFFT (GPU), clFFT (CPU/GPU) and fftw (CPU)
+    \end{itemize}
+\pause
+\vfill
+  \item compared cuFFT (GPU), clFFT (CPU+GPU) and fftw (CPU)
+  \item compared hardware choices for single library
   %\item fix the CPU/GPU clock for benchmarks if possible
-  \item \gearshifft{} also helped to find bugs
+  \item \gearshifft{} uncovered bugs ($2\times$ clFFT, fftw, cufft, mkl gnuwrapper)
     % clfft: CPU, complex-to-real fails for 4096-FFT (not fixed yet)
     % clfft: memory leak
     % fftw: multi-core slowdown at planning stage, 2d/3d out-of-place not part of default wisdoms [undocumented]
     % cufft: recreating plans after context has been destroyed crashed in cuda 7.5 (fixed in cuda8)
-  \item future task: more libraries and additional benchmark paths       
-  \item we warmly welcome contributions (results, code, \ldots)
-    
+    % mkl gnuwrapper: 3D radix-3 transforms numerically unstable in 2017u4
   \end{itemize}
+\vfill
 \end{frame}
 
-\begin{frame}{Summary}{}
-  fftw has long planning times, but finds better plans:
+\begin{frame}{Outlook}{}
+
+\vfill
   \begin{itemize}
+  \item more libraries\\
+    (MKL gnu wrapper, pure MKL, rocFFT, hcFFT, ...)
+  \item more hardware \\
+    (Volta, Vega, KNL, EPYC, Skylake Xeons, ...)
+%  \item additional benchmark paths
+  \item online visualisation of results
+  \item other operating systems?
+  \end{itemize}
+
+\vfill
+  \pause \Large
+  \textbf{We need you}\\
+  \quad\quad \ldots \textbf{to provide feedback and contribute}!\\
+
+\vfill
+
+\begin{center}
+  \href{https://github.com/mpicbg-scicomp/gearshifft}{\textbf{github.com/mpicbg-scicomp/gearshifft}}
+\end{center}
+
+
+\vfill
+  \pause
+ \centering
+  Thank you for your attention!
+\vfill
+\end{frame}
+
+%% BACKUP SLIDES %%
+\appendix
+\setbeamertemplate{footline}{}
+
+% \begin{frame}{}{}
+%   \vfill
+  
+%   \LARGE\centering
+  
+%   Thank you for your attention!
+
+%   \large
+%   Questions + Discussion
+%   \vfill
+% \end{frame}
+
+\begin{frame}{Our Experiences}{}
+
+  fftw on CPU
+  \begin{itemize}
+  \item has long planning times, but finds better plans
   \item useful when plan is computed once and reused many times
   \item not intended for multi-core and NUMA systems
   \item has some pitfalls in compiling fftw, plan-rigors and wisdom generations
@@ -499,7 +572,7 @@ $ ./gearshifft_clfft -e 1048576
   %\item multi-core increases planning time a lot, still same FFT performance as single-core is chosen by fftw
   \end{itemize}
 
-  clFFT works on GPU and CPU.
+  clFFT on GPU and CPU
   \begin{itemize}
   \item fast planning, but low FFT performance
   \item cannot handle arbitrary radices
@@ -507,7 +580,7 @@ $ ./gearshifft_clfft -e 1048576
   \item negligible runtime differences for radix-$\{2,3,5,7\}$ FFTs
   \end{itemize}
 
-  cuFFT works on Nvidia GPUs.
+  cuFFT on Nvidia GPUs only
   \begin{itemize}
   \item fast planning, average FFT performance on small FFTs
   \item outperforms on large FFTs
@@ -515,21 +588,7 @@ $ ./gearshifft_clfft -e 1048576
   
 \end{frame}
 
-%% BACKUP SLIDES %%
-\appendix
-\setbeamertemplate{footline}{}
 
-\begin{frame}{}{}
-  \vfill
-  
-  \LARGE\centering
-  
-  Thank you for your attention!
-
-  \large
-  Questions + Discussion
-  \vfill
-\end{frame}
 
 \begin{frame}{Xeon E5-2680}{fftw -- single-thread vs. multithread}
   \includegraphics[width=\textwidth]{fftw-measure-single-multi.png}
