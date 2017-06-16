@@ -191,7 +191,7 @@
   \item free and open-source benchmark suite for FFT libraries
     \begin{itemize}
     \item various conditions of FFTs can be benchmarked
-    \item supports cuFFT, clFFT and fftw (mkl and hcfft planned)
+    \item supports cuFFT, clFFT and fftw (mkl ongoing)
     \item performs round-trip $fft^{-1}(fft(signal))$ and validation
     \end{itemize}
     \pause
@@ -199,7 +199,7 @@
   \item licensed under Apache License 2.0
   \item community-ready for contributions
   \item vendor independent 
-  \item standardized output format
+  \item standardized csv output format
   \item open and extensible architecture written in C++14
   \end{itemize}
 \vfill
@@ -211,13 +211,13 @@
 \vfill
 \end{frame}
 
-\begin{frame}[fragile]{gearshifft}{Rational}
+\begin{frame}[fragile]{gearshifft}{Rational for single FFT benchmark}
 
-Simplified Workflow for a \textbf{single} FFT benchmark of an FFT lib\\
-  (e.g. 1024-FFT real-inplace single-precision):\\[.5em]
+% Simplified Workflow for a \textbf{single} FFT benchmark\\
+%   (e.g. 1024-FFT real-inplace single-precision):\\[.5em]
 
 \begin{minipage}[t]{0.34\textwidth}
-\textbf{FFT/lib operations}
+\textbf{API operations}
 \begin{lstlisting}[numbers=none]
 init_forward();
 exec_forward();
@@ -255,7 +255,7 @@ store(val, PlanInit);
 \vfill
 \only<2>{
 \begin{itemize}
-\item context and data management excluded here
+%\item context and data management excluded here
 \item context in \gearshifft{} has application lifetime
 \item round-trip FFT API is templated, specialized by library clients
 \end{itemize}}
@@ -263,7 +263,7 @@ store(val, PlanInit);
 \only<3>{
 \begin{itemize}
 \item time FFT operations
-\item \gearshifft{} templates and reuses timer objects
+\item \gearshifft{} reuses timer objects
   \begin{itemize}
   \item developer can provide own timer class
   \item reusing timer objects minimizes latency
@@ -272,14 +272,11 @@ store(val, PlanInit);
 
 \only<4>{
 \begin{itemize}
-\item time values are collected
-  \begin{itemize}
-  \item \gearshifft{} uses \mc{std::array[<run_id>][<fft_op_id>]}
-  \end{itemize}
+\item time values are collected per run and operation
 \item \gearshifft{} stores results in csv eventually
   \begin{itemize}
-  \item also contains meta-data, allocation and transfer sizes and times for context setup 
-  \item statistics of benchmarks can be displayed
+  \item contains meta-data (context details, software versions, ...)
+  \item benchmarks can be displayed with downstream tools
   \end{itemize}
 \end{itemize}}
 
@@ -351,25 +348,25 @@ $ ./gearshifft_clfft -e 1048576
 \end{frame}
 
 
-\begin{frame}{gearshifft}{Libraries}
+\begin{frame}{gearshifft}{Currently supported libraries}
   fftw
   \begin{itemize}
   \item for CPUs only, code 20 years old
-  \item not designed for modern multi-core CPUs    
+%  \item not designed for modern multi-core CPUs    
   \item search-depth for optimal plan is controlled by rigor flags
   \item precomputed plans can be stored to ``wisdoms''
   \end{itemize}
-  
+\pause  
   cuFFT 
   \begin{itemize}
-  \item Nvidia's CUDA implementation of FFTs for Nvidia GPUs
+  \item CUDA implementation of FFTs for Nvidia GPUs
   \item supports arbitrary and mixed radices
   \end{itemize}
-
+\pause
   clFFT
   \begin{itemize}
   \item AMD's OpenCL implementation of FFTs
-  \item optimized for AMD GPUs, but also works on CPUs and other compute devices
+  \item supports CPUs and GPUs of any vendor (optimized for AMD GPUs)
   \item supports mixed radices 2, 3, 5, 7, 11 and 13
   \end{itemize}
   
