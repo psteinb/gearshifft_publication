@@ -11,6 +11,7 @@
   pdfauthor={Peter Steinbach, Matthias Werner}
   }
 ]{beamer}
+\usepackage{appendixnumberbeamer}
 \usetheme{custom}
 \def\resetbeamertemplate{\setbeamertemplate{background canvas}{ }}
 \let\Tiny=\tiny
@@ -134,7 +135,7 @@
   \item factorization of $n$ and recursive decomposition yield smaller DFTs $\Rightarrow$ FFT$\sim\mathcal{O}(n\log n)$
 
     \begin{itemize}
-    \item Cooley-Tukey: Radix-2 DFTs
+    \item Cooley-Tukey: Radix-2 DFTs ($n=2^k$)
     \item Stockham's formulations avoid incoherent memory access
     \item Bluestein's algorithm allows arbitrary and mixed radices
     \end{itemize}
@@ -190,7 +191,7 @@
   \item free and open-source benchmark suite for FFT libraries
     \begin{itemize}
     \item various conditions of FFTs can be benchmarked
-    \item currently supports cuFFT, clFFT and fftw
+    \item currently supports cuFFT, clFFT and fftw\newline (discovering by cmake)
     \item implements round-trip FFTs with validation
     \end{itemize}
   \item licensed under Apache License 2.0
@@ -470,20 +471,28 @@ $ ./gearshifft_clfft -e 1048576
   
   \begin{itemize}
   \item \gearshifft{} enables in-depth analysis of FFT libraries
-  \item there is a $<3\%$ latency overhead due to the timer objects
-  \item when benchmarking fix the CPU/GPU clock if possible
-  \item found bugs in each library
+%    \begin{itemize}
+    \item compile-time constant interface between clients and benchmark framework
+    \item reproducible and comparable results
+    \item low code redundancy and overhead\newline ($<3\%$ latency overhead due to the timer)
+      % \end{itemize}
+  \item compared cuFFT (GPU), clFFT (CPU/GPU) and fftw (CPU)
+  %\item fix the CPU/GPU clock for benchmarks if possible
+  \item \gearshifft{} also helped to find bugs
     % clfft: CPU, complex-to-real fails for 4096-FFT (not fixed yet)
     % clfft: memory leak
     % fftw: multi-core slowdown at planning stage, 2d/3d out-of-place not part of default wisdoms [undocumented]
     % cufft: recreating plans after context has been destroyed crashed in cuda 7.5 (fixed in cuda8)
+  \item future task: more libraries and additional benchmark paths       
+  \item we warmly welcome contributions (results, code, \ldots)
+    
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Discussion}{}
+\begin{frame}{Summary}{}
   fftw has long planning times, but finds better plans:
   \begin{itemize}
-  \item useful when plan is computed once and reused thousands of times
+  \item useful when plan is computed once and reused many times
   \item not intended for multi-core and NUMA systems
   \item has some pitfalls in compiling fftw, plan-rigors and wisdom generations
     % (sse2 vs. avx, openmp vs. mpi vs. threads, do not mix float and double , fixes used number of cores to wisdom, patient vs measure and their vulnerability to multi-core slow-down issue)
@@ -495,6 +504,7 @@ $ ./gearshifft_clfft -e 1048576
   \item fast planning, but low FFT performance
   \item cannot handle arbitrary radices
     %(only combos of powers of 2,3,5,7,11,13)
+  \item negligible runtime differences for radix-$\{2,3,5,7\}$ FFTs
   \end{itemize}
 
   cuFFT works on Nvidia GPUs.
@@ -505,5 +515,47 @@ $ ./gearshifft_clfft -e 1048576
   
 \end{frame}
 
+%% BACKUP SLIDES %%
+\appendix
+\setbeamertemplate{footline}{}
+
+\begin{frame}{}{}
+  \vfill
+  
+  \LARGE\centering
+  
+  Thank you for your attention!
+
+  \large
+  Questions + Discussion
+  \vfill
+\end{frame}
+
+\begin{frame}{Xeon E5-2680}{fftw -- single-thread vs. multithread}
+  \includegraphics[width=\textwidth]{fftw-measure-single-multi.png}
+  
+\vspace{-2em}  \includegraphics[width=\textwidth]{fftw-measure-single-multi-planning.png}
+  
+\vspace{-2em}  \includegraphics[width=\textwidth]{fftw-measure-single-multi-ifft.png}
+\end{frame}
+
+\begin{frame}{Xeon E5-2680}{fftw + MKL + clFFT}
+\vspace{-0.5em} \hspace*{-2em}  \includegraphics[width=1.15\textwidth]{fftw-mkl.png}
+  
+\vspace{-2.1em} \hspace*{-2em}  \includegraphics[width=1.15\textwidth]{fftw-mkl-fft.png}
+
+\vspace{-0.1em} \hspace*{-2em}  \includegraphics[width=1.15\textwidth]{clfft-mkl.png}
+\end{frame}
+
+% \begin{frame}{P100}{CUDA9 (Beta) + CUDA8 + clFFT 2.12.2}
+%   \centering
+%   \hspace*{-2em}  \includegraphics[width=1.1\textwidth]{p100-cuda9-cuda8.png}
+  
+%   {\scriptsize{(Data 1 = CUDA 9, Data 2 = CUDA 8)}}
+  
+%   \hspace*{-2em}  \includegraphics[width=1.1\textwidth]{p100-clfft-cuda9.png}
+  
+%   {\scriptsize{(Data 1 = CUDA 9, Data 2 = clFFT 2.12.2)}}
+% \end{frame}
 
 \end{document}
