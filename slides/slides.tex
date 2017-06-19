@@ -362,7 +362,7 @@ $ ./gearshifft_clfft -e 1048576
   \begin{itemize}
   \item CUDA implementation of FFTs for Nvidia GPUs
   \item supports arbitrary and mixed radices
-  \item if not "powerof2" cuFFT plan can consume $8\times$ more memory (estimated plan size also recorded by \gearshifft{}) % @todo: backup slide
+  \item if not "powerof2" cuFFT plan can consume $8\times$ more memory (estimated plan size also recorded by \gearshifft{})
   \end{itemize}
 \pause
   {\textbf{clFFT}}
@@ -370,7 +370,7 @@ $ ./gearshifft_clfft -e 1048576
   \item AMD's OpenCL implementation of FFTs
   \item supports CPUs and GPUs of any vendor (optimized for AMD GPUs)
   \item supports only mixed radices 2, 3, 5, 7, 11 and 13
-  \item there are size limits (\SI{64}{MiB} signal size)
+  \item there are size limits ($\le\SI{64}{MiB}$ signal size for real 1D transform)
   \end{itemize}
   
 \end{frame}
@@ -609,6 +609,12 @@ $ ./gearshifft_clfft -e 1048576
 
 \vspace{-0.1em} \hspace*{-2em}  \includegraphics[width=1.15\textwidth]{clfft-mkl.png}
 \end{frame}
+
+\begin{frame}{P100}{CUDA8 PlanSize}
+  \centering
+  \hspace*{-2em}  \includegraphics[width=1.1\textwidth]{p100-cuda8-kind-plansize.png}
+\end{frame}
+
 
 \begin{frame}{P100}{CUDA9 (Beta) + CUDA8 + clFFT 2.12.2}
   \centering
