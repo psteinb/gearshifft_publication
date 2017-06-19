@@ -90,8 +90,6 @@
 \newcommand{\mc}[1]{\lstinline!#1!}
 \newcommand{\iu}{{\mathrm{i}\mkern1mu}}
 
-%% Todo: replace dirtree with gearshifft infos
-%%        what is templated, what is runtime
 
 \begin{document}
 
@@ -258,7 +256,7 @@ store(val, PlanInit);
 \begin{itemize}
 %\item context and data management excluded here
 \item context in \gearshifft{} has application lifetime
-\item round-trip FFT API is templated, specialized by library clients
+\item round-trip FFT API is templated, specialized by library clients\\(static polymorphism by Static Adapter design pattern)
 \end{itemize}}
 
 \only<3>{
@@ -296,7 +294,7 @@ for( T_Precision : {float, double}) // compile-time
 
 
 \begin{frame}[fragile]{gearshifft}{Basic Framework in C++/Boost}
-\hspace*{-2em}
+\hspace*{-2.5em}
   \tkzgearshifft
 \vspace{-3em}
 \only<1>{  
@@ -350,7 +348,7 @@ $ ./gearshifft_clfft -e 1048576
 
 
 \begin{frame}{gearshifft}{Currently supported libraries}
-  fftw
+  {\textbf{fftw}}
   \begin{itemize}
   \item for CPUs only, code 20 years old
 %  \item not designed for modern multi-core CPUs    
@@ -358,13 +356,13 @@ $ ./gearshifft_clfft -e 1048576
   \item precomputed plans can be stored to ``wisdoms''
   \end{itemize}
 \pause  
-  cuFFT 
+  {\textbf{cuFFT}} 
   \begin{itemize}
   \item CUDA implementation of FFTs for Nvidia GPUs
   \item supports arbitrary and mixed radices
   \end{itemize}
 \pause
-  clFFT
+  {\textbf{clFFT}}
   \begin{itemize}
   \item AMD's OpenCL implementation of FFTs
   \item supports CPUs and GPUs of any vendor (optimized for AMD GPUs)
@@ -376,22 +374,24 @@ $ ./gearshifft_clfft -e 1048576
 \begin{frame}{gearshifft}{Setup}
 \begin{table}[tbp]
   \centering
-  {\scriptsize{
+  {\small{
   \caption{Benchmark Hardware}
   \label{tab:hardware}
-  \begin{tabular}{lll}
+  \begin{tabular}{llll}
     \toprule
-                        & \multicolumn{2}{c}{\textbf{Taurus}}                                         \\
-                        & \multicolumn{2}{c}{HPC Cluster}                                             \\
+                        & \multicolumn{2}{c}{\textbf{Taurus}}   & \textbf{Islay}                       \\
+                        & \multicolumn{2}{c}{HPC Cluster}       & Workstation                          \\
     \midrule
-    \textbf{CPU family} & Haswell Xeon               & Haswell Xeon           \\
-    \textbf{CPU model } & $2{\times}$ E5-2680 v3     & $2{\times}$ E5-2680 v3 \\
-    \textbf{RAM       } & \SI{64}{\gibi\byte}        & \SI{64}{\gibi\byte}    \\
-    \textbf{GPU} {\scriptsize{(PCIe3.0)}} & 4x K80   & 1x P100                \\
-    \textbf{GPU memory} & 4x \SI{12}{\gibi\byte}     & \SI{16}{\gibi\byte}    \\
-    \textbf{GPU driver} & $367.48$                   & $375.66$               \\
-    \textbf{OS}         & RHEL $6.8$                 & CentOS $7.3$       \\
-    \bottomrule
+    \textbf{CPU family} & Haswell Xeon               & Haswell Xeon           & Haswell Xeon           \\
+    \textbf{CPU model } & $2{\times}$ E5-2680 v3     & $2{\times}$ E5-2680 v3 & $2{\times}$ E5-2640 v3 \\
+    \textbf{RAM       } & \SI{64}{\gibi\byte}        & \SI{64}{\gibi\byte}    & \SI{64}{\gibi\byte}    \\
+    \midrule
+    \textbf{GPU} {\scriptsize{(PCIe3.0)}} & 4x K80   & 1x P100                & 1x GTX 1080            \\ 
+    \textbf{GPU memory} & 4x \SI{12}{\gibi\byte}     & \SI{16}{\gibi\byte}    & \SI{8}{\gibi\byte}     \\
+    \textbf{GPU driver} & $367.48$                   & $375.66$               & $367.57$               \\
+    \midrule
+    \textbf{OS}         & RHEL $6.8$                 & CentOS $7.3$           & CentOS $7.2$           \\
+    \bottomrule                                                               
   \end{tabular}}}
 \end{table}
 
@@ -416,7 +416,7 @@ $ ./gearshifft_clfft -e 1048576
       \includegraphics[width=0.5\textwidth]{figures/results_validate_cufft_b.pdf}\\
       \includegraphics[width=0.5\textwidth]{figures/results_validate_cufft_d.pdf}
     }\label{fig:tts_verify_b}}
-  \caption{\textit{gearshifft} (\cufft{}) vs. \textit{standalone} \cufft{} --  multiple timer objects \& one timer object (\textit{standalone-tts}) -- single-precision in-place real-to-complex round-trip FFTs on the K80.}
+  \caption{\textit{gearshifft} (\cufft{}) vs. \textit{standalone} \cufft{}\newline(\textit{standalone-tts}: only one timer object)\newline single-precision in-place real-to-complex round-trip FFTs on the Taurus/K80.}
   \label{fig:verify_cufft}
 \end{figure}
 \end{frame}
@@ -429,7 +429,7 @@ $ ./gearshifft_clfft -e 1048576
   \subfloat[Time to Solution]{\includegraphics[width=0.5\textwidth]{figures/results_plan_flags_a.pdf}\label{fig:plan_flags_a}}
   \hfill
   \subfloat[Time for Forward Transform only]{\includegraphics[width=0.5\textwidth]{figures/results_plan_flags_b.pdf}\label{fig:plan_flags_b}}
-  \caption{\texttt{powerof2} 3D single-precision real-to-complex in-place forward transforms.}
+  \caption{\texttt{powerof2} 3D single-precision real-to-complex in-place forward transforms on Taurus/E5-2680v3.}
   \label{fig:fftw_plan_flags}
 \end{figure}
 \pause
@@ -461,10 +461,10 @@ $ ./gearshifft_clfft -e 1048576
 \begin{figure}[!tbp]
   \centering
   \includegraphics[width=\textwidth]{figures/results_r2c_fwd_legend.pdf}\vspace{-1em}
-  \subfloat[3D transforms]{\includegraphics[width=0.45\textwidth]{figures/results_r2c_fwd_a.pdf}\label{fig:r2c_fwd_a}}
+  \subfloat[3D transforms]{\includegraphics[width=0.5\textwidth]{figures/results_r2c_fwd_a.pdf}\label{fig:r2c_fwd_a}}
   \hfill
-  \subfloat[1D transforms]{\includegraphics[width=0.45\textwidth]{figures/results_r2c_fwd_b.pdf}\label{fig:r2c_fwd_b}}
-  \caption{\texttt{powerof2} out-of-place single-precision real-to-complex forward transforms.}
+  \subfloat[1D transforms]{\includegraphics[width=0.5\textwidth]{figures/results_r2c_fwd_b.pdf}\label{fig:r2c_fwd_b}}
+  \caption{\texttt{powerof2} out-of-place single-precision real-to-complex forward transforms (Taurus/E5-2680v3, Taurus/K80, Islay/GTX1080).}
   \label{fig:power_of_2}
 \end{figure}
 \vfill
