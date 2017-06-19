@@ -24,6 +24,7 @@
 \usetikzlibrary{trees}
 \usetikzlibrary{backgrounds}
 \usetikzlibrary{mindmap}
+\usetikzlibrary{shadows}
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -89,8 +90,6 @@
 \newcommand{\mc}[1]{\lstinline!#1!}
 \newcommand{\iu}{{\mathrm{i}\mkern1mu}}
 
-%% Todo: replace dirtree with gearshifft infos
-%%        what is templated, what is runtime
 
 \begin{document}
 
@@ -100,9 +99,9 @@
   \centering
   \begin{tikzpicture}
     \begin{scope}[every node/.style={align=center, anchor=north, font=\bfseries}, xscale=1.15, yscale=2.6]
-      \node[fill=yellow,inner sep=5pt,draw,rectangle,rounded corners] at (0,-0.5) {\textbf{FFTs}};
+      \node[fill=gray,text=white,inner sep=5pt, minimum width=3cm,minimum height=2cm,rectangle,rounded corners, anchor=center, drop shadow] at (0,-0.5) {\Huge\textbf{FFTs}};
       % https://commons.wikimedia.org/wiki/File:JPEG_compression_Example.jpg
-      \node[visible on=<3->] at (-3.5, 0.0) {\includegraphics[width=0.25\textwidth]{jpeg-compression.jpg}\\ compression};
+      \node [visible on=<3->] (comprimage) at (-3.5, 0.0) {\includegraphics[width=0.25\textwidth]{jpeg-compression.jpg}\\ compression};
       % https://imagej.net/Multiview-Reconstruction
       \node[visible on=<3->] at ( 3.5, 0.0) {\includegraphics[width=0.25\textwidth]{imagej.jpg}\\ biology};
       % https://commons.wikimedia.org/wiki/File:Deep_learning.png
@@ -147,12 +146,12 @@
 
 \begin{frame}{Introduction}{FFTs and their parameters}
   \centering  
-  \begin{tikzpicture}[root concept/.style={rectangle},
+  \begin{tikzpicture}[root concept/.style={rectangle, rounded corners},
     small mindmap]
 %level 1 concept/.append style={sibling angle=20}, small mindmap]
 
     \path[concept color=white,text=black]
-    node[concept,font=\large\bfseries] {Fast Fourier Transforms}
+    node[concept,font=\huge\bfseries] {FFTs}
     [grow=down]
     child[concept color=red, text=white] { node[concept] {\textbf{library}\\ cuFFT, clFFT, fftw, \ldots} }
     child[concept color=green] { node[concept] {\textbf{transform}\\ real, complex} }
@@ -191,31 +190,33 @@
   \item free and open-source benchmark suite for FFT libraries
     \begin{itemize}
     \item various conditions of FFTs can be benchmarked
-    \item currently supports cuFFT, clFFT and fftw\newline (discovering by cmake)
-    \item implements round-trip FFTs with validation
+    \item supports cuFFT, clFFT and fftw (mkl ongoing)
+    \item performs round-trip $fft^{-1}(fft(signal))$ and validation
     \end{itemize}
+    \pause
+    \vfill
   \item licensed under Apache License 2.0
-  \item community-ready
+  \item community-ready for contributions
   \item vendor independent 
-  \item standardized output format
+  \item standardized csv output format
   \item open and extensible architecture written in C++14
   \end{itemize}
 \vfill
 \pause
 \begin{center}
-  \includegraphics[width=.4\textwidth]{gearshifft_logo_img_100.png}
+  \includegraphics[width=.35\textwidth]{gearshifft_logo_img_100.png}
 \end{center}
 
 \vfill
 \end{frame}
 
-\begin{frame}[fragile]{gearshifft}{Rational}
+\begin{frame}[fragile]{gearshifft}{Rational for single FFT benchmark}
 
-Simplified Workflow for a \textbf{single} FFT benchmark of an FFT lib\\
-  (e.g. 1024-FFT real-inplace single-precision):\\[.5em]
+% Simplified Workflow for a \textbf{single} FFT benchmark\\
+%   (e.g. 1024-FFT real-inplace single-precision):\\[.5em]
 
 \begin{minipage}[t]{0.34\textwidth}
-\textbf{FFT/lib operations}
+\textbf{API operations}
 \begin{lstlisting}[numbers=none]
 init_forward();
 exec_forward();
@@ -253,15 +254,15 @@ store(val, PlanInit);
 \vfill
 \only<2>{
 \begin{itemize}
-\item context and data management excluded here
+%\item context and data management excluded here
 \item context in \gearshifft{} has application lifetime
-\item round-trip FFT API is templated, specialized by library clients
+\item round-trip FFT API is templated, specialized by library clients\\(static polymorphism by Static Adapter design pattern)
 \end{itemize}}
 
 \only<3>{
 \begin{itemize}
 \item time FFT operations
-\item \gearshifft{} templates and reuses timer objects
+\item \gearshifft{} reuses timer objects
   \begin{itemize}
   \item developer can provide own timer class
   \item reusing timer objects minimizes latency
@@ -270,14 +271,11 @@ store(val, PlanInit);
 
 \only<4>{
 \begin{itemize}
-\item time values are collected
-  \begin{itemize}
-  \item \gearshifft{} uses \mc{std::array[<run_id>][<fft_op_id>]}
-  \end{itemize}
+\item time values are collected per run and operation
 \item \gearshifft{} stores results in csv eventually
   \begin{itemize}
-  \item also contains meta-data, allocation and transfer sizes and times for context setup 
-  \item statistics of benchmarks can be displayed
+  \item contains meta-data (context details, software versions, ...)
+  \item benchmarks can be displayed with downstream tools
   \end{itemize}
 \end{itemize}}
 
@@ -296,7 +294,7 @@ for( T_Precision : {float, double}) // compile-time
 
 
 \begin{frame}[fragile]{gearshifft}{Basic Framework in C++/Boost}
-\hspace*{-2em}
+\hspace*{-2.5em}
   \tkzgearshifft
 \vspace{-3em}
 \only<1>{  
@@ -349,25 +347,25 @@ $ ./gearshifft_clfft -e 1048576
 \end{frame}
 
 
-\begin{frame}{gearshifft}{Libraries}
-  fftw
+\begin{frame}{gearshifft}{Currently supported libraries}
+  {\textbf{fftw}}
   \begin{itemize}
   \item for CPUs only, code 20 years old
-  \item not designed for modern multi-core CPUs    
+%  \item not designed for modern multi-core CPUs    
   \item search-depth for optimal plan is controlled by rigor flags
   \item precomputed plans can be stored to ``wisdoms''
   \end{itemize}
-  
-  cuFFT 
+\pause  
+  {\textbf{cuFFT}} 
   \begin{itemize}
-  \item Nvidia's CUDA implementation of FFTs for Nvidia GPUs
+  \item CUDA implementation of FFTs for Nvidia GPUs
   \item supports arbitrary and mixed radices
   \end{itemize}
-
-  clFFT
+\pause
+  {\textbf{clFFT}}
   \begin{itemize}
   \item AMD's OpenCL implementation of FFTs
-  \item optimized for AMD GPUs, but also works on CPUs and other compute devices
+  \item supports CPUs and GPUs of any vendor (optimized for AMD GPUs)
   \item supports mixed radices 2, 3, 5, 7, 11 and 13
   \end{itemize}
   
@@ -376,22 +374,24 @@ $ ./gearshifft_clfft -e 1048576
 \begin{frame}{gearshifft}{Setup}
 \begin{table}[tbp]
   \centering
-  {\scriptsize{
+  {\small{
   \caption{Benchmark Hardware}
   \label{tab:hardware}
-  \begin{tabular}{lll}
+  \begin{tabular}{llll}
     \toprule
-                        & \multicolumn{2}{c}{\textbf{Taurus}}                                         \\
-                        & \multicolumn{2}{c}{HPC Cluster}                                             \\
+                        & \multicolumn{2}{c}{\textbf{Taurus}}   & \textbf{Islay}                       \\
+                        & \multicolumn{2}{c}{HPC Cluster}       & Workstation                          \\
     \midrule
-    \textbf{CPU family} & Haswell Xeon               & Haswell Xeon           \\
-    \textbf{CPU model } & $2{\times}$ E5-2680 v3     & $2{\times}$ E5-2680 v3 \\
-    \textbf{RAM       } & \SI{64}{\gibi\byte}        & \SI{64}{\gibi\byte}    \\
-    \textbf{GPU} {\scriptsize{(PCIe3.0)}} & 4x K80   & 1x P100                \\
-    \textbf{GPU memory} & 4x \SI{12}{\gibi\byte}     & \SI{16}{\gibi\byte}    \\
-    \textbf{GPU driver} & $367.48$                   & $375.66$               \\
-    \textbf{OS}         & RHEL $6.8$                 & CentOS $7.3$       \\
-    \bottomrule
+    \textbf{CPU family} & Haswell Xeon               & Haswell Xeon           & Haswell Xeon           \\
+    \textbf{CPU model } & $2{\times}$ E5-2680 v3     & $2{\times}$ E5-2680 v3 & $2{\times}$ E5-2640 v3 \\
+    \textbf{RAM       } & \SI{64}{\gibi\byte}        & \SI{64}{\gibi\byte}    & \SI{64}{\gibi\byte}    \\
+    \midrule
+    \textbf{GPU} {\scriptsize{(PCIe3.0)}} & 4x K80   & 1x P100                & 1x GTX 1080            \\ 
+    \textbf{GPU memory} & 4x \SI{12}{\gibi\byte}     & \SI{16}{\gibi\byte}    & \SI{8}{\gibi\byte}     \\
+    \textbf{GPU driver} & $367.48$                   & $375.66$               & $367.57$               \\
+    \midrule
+    \textbf{OS}         & RHEL $6.8$                 & CentOS $7.3$           & CentOS $7.2$           \\
+    \bottomrule                                                               
   \end{tabular}}}
 \end{table}
 
@@ -416,7 +416,7 @@ $ ./gearshifft_clfft -e 1048576
       \includegraphics[width=0.5\textwidth]{figures/results_validate_cufft_b.pdf}\\
       \includegraphics[width=0.5\textwidth]{figures/results_validate_cufft_d.pdf}
     }\label{fig:tts_verify_b}}
-  \caption{\textit{gearshifft} (\cufft{}) vs. \textit{standalone} \cufft{} --  multiple timer objects \& one timer object (\textit{standalone-tts}) -- single-precision in-place real-to-complex round-trip FFTs on the K80.}
+  \caption{\textit{gearshifft} (\cufft{}) vs. \textit{standalone} \cufft{}\newline(\textit{standalone-tts}: only one timer object)\newline single-precision in-place real-to-complex round-trip FFTs on the Taurus/K80.}
   \label{fig:verify_cufft}
 \end{figure}
 \end{frame}
@@ -429,7 +429,7 @@ $ ./gearshifft_clfft -e 1048576
   \subfloat[Time to Solution]{\includegraphics[width=0.5\textwidth]{figures/results_plan_flags_a.pdf}\label{fig:plan_flags_a}}
   \hfill
   \subfloat[Time for Forward Transform only]{\includegraphics[width=0.5\textwidth]{figures/results_plan_flags_b.pdf}\label{fig:plan_flags_b}}
-  \caption{\fftw{} on Intel E5-2680v3 CPU computing \texttt{powerof2} 3D single-precision real-to-complex in-place forward transforms.}
+  \caption{\texttt{powerof2} 3D single-precision real-to-complex in-place forward transforms on Taurus/E5-2680v3.}
   \label{fig:fftw_plan_flags}
 \end{figure}
 \pause
@@ -451,16 +451,36 @@ $ ./gearshifft_clfft -e 1048576
   \hfill
   \subfloat[Time for Forward Transform only]{\includegraphics[width=0.5\textwidth]{figures/results_non_power_of_2_a.pdf}\label{fig:non_power_of_2_a}}
   % changed order of a and b to be consistent with previous slide
-  \caption{\fftw{} and \clfft{} on Intel E5-2680v3 CPU with 24 threads versus \cufft{} on P100 GPU computing single-precision real-to-complex out-of-place forward transforms of 3D shapes.}
+  \caption{single-precision real-to-complex out-of-place forward transforms of 3D shapes.}
   \label{fig:non_power_of_2}
 \end{figure}
 \end{frame}
+
+\begin{frame}{Results}{cuFFT on different hardware}
+\vfill
+\begin{figure}[!tbp]
+  \centering
+  \includegraphics[width=\textwidth]{figures/results_r2c_fwd_legend.pdf}\vspace{-1em}
+  \subfloat[3D transforms]{\includegraphics[width=0.5\textwidth]{figures/results_r2c_fwd_a.pdf}\label{fig:r2c_fwd_a}}
+  \hfill
+  \subfloat[1D transforms]{\includegraphics[width=0.5\textwidth]{figures/results_r2c_fwd_b.pdf}\label{fig:r2c_fwd_b}}
+  \caption{\texttt{powerof2} out-of-place single-precision real-to-complex forward transforms (Taurus/E5-2680v3, Taurus/K80, Islay/GTX1080).}
+  \label{fig:power_of_2}
+\end{figure}
+\vfill
+\begin{center}
+  \large
+  Which hardware would you buy?
+\end{center}
+\vfill
+\end{frame}
+
 
 %\setbeamertemplate{background canvas}{\includegraphics[width=\paperwidth]{rshiny.png}}
 \begin{frame}{Results on the web}
   \begin{center}
     \includegraphics[width=.8\textwidth]{rshiny.png}\\[20pt]
-    \href{https://github.com/mpicbg-scicomp/gearshifft/tree/master/rshiny}{mpicbg-scicomp/gearshifft/tree/master/rshiny}
+    \href{https://github.com/mpicbg-scicomp/gearshifft/tree/master/rshiny}{github.com/mpicbg-scicomp/gearshifft/tree/master/rshiny}
   \end{center}
 
 \end{frame}
@@ -468,30 +488,83 @@ $ ./gearshifft_clfft -e 1048576
 %\resetbeamertemplate
 
 \begin{frame}{Summary}{}
-  
+
+\vfill  
   \begin{itemize}
   \item \gearshifft{} enables in-depth analysis of FFT libraries
-%    \begin{itemize}
+    \begin{itemize}
     \item compile-time constant interface between clients and benchmark framework
     \item reproducible and comparable results
     \item low code redundancy and overhead\newline ($<3\%$ latency overhead due to the timer)
-      % \end{itemize}
-  \item compared cuFFT (GPU), clFFT (CPU/GPU) and fftw (CPU)
+    \end{itemize}
+\pause
+\vfill
+  \item compared cuFFT (GPU), clFFT (CPU+GPU) and fftw (CPU)
+  \item compared hardware choices for single library
   %\item fix the CPU/GPU clock for benchmarks if possible
-  \item \gearshifft{} also helped to find bugs
+  \item \gearshifft{} uncovered bugs ($2\times$ clFFT, fftw, cufft, mkl gnuwrapper)
     % clfft: CPU, complex-to-real fails for 4096-FFT (not fixed yet)
     % clfft: memory leak
     % fftw: multi-core slowdown at planning stage, 2d/3d out-of-place not part of default wisdoms [undocumented]
     % cufft: recreating plans after context has been destroyed crashed in cuda 7.5 (fixed in cuda8)
-  \item future task: more libraries and additional benchmark paths       
-  \item we warmly welcome contributions (results, code, \ldots)
-    
+    % mkl gnuwrapper: 3D radix-3 transforms numerically unstable in 2017u4
   \end{itemize}
+\vfill
 \end{frame}
 
-\begin{frame}{Summary}{}
-  fftw has long planning times, but finds better plans:
+\begin{frame}{Outlook}{}
+
+\vfill
   \begin{itemize}
+  \item more libraries\\
+    (MKL gnu wrapper, pure MKL, rocFFT, hcFFT, ...)
+  \item more hardware \\
+    (Volta, Vega, KNL, EPYC, Skylake Xeons, ...)
+%  \item additional benchmark paths
+  \item online visualisation of results
+  \item other operating systems?
+  \end{itemize}
+
+\vfill
+  \pause \Large
+  \textbf{We need you}\\
+  \quad\quad \ldots \textbf{to provide feedback and contribute}!\\
+
+\vfill
+
+\begin{center}
+  \href{https://github.com/mpicbg-scicomp/gearshifft}{\textbf{github.com/mpicbg-scicomp/gearshifft}}
+\end{center}
+
+
+\vfill
+  \pause
+ \centering
+  Thank you for your attention!
+\vfill
+\end{frame}
+
+%% BACKUP SLIDES %%
+\appendix
+\setbeamertemplate{footline}{}
+
+% \begin{frame}{}{}
+%   \vfill
+  
+%   \LARGE\centering
+  
+%   Thank you for your attention!
+
+%   \large
+%   Questions + Discussion
+%   \vfill
+% \end{frame}
+
+\begin{frame}{Our Experiences}{}
+
+  fftw on CPU
+  \begin{itemize}
+  \item has long planning times, but finds better plans
   \item useful when plan is computed once and reused many times
   \item not intended for multi-core and NUMA systems
   \item has some pitfalls in compiling fftw, plan-rigors and wisdom generations
@@ -499,7 +572,7 @@ $ ./gearshifft_clfft -e 1048576
   %\item multi-core increases planning time a lot, still same FFT performance as single-core is chosen by fftw
   \end{itemize}
 
-  clFFT works on GPU and CPU.
+  clFFT on GPU and CPU
   \begin{itemize}
   \item fast planning, but low FFT performance
   \item cannot handle arbitrary radices
@@ -507,7 +580,7 @@ $ ./gearshifft_clfft -e 1048576
   \item negligible runtime differences for radix-$\{2,3,5,7\}$ FFTs
   \end{itemize}
 
-  cuFFT works on Nvidia GPUs.
+  cuFFT on Nvidia GPUs only
   \begin{itemize}
   \item fast planning, average FFT performance on small FFTs
   \item outperforms on large FFTs
@@ -515,21 +588,7 @@ $ ./gearshifft_clfft -e 1048576
   
 \end{frame}
 
-%% BACKUP SLIDES %%
-\appendix
-\setbeamertemplate{footline}{}
 
-\begin{frame}{}{}
-  \vfill
-  
-  \LARGE\centering
-  
-  Thank you for your attention!
-
-  \large
-  Questions + Discussion
-  \vfill
-\end{frame}
 
 \begin{frame}{Xeon E5-2680}{fftw -- single-thread vs. multithread}
   \includegraphics[width=\textwidth]{fftw-measure-single-multi.png}
