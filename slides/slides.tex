@@ -218,11 +218,13 @@
 \begin{minipage}[t]{0.34\textwidth}
 \textbf{API operations}
 \begin{lstlisting}[numbers=none]
-init_forward();
-exec_forward();
-init_inverse();
-exec_inverse();
-destroy_plan();
+init_context();
+ init_forward();
+ exec_forward();
+ init_inverse();
+ exec_inverse();
+ destroy_plan();
+destroy_context();
 \end{lstlisting}
 \end{minipage}
 \begin{minipage}[t]{0.3\textwidth}
@@ -293,7 +295,7 @@ for( T_Precision : {float, double}) // compile-time
 \end{lrbox}
 
 
-\begin{frame}[fragile]{gearshifft}{Basic Framework in C++/Boost}
+\begin{frame}[fragile]{gearshifft}{Basic framework in C++/Boost}
 \hspace*{-2.5em}
   \tkzgearshifft
 \vspace{-3em}
@@ -324,11 +326,11 @@ for( T_Precision : {float, double}) // compile-time
   }
 \end{frame}
 
-\begin{frame}[fragile]{gearshifft}{Command-line Examples}
+\begin{frame}[fragile]{gearshifft}{Command-line examples}
   \begin{itemize}[<+->]
 \item 
 \textbf{benchmark clFFT on CPU}: load extents.csv and store results in result.csv
-\begin{lstlisting}[numbers=none,language=bash]
+\begin{lstlisting}[numbers=none,language=bash,basicstyle=\small\ttfamily,columns=fixed]
 $ ./gearshifft_clfft -f ../config/extents.csv
                      -o result.csv -d cpu
 \end{lstlisting}
@@ -336,7 +338,7 @@ $ ./gearshifft_clfft -f ../config/extents.csv
 \item Command-line supports wildcards from Boost options
 \item 
 \textbf{benchmark clFFT on GPU} with $extent=1048576$, float and out-of-place real transforms
-\begin{lstlisting}[numbers=none,language=bash]
+\begin{lstlisting}[numbers=none,language=bash,basicstyle=\small\ttfamily,columns=fixed]
 $ ./gearshifft_clfft -e 1048576
                      -r */float/*/Outplace_Real
 # -r <run_filter> with 
@@ -360,18 +362,20 @@ $ ./gearshifft_clfft -e 1048576
   \begin{itemize}
   \item CUDA implementation of FFTs for Nvidia GPUs
   \item supports arbitrary and mixed radices
+  \item if not "powerof2" cuFFT plan can consume $8\times$ more memory (estimated plan size also recorded by \gearshifft{}) % @todo: backup slide
   \end{itemize}
 \pause
   {\textbf{clFFT}}
   \begin{itemize}
   \item AMD's OpenCL implementation of FFTs
   \item supports CPUs and GPUs of any vendor (optimized for AMD GPUs)
-  \item supports mixed radices 2, 3, 5, 7, 11 and 13
+  \item supports only mixed radices 2, 3, 5, 7, 11 and 13
+  \item there are size limits (\SI{64}{MiB} signal size)
   \end{itemize}
   
 \end{frame}
 
-\begin{frame}{gearshifft}{Setup}
+\begin{frame}{gearshifft}{Setup for benchmark examples}
 \begin{table}[tbp]
   \centering
   {\small{
