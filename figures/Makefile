@@ -54,7 +54,7 @@ results_transfer_times : $(cufft8_files)
 	./compare -r -s -k "powerof2" -n 3 -a "hardware,inplace" --legend-only --ylabel="t(upload)+t(download)/t_[%]" --ylimit=0,100 --xlabel="signal_size_[bytes]" --ymetric="100.*(Time_Download+Time_Upload)/Time_Total"  --notitle --logx=2 -f $(@)_legend $? > $(@)_legend.log 2>&1
 
 
-results_r2c_fwd : $(cufft8_GTX1080_files) $(clfft_GTX1080_files) $(cufft8_P100_files) $(clfft_P100_files) $(cufft8_K80_files) $(clfft_K80_files) $(measure_fftw_files)
+results_r2c_fwd : $(cufft8_GTX1080_files) $(clfft_GTX1080_files) $(cufft8_P100_files) $(clfft_P100_files) $(measure_fftw_files)
 	@echo "input: $(?)"
 	./compare --pdfheight=3.0 -r -o -s -k "powerof2" --ylimit=0.00001,1000 -n 3 -a "hardware,library" --xlabel="signal_size_[bytes]" --ylabel="t(FFT)_[ms]" --ymetric="Time_FFT" --nolegend --notitle --logy=10 --logx=2 -f $(@)_a $? > $(@)_a.log 2>&1
 	./compare --pdfheight=3.0 -r -o -s -k "powerof2" --ylimit=0.00001,1000 -n 1 -a "hardware,library" --xlabel="signal_size_[bytes]" --ylabel="t(FFT)_[ms]" --ymetric="Time_FFT" --nolegend --notitle --logy=10 --logx=2 -f $(@)_b $? > $(@)_b.log 2>&1
