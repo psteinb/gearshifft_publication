@@ -87,7 +87,7 @@
 \newcommand{\cufft}{\texttt{cuFFT}}
 \newcommand{\clfft}{\texttt{clFFT}}
 \newcommand{\nvidia}{Nvidia}
-\newcommand{\mc}[1]{\lstinline!#1!}
+\newcommand{\mc}[1]{\texttt{\lstinline!#1!}}
 \newcommand{\iu}{{\mathrm{i}\mkern1mu}}
 
 
@@ -416,7 +416,7 @@ $ ./gearshifft_clfft -e 1048576
       \includegraphics[width=0.5\textwidth]{figures/results_validate_cufft_b.pdf}\\
       \includegraphics[width=0.5\textwidth]{figures/results_validate_cufft_d.pdf}
     }\label{fig:tts_verify_b}}
-  \caption{\textit{gearshifft} (\cufft{}) vs. \textit{standalone} \cufft{}\newline(\textit{standalone-tts}: only one timer object)\newline single-precision in-place real-to-complex round-trip FFTs on the Taurus/K80.}
+  \caption{\textit{gearshifft} (\cufft{}) vs. \textit{standalone} \cufft{}\newline(\textit{standalone-tts}: only one timer object for time-to-solution)\newline single-precision in-place real-to-complex round-trip FFTs on the Taurus/K80.}
   \label{fig:verify_cufft}
 \end{figure}
 \end{frame}
@@ -435,9 +435,9 @@ $ ./gearshifft_clfft -e 1048576
 \pause
 \vspace{-1em}
 \begin{itemize}
-\item mean and standard deviations over 10 runs per signal shape
+\item mean and standard deviations shown
 \item \mc{FFTW_MEASURE} imposes considerable time for planning
-\item \mc{FFTW_MEASURE} beats \mc{FFTW_WISDOM_ONLY} for large input signals
+\item \mc{FFTW_MEASURE} beats \mc{FFTW_WISDOM_ONLY} for signals above \SI{1}{\kibi\byte}
   % this is actually a contradiction to that wisdoms use patient mode to get more optimal plans -> weird fftw behavior probably due to multi-core use
 \end{itemize}
 \end{frame}
@@ -464,7 +464,7 @@ $ ./gearshifft_clfft -e 1048576
   \subfloat[3D transforms]{\includegraphics[width=0.5\textwidth]{figures/results_r2c_fwd_a.pdf}\label{fig:r2c_fwd_a}}
   \hfill
   \subfloat[1D transforms]{\includegraphics[width=0.5\textwidth]{figures/results_r2c_fwd_b.pdf}\label{fig:r2c_fwd_b}}
-  \caption{\texttt{powerof2} out-of-place single-precision real-to-complex forward transforms (Taurus/E5-2680v3, Taurus/K80, Islay/GTX1080).}
+  \caption{\texttt{powerof2} out-of-place single-precision real-to-complex forward transforms (Taurus/E5-2680v3, Taurus/K80, Taurus/P100-PCIe, Islay/GTX1080).}
   \label{fig:power_of_2}
 \end{figure}
 \vfill
