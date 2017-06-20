@@ -95,7 +95,7 @@
 
 \frame[plain]{\titlepage}
 
-\begin{frame}{Fields of the Fast Fourier Transformation}
+\begin{frame}{FFT use cases}
   \centering
   \begin{tikzpicture}
     \begin{scope}[every node/.style={align=center, anchor=north, font=\bfseries}, xscale=1.15, yscale=2.6]
@@ -120,7 +120,7 @@
 \end{frame}
 
 
-\begin{frame}{Introduction}{Fourier Transformation}
+\begin{frame}{Introduction}{The Fourier transformation}
 
 \vfill
   \begin{equation}
@@ -293,7 +293,7 @@ for( T_Precision : {float, double}) // compile-time
 \end{lrbox}
 
 
-\begin{frame}[fragile]{gearshifft}{Basic Framework in C++/Boost}
+\begin{frame}[fragile]{gearshifft}{Basic framework in C++}
 \hspace*{-2.5em}
   \tkzgearshifft
 \vspace{-3em}
@@ -324,7 +324,7 @@ for( T_Precision : {float, double}) // compile-time
   }
 \end{frame}
 
-\begin{frame}[fragile]{gearshifft}{Command-line Examples}
+\begin{frame}[fragile]{gearshifft}{Command-line examples}
   \begin{itemize}[<+->]
 \item 
 \textbf{benchmark clFFT on CPU}: load extents.csv and store results in result.csv
@@ -456,15 +456,15 @@ $ ./gearshifft_clfft -e 1048576
 \end{figure}
 \end{frame}
 
-\begin{frame}{Results}{cuFFT on different hardware}
+\begin{frame}{Results}{FFTs on different GPUs}
 \vfill
 \begin{figure}[!tbp]
   \centering
-  \includegraphics[width=\textwidth]{figures/results_r2c_fwd_legend.pdf}\vspace{-1em}
-  \subfloat[3D transforms]{\includegraphics[width=0.5\textwidth]{figures/results_r2c_fwd_a.pdf}\label{fig:r2c_fwd_a}}
+  \includegraphics[width=\textwidth]{figures/results_r2c_fwd_gpuonly_legend.pdf}\vspace{-1em}
+  \subfloat[3D transforms]{\includegraphics[width=0.5\textwidth]{figures/results_r2c_fwd_gpuonly_a.pdf}\label{fig:r2c_fwd_gpuonly_a}}
   \hfill
-  \subfloat[1D transforms]{\includegraphics[width=0.5\textwidth]{figures/results_r2c_fwd_b.pdf}\label{fig:r2c_fwd_b}}
-  \caption{\texttt{powerof2} out-of-place single-precision real-to-complex forward transforms (Taurus/E5-2680v3, Taurus/K80, Taurus/P100-PCIe, Islay/GTX1080).}
+  \subfloat[1D transforms]{\includegraphics[width=0.5\textwidth]{figures/results_r2c_fwd_gpuonly_b.pdf}\label{fig:r2c_fwd_gpuonly_b}}
+  \caption{\texttt{powerof2} out-of-place single-precision real-to-complex forward transforms (Taurus/K80, Taurus/P100-PCIe, Islay/GTX1080).}
   \label{fig:power_of_2}
 \end{figure}
 \vfill
