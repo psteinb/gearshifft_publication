@@ -608,6 +608,19 @@ $ ./gearshifft_clfft -e 1048576
 \vspace{-0.1em} \hspace*{-2em}  \includegraphics[width=1.15\textwidth]{clfft-mkl.png}
 \end{frame}
 
+\begin{frame}{P100}{CUDA8 PlanSize}
+\centering
+\hspace*{-2em}  \includegraphics[width=1.1\textwidth]{p100-cuda8-kind-plansize.png}
+\end{frame}
+
+\begin{frame}{P100}{CUDA9 (Beta) + CUDA8 + clFFT 2.12.2}
+\centering
+\hspace*{-2em}  \includegraphics[width=1.1\textwidth]{p100-cuda9-cuda8.png}
+{\scriptsize{(Data 1 = CUDA 9, Data 2 = CUDA 8)}}
+\hspace*{-2em}  \includegraphics[width=1.1\textwidth]{p100-clfft-cuda9.png}
+{\scriptsize{(Data 1 = CUDA 9, Data 2 = clFFT 2.12.2)}}
+\end{frame}
+
 % \begin{frame}{P100}{CUDA9 (Beta) + CUDA8 + clFFT 2.12.2}
 %   \centering
 %   \hspace*{-2em}  \includegraphics[width=1.1\textwidth]{p100-cuda9-cuda8.png}
