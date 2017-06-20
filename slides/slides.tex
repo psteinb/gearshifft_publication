@@ -360,13 +360,15 @@ $ ./gearshifft_clfft -e 1048576
   \begin{itemize}
   \item CUDA implementation of FFTs for Nvidia GPUs
   \item supports arbitrary and mixed radices
-  \end{itemize}
+  \item if not "powerof2" cuFFT plan can consume $8\times$ more memory
+\end{itemize}
 \pause
   {\textbf{clFFT}}
   \begin{itemize}
   \item AMD's OpenCL implementation of FFTs
   \item supports CPUs and GPUs of any vendor (optimized for AMD GPUs)
   \item supports mixed radices 2, 3, 5, 7, 11 and 13
+  \item there are size limits ($\le\SI{64}{MiB}$ signal size for real 1D transform)
   \end{itemize}
   
 \end{frame}
