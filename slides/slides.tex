@@ -328,7 +328,7 @@ for( T_Precision : {float, double}) // compile-time
   \begin{itemize}[<+->]
 \item 
 \textbf{benchmark clFFT on CPU}: load extents.csv and store results in result.csv
-\begin{lstlisting}[numbers=none,language=bash]
+\begin{lstlisting}[numbers=none,language=bash,basicstyle=\small\ttfamily,columns=fixed]
 $ ./gearshifft_clfft -f ../config/extents.csv
                      -o result.csv -d cpu
 \end{lstlisting}
@@ -336,7 +336,7 @@ $ ./gearshifft_clfft -f ../config/extents.csv
 \item Command-line supports wildcards from Boost options
 \item 
 \textbf{benchmark clFFT on GPU} with $extent=1048576$, float and out-of-place real transforms
-\begin{lstlisting}[numbers=none,language=bash]
+\begin{lstlisting}[numbers=none,language=bash,basicstyle=\small\ttfamily,columns=fixed]
 $ ./gearshifft_clfft -e 1048576
                      -r */float/*/Outplace_Real
 # -r <run_filter> with 
