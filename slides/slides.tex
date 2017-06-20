@@ -120,7 +120,7 @@
 \end{frame}
 
 
-\begin{frame}{Introduction}{The Fourier transformation}
+\begin{frame}{Introduction}{The discrete Fourier transformation}
 
 \vfill
   \begin{equation}
@@ -129,8 +129,8 @@
   \end{equation}
 \vfill  
   \begin{itemize}
-  \item fast implementation of discrete Fourier transform (DFT) \eqref{eq:dft}
-  \item forward transform: time domain $\Rightarrow$ frequency domain
+  \item FFT = fast implementation of discrete Fourier transform (DFT) \eqref{eq:dft}
+  \item forward transform: time domain $\Rightarrow$ frequency domain (backward transform: inverse)
   \item factorization of $n$ and recursive decomposition yield smaller DFTs $\Rightarrow$ FFT$\sim\mathcal{O}(n\log n)$
 
     \begin{itemize}
@@ -368,7 +368,7 @@ $ ./gearshifft_clfft -e 1048576
   \item AMD's OpenCL implementation of FFTs
   \item supports CPUs and GPUs of any vendor (optimized for AMD GPUs)
   \item supports mixed radices 2, 3, 5, 7, 11 and 13
-  \item there are size limits ($\le\SI{64}{MiB}$ signal size for real 1D transform)
+  \item signal size limits ($\le\SI{64}{MiB}$ for real 1D transforms)
   \end{itemize}
   
 \end{frame}
