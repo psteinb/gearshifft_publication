@@ -21,7 +21,7 @@ wisdom_fftw_files = $(wildcard ../results/haswell/fftw3.3.6pl1/fftw_wisdom*csv)
 cufft8_K80_validate_files = $(wildcard ../results/K80/cuda-8.0.44/validate_cufft*r2c*inplace_RHEL6.8.csv)
 cufft8_K80_validate_small_files = $(wildcard ../results/K80/cuda-8.0.44/validate_cufft*r2c*inplace_small_RHEL6.8.csv)
 
-TARGETS = results_tts results_plan_flags results_plan_time results_r2c_fwd results_non_power_of_2 results_r2c_vs_c2c results_placeness results_validate_cufft
+TARGETS = results_tts results_plan_flags results_plan_time results_r2c_fwd results_r2c_fwd_gpuonly results_non_power_of_2 results_r2c_vs_c2c results_placeness results_validate_cufft
 
 all : $(TARGETS)
 
@@ -54,11 +54,18 @@ results_transfer_times : $(cufft8_files)
 	./compare -r -s -k "powerof2" -n 3 -a "hardware,inplace" --legend-only --ylabel="t(upload)+t(download)/t_[%]" --ylimit=0,100 --xlabel="signal_size_[bytes]" --ymetric="100.*(Time_Download+Time_Upload)/Time_Total"  --notitle --logx=2 -f $(@)_legend $? > $(@)_legend.log 2>&1
 
 
-results_r2c_fwd : $(cufft8_GTX1080_files) $(cufft8_P100_files) $(clfft_GTX1080_files) $(clfft_P100_files) $(measure_fftw_files)
+results_r2c_fwd : $(cufft8_GTX1080_files) $(clfft_GTX1080_files) $(cufft8_P100_files) $(clfft_P100_files) $(measure_fftw_files)
 	@echo "input: $(?)"
 	./compare --pdfheight=3.0 -r -o -s -k "powerof2" --ylimit=0.00001,1000 -n 3 -a "hardware,library" --xlabel="signal_size_[bytes]" --ylabel="t(FFT)_[ms]" --ymetric="Time_FFT" --nolegend --notitle --logy=10 --logx=2 -f $(@)_a $? > $(@)_a.log 2>&1
 	./compare --pdfheight=3.0 -r -o -s -k "powerof2" --ylimit=0.00001,1000 -n 1 -a "hardware,library" --xlabel="signal_size_[bytes]" --ylabel="t(FFT)_[ms]" --ymetric="Time_FFT" --nolegend --notitle --logy=10 --logx=2 -f $(@)_b $? > $(@)_b.log 2>&1
 	./compare -r -o -s -k "powerof2" -n 1 -a "hardware,library" --xlabel="signal_size_[bytes]" --ylabel="t(FFT)_[ms]" --ymetric="Time_FFT" --legend-only --notitle --logy=10 --logx=2 -f $(@)_legend $? > $(@)_legend.log 2>&1
+
+results_r2c_fwd_gpuonly : $(cufft8_GTX1080_files) $(clfft_GTX1080_files) $(cufft8_P100_files) $(clfft_P100_files) $(cufft8_K80_files) $(clfft_K80_files)
+	@echo "input: $(?)"
+	./compare --pdfheight=3.0 -r -o -s -k "powerof2" --ylimit=0.01,1000 -n 3 -a "hardware,library" --xlabel="signal_size_[bytes]" --ylabel="t(FFT)_[ms]" --ymetric="Time_FFT" --nolegend --notitle --logy=10 --logx=2 -f $(@)_a $? > $(@)_a.log 2>&1
+	./compare --pdfheight=3.0 -r -o -s -k "powerof2" --ylimit=0.01,1000 -n 1 -a "hardware,library" --xlabel="signal_size_[bytes]" --ylabel="t(FFT)_[ms]" --ymetric="Time_FFT" --nolegend --notitle --logy=10 --logx=2 -f $(@)_b $? > $(@)_b.log 2>&1
+	./compare -r -o -s -k "powerof2" -n 1 -a "hardware,library" --xlabel="signal_size_[bytes]" --ylabel="t(FFT)_[ms]" --ymetric="Time_FFT" --legend-only --notitle --logy=10 --logx=2 -f $(@)_legend $? > $(@)_legend.log 2>&1
+
 
 results_non_power_of_2 : $(cufft8_P100_files) $(measure_fftw_files) $(clfft_cpu_files)
 	@echo "input: $(?)"

@@ -87,7 +87,7 @@
 \newcommand{\cufft}{\texttt{cuFFT}}
 \newcommand{\clfft}{\texttt{clFFT}}
 \newcommand{\nvidia}{Nvidia}
-\newcommand{\mc}[1]{\lstinline!#1!}
+\newcommand{\mc}[1]{\texttt{\lstinline!#1!}}
 \newcommand{\iu}{{\mathrm{i}\mkern1mu}}
 
 
@@ -95,7 +95,7 @@
 
 \frame[plain]{\titlepage}
 
-\begin{frame}{Fields of the Fast Fourier Transformation}
+\begin{frame}{FFT use cases}
   \centering
   \begin{tikzpicture}
     \begin{scope}[every node/.style={align=center, anchor=north, font=\bfseries}, xscale=1.15, yscale=2.6]
@@ -120,7 +120,7 @@
 \end{frame}
 
 
-\begin{frame}{Introduction}{Fourier Transformation}
+\begin{frame}{Introduction}{The discrete Fourier transformation}
 
 \vfill
   \begin{equation}
@@ -129,8 +129,8 @@
   \end{equation}
 \vfill  
   \begin{itemize}
-  \item fast implementation of discrete Fourier transform (DFT) \eqref{eq:dft}
-  \item forward transform: time domain $\Rightarrow$ frequency domain
+  \item FFT = fast implementation of discrete Fourier transform (DFT) \eqref{eq:dft}
+  \item forward transform: time domain $\Rightarrow$ frequency domain (backward transform: inverse)
   \item factorization of $n$ and recursive decomposition yield smaller DFTs $\Rightarrow$ FFT$\sim\mathcal{O}(n\log n)$
 
     \begin{itemize}
@@ -293,7 +293,7 @@ for( T_Precision : {float, double}) // compile-time
 \end{lrbox}
 
 
-\begin{frame}[fragile]{gearshifft}{Basic Framework in C++/Boost}
+\begin{frame}[fragile]{gearshifft}{Basic framework in C++}
 \hspace*{-2.5em}
   \tkzgearshifft
 \vspace{-3em}
@@ -324,11 +324,11 @@ for( T_Precision : {float, double}) // compile-time
   }
 \end{frame}
 
-\begin{frame}[fragile]{gearshifft}{Command-line Examples}
+\begin{frame}[fragile]{gearshifft}{Command-line examples}
   \begin{itemize}[<+->]
 \item 
 \textbf{benchmark clFFT on CPU}: load extents.csv and store results in result.csv
-\begin{lstlisting}[numbers=none,language=bash]
+\begin{lstlisting}[numbers=none,language=bash,basicstyle=\small\ttfamily,columns=fixed]
 $ ./gearshifft_clfft -f ../config/extents.csv
                      -o result.csv -d cpu
 \end{lstlisting}
@@ -336,7 +336,7 @@ $ ./gearshifft_clfft -f ../config/extents.csv
 \item Command-line supports wildcards from Boost options
 \item 
 \textbf{benchmark clFFT on GPU} with $extent=1048576$, float and out-of-place real transforms
-\begin{lstlisting}[numbers=none,language=bash]
+\begin{lstlisting}[numbers=none,language=bash,basicstyle=\small\ttfamily,columns=fixed]
 $ ./gearshifft_clfft -e 1048576
                      -r */float/*/Outplace_Real
 # -r <run_filter> with 
@@ -360,13 +360,15 @@ $ ./gearshifft_clfft -e 1048576
   \begin{itemize}
   \item CUDA implementation of FFTs for Nvidia GPUs
   \item supports arbitrary and mixed radices
-  \end{itemize}
+  \item if not "powerof2" cuFFT plan can consume $8\times$ more memory
+\end{itemize}
 \pause
   {\textbf{clFFT}}
   \begin{itemize}
   \item AMD's OpenCL implementation of FFTs
   \item supports CPUs and GPUs of any vendor (optimized for AMD GPUs)
   \item supports mixed radices 2, 3, 5, 7, 11 and 13
+  \item signal size limits ($\le\SI{64}{MiB}$ for real 1D transforms)
   \end{itemize}
   
 \end{frame}
@@ -416,7 +418,7 @@ $ ./gearshifft_clfft -e 1048576
       \includegraphics[width=0.5\textwidth]{figures/results_validate_cufft_b.pdf}\\
       \includegraphics[width=0.5\textwidth]{figures/results_validate_cufft_d.pdf}
     }\label{fig:tts_verify_b}}
-  \caption{\textit{gearshifft} (\cufft{}) vs. \textit{standalone} \cufft{}\newline(\textit{standalone-tts}: only one timer object)\newline single-precision in-place real-to-complex round-trip FFTs on the Taurus/K80.}
+  \caption{\textit{gearshifft} (\cufft{}) vs. \textit{standalone} \cufft{}\newline(\textit{standalone-tts}: only one timer object for time-to-solution)\newline single-precision in-place real-to-complex round-trip FFTs on the Taurus/K80.}
   \label{fig:verify_cufft}
 \end{figure}
 \end{frame}
@@ -435,9 +437,9 @@ $ ./gearshifft_clfft -e 1048576
 \pause
 \vspace{-1em}
 \begin{itemize}
-\item mean and standard deviations over 10 runs per signal shape
+\item mean and standard deviations shown
 \item \mc{FFTW_MEASURE} imposes considerable time for planning
-\item \mc{FFTW_MEASURE} beats \mc{FFTW_WISDOM_ONLY} for large input signals
+\item \mc{FFTW_MEASURE} beats \mc{FFTW_WISDOM_ONLY} for signals above \SI{1}{\kibi\byte}
   % this is actually a contradiction to that wisdoms use patient mode to get more optimal plans -> weird fftw behavior probably due to multi-core use
 \end{itemize}
 \end{frame}
@@ -456,15 +458,15 @@ $ ./gearshifft_clfft -e 1048576
 \end{figure}
 \end{frame}
 
-\begin{frame}{Results}{cuFFT on different hardware}
+\begin{frame}{Results}{FFTs on different GPUs}
 \vfill
 \begin{figure}[!tbp]
   \centering
-  \includegraphics[width=\textwidth]{figures/results_r2c_fwd_legend.pdf}\vspace{-1em}
-  \subfloat[3D transforms]{\includegraphics[width=0.5\textwidth]{figures/results_r2c_fwd_a.pdf}\label{fig:r2c_fwd_a}}
+  \includegraphics[width=\textwidth]{figures/results_r2c_fwd_gpuonly_legend.pdf}\vspace{-1em}
+  \subfloat[3D transforms]{\includegraphics[width=0.5\textwidth]{figures/results_r2c_fwd_gpuonly_a.pdf}\label{fig:r2c_fwd_gpuonly_a}}
   \hfill
-  \subfloat[1D transforms]{\includegraphics[width=0.5\textwidth]{figures/results_r2c_fwd_b.pdf}\label{fig:r2c_fwd_b}}
-  \caption{\texttt{powerof2} out-of-place single-precision real-to-complex forward transforms (Taurus/E5-2680v3, Taurus/K80, Islay/GTX1080).}
+  \subfloat[1D transforms]{\includegraphics[width=0.5\textwidth]{figures/results_r2c_fwd_gpuonly_b.pdf}\label{fig:r2c_fwd_gpuonly_b}}
+  \caption{\texttt{powerof2} out-of-place single-precision real-to-complex forward transforms (Taurus/K80, Taurus/P100-PCIe, Islay/GTX1080).}
   \label{fig:power_of_2}
 \end{figure}
 \vfill
@@ -604,6 +606,19 @@ $ ./gearshifft_clfft -e 1048576
 \vspace{-2.1em} \hspace*{-2em}  \includegraphics[width=1.15\textwidth]{fftw-mkl-fft.png}
 
 \vspace{-0.1em} \hspace*{-2em}  \includegraphics[width=1.15\textwidth]{clfft-mkl.png}
+\end{frame}
+
+\begin{frame}{P100}{CUDA8 PlanSize}
+\centering
+\hspace*{-2em}  \includegraphics[width=1.1\textwidth]{p100-cuda8-kind-plansize.png}
+\end{frame}
+
+\begin{frame}{P100}{CUDA9 (Beta) + CUDA8 + clFFT 2.12.2}
+\centering
+\hspace*{-2em}  \includegraphics[width=1.1\textwidth]{p100-cuda9-cuda8.png}
+{\scriptsize{(Data 1 = CUDA 9, Data 2 = CUDA 8)}}
+\hspace*{-2em}  \includegraphics[width=1.1\textwidth]{p100-clfft-cuda9.png}
+{\scriptsize{(Data 1 = CUDA 9, Data 2 = clFFT 2.12.2)}}
 \end{frame}
 
 % \begin{frame}{P100}{CUDA9 (Beta) + CUDA8 + clFFT 2.12.2}
